@@ -3,7 +3,7 @@ Sets up parameters for a model run. Used to read in settings from any provided
 rc file, and set default values for any parameters that are not provided in the 
 rc file.
 
-Based off the rcsetup.py functions used in matplotlib.
+NOTE: Based off the rcsetup.py functions used in matplotlib.
 """
 
 def validate_float(s):
@@ -67,3 +67,11 @@ defaultParams = {
     'initial_proportion_private_infrastructure' : [.1, validate_proportion]
     'initial_proportion_public_infrastructure' : [..05, validate_proportion]
 }
+
+# Used for testing whether default values validate properly
+if __name__ == '__main__':
+    rc = defaultParams
+    rc['datapath'][0] = '/'
+    for key in rc:
+        if not rc[key][1](rc[key][0]) == rc[key][0]:
+            print "%s: %s != %s"%(key, rc[key][1](rc[key][0]), rc[key][0])
