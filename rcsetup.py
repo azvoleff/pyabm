@@ -18,6 +18,10 @@ def validate_int(s):
     except ValueError:
         raise ValueError('Could not convert "%s" to int' % s)
 
+def validate_writable_dir():
+    "Checks that a directory exists and is writable"
+    #TODO
+
 class validate_nseq_float:
     def __init__(self, n):
         self.n = n
@@ -46,6 +50,7 @@ defaultParams = {
     'model.initial_num_persons' : [5000, validate_int]
     'model.initial_num_households' : [750, validate_int]
     'model.initial_num_neighborhoods' : [65, validate_int]
+    'model.datapath' : [get_home_dir(), validate_writable_dir]
     
     # Person agent parameters
     'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(defaultParams['model.timesteps'])]
