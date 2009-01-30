@@ -18,9 +18,18 @@ def validate_int(s):
     except ValueError:
         raise ValueError('Could not convert "%s" to int' % s)
 
-def validate_writable_dir():
-    "Checks that a directory exists and is writable"
-    #TODO
+def validate_writable_dir(s):
+    """Checks that a directory exists and is writable, fails if the 
+    directory does not exist or if s is not a string"""
+
+    try:
+        s = s + '' #check that it is a string
+    except TypeError:
+        raise TypeError("%s is not a writable directory"%s)
+    if not os.path.exists(s)
+        raise IOError("%s is not a writable directory"%s)
+
+    return True
 
 class validate_nseq_float:
     def __init__(self, n):
@@ -54,8 +63,8 @@ defaultParams = {
     
     # Person agent parameters
     'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(defaultParams['model.timesteps'])]
-    'hazard_birth' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(defaultParams['model.timesteps'])]
-    'hazard_marriage' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(defaultParams['model.timesteps'])]
+    'hazard_birth' : [[0, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(defaultParams['model.timesteps'])]
+    'hazard_marriage' : [[0, 0, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(defaultParams['model.timesteps'])]
 
     # Household agent parameters
     'prob_any_non_wood_fuel' : [.5, validate_float]
