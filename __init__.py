@@ -7,6 +7,8 @@ the model.
 Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
+import os
+
 from rcsetup import defaultParams
 
 def _is_writable_dir(p):
@@ -22,6 +24,12 @@ def _is_writable_dir(p):
         t.close()
     except OSError: return False
     else: return True
+
+def _get_data_path(): #TODO
+    """
+    figures out what directory to use to store model output
+    """
+    return path
 
 class RcParams(dict):
 
@@ -42,6 +50,7 @@ class RcParams(dict):
             raise KeyError('%s is not a valid rc parameter.\
 See rcParams.keys() for a list of valid parameters.'%key)
 
+fname = 'chitwanABMrc' #TODO: write a function to find this
 def rc_params(fname):
     'Return the default params updated from the values in the rc file'
 
@@ -81,9 +90,9 @@ def rc_params(fname):
 Bad key "%s" on line %d in
 %s.""" % (key, cnt, fname)
 
-    # datapath stores the directory in which to save model output
-    if ret['datapath'] is None:
-        ret['datapath'] = get_data_path()
+    # datapath stores the directory in which to save model output TODO
+    if ret['model.datapath'] is None:
+        ret['model.datapath'] = _get_data_path()
 
     return ret
 
