@@ -8,6 +8,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import os
+import sys
 
 from rcsetup import defaultParams
 

@@ -20,12 +20,12 @@ def validate_int(s):
     except ValueError:
         raise ValueError('Could not convert "%s" to int' % s)
 
-def validate_proportion(s):
-    "Checks that s is a number between 0 and 1 inlusive, or raises an error."
+def validate_unit_interval(s):
+    "Checks that s is a number between 0 and 1, inclusive, or raises an error."
     try:
-        s + 1
-    except:
-        raise TypeError('Could not convert "%s" to float or int'%s)
+        s = float(s)
+    except ValueError:
+        raise ValueError('Could not convert "%s" to float'%s)
     if s < 0 and s > 1:
         raise ValueError('"%s" is not between 0 and 1'%s)
 
@@ -101,19 +101,19 @@ defaultParams = {
     'hazard_marriage' : [[0, 0, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
 
     # Household agent parameters
-    'prob_any_non_wood_fuel' : [.5, validate_float],
-    'prob_own_house_plot' : [.5, validate_float],
-    'prob_own_any_land' : [.5, validate_float],
-    'prob_rented_out_land' : [.5, validate_float],
+    'prob_any_non_wood_fuel' : [.5, validate_unit_interval],
+    'prob_own_house_plot' : [.5, validate_unit_interval],
+    'prob_own_any_land' : [.5, validate_unit_interval],
+    'prob_rented_out_land' : [.5, validate_unit_interval],
 
     # Neighborhood agent parameters
     'prob_elec' : [.1, validate_float],
 
     # Landscape parameters
-    'initial_proportion_veg' : [.3, validate_proportion],
-    'initial_proportion_ag' : [.3, validate_proportion],
-    'initial_proportion_private_infrastructure' : [.1, validate_proportion],
-    'initial_proportion_public_infrastructure' : [.05, validate_proportion],
+    'initial_proportion_veg' : [.3, validate_unit_interval],
+    'initial_proportion_ag' : [.3, validate_unit_interval],
+    'initial_proportion_private_infrastructure' : [.1, validate_unit_interval],
+    'initial_proportion_public_infrastructure' : [.05, validate_unit_interval],
 }
 
 # Used for testing whether default values validate properly
