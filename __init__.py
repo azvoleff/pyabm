@@ -9,6 +9,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import os
 import sys
+import warnings
 
 from rcsetup import defaultParams
 
@@ -25,12 +26,6 @@ def _is_writable_dir(p):
         t.close()
     except OSError: return False
     else: return True
-
-def _get_data_path(): #TODO
-    """
-    figures out what directory to use to store model output
-    """
-    return path
 
 class RcParams(dict):
 
@@ -90,10 +85,6 @@ def rc_params(fname):
             print >> sys.stderr, """
 Bad key "%s" on line %d in
 %s.""" % (key, cnt, fname)
-
-    # datapath stores the directory in which to save model output TODO
-    if ret['model.datapath'] is None:
-        ret['model.datapath'] = _get_data_path()
 
     return ret
 
