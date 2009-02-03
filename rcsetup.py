@@ -96,8 +96,8 @@ defaultParams = {
     'model.datapath' : [_get_home_dir(), validate_writable_dir],
     
     # Person agent parameters
-    'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
     'hazard_birth' : [[0, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
+    'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
     'hazard_marriage' : [[0, 0, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
 
     # Household agent parameters
