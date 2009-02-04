@@ -62,7 +62,6 @@ def rc_params(fname):
 
     for key, (val, line, cnt) in rc_temp.iteritems():
         if defaultParams.has_key(key):
-            print key, val
             ret[key] = val # try to convert to proper type or raise
         else:
             print >> sys.stderr, """
