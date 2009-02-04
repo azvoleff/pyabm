@@ -6,8 +6,6 @@ rc file.
 NOTE: Based off the rcsetup.py functions used in matplotlib.
 """
 
-from chitwanABM import RcParams
-
 import os
 import tempfile
 
@@ -152,6 +150,24 @@ defaultParams = {
 ###***END OF RC DEFINITION***###
 ################################
 
+class RcParams(dict):
+    """
+    A dictionary object including validation
+
+    Validation functions are contained in rcsetup.py.
+    """
+
+    validate = dict([ (key, converter) for key, (default, converter) in \
+                     defaultParams.iteritems() ])
+
+    def __setitem__(self, key, val):
+        try:
+            cval = self.validate[key](val)
+            dict.__setitem__(self, key, cval)
+        except KeyError:
+            raise KeyError('%s is not a valid rc parameter.\
+See rcParams.keys() for a list of valid parameters.'%key)
+
 def write_RCfile(outputFilename, docstring=None, updated_params=None):
     """Write default rcParams to a file after optionally updateing them from an 
     rcParam dictionary."""
@@ -240,8 +256,8 @@ def write_RCfile(outputFilename, docstring=None, updated_params=None):
             outFile.write(line)
 
 ## Used for testing whether default values validate properly
-if __name__ == '__main__':
-    rc = defaultParams
-    for key in rc:
-        if not rc[key][1](rc[key][0]) == rc[key][0]:
-            print "%s: %s != %s"%(key, rc[key][1](rc[key][0]), rc[key][0])
+#if __name__ == '__main__':
+#    rc = defaultParams
+#    for key in rc:
+#        if not rc[key][1](rc[key][0]) == rc[key][0]:
+#            print "%s: %s != %s"%(key, rc[key][1](rc[key][0]), rc[key][0])

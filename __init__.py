@@ -12,6 +12,7 @@ import sys
 import warnings
 
 from rcsetup import defaultParams
+from rcsetup import RcParams
 
 def _is_writable_dir(p):
     """
@@ -26,25 +27,6 @@ def _is_writable_dir(p):
         t.close()
     except OSError: return False
     else: return True
-
-class RcParams(dict):
-
-    """
-    A dictionary object including validation
-
-    Validation functions are contained in rcsetup.py.
-    """
-
-    validate = dict([ (key, converter) for key, (default, converter) in \
-                     defaultParams.iteritems() ])
-
-    def __setitem__(self, key, val):
-        try:
-            cval = self.validate[key](val)
-            dict.__setitem__(self, key, cval)
-        except KeyError:
-            raise KeyError('%s is not a valid rc parameter.\
-See rcParams.keys() for a list of valid parameters.'%key)
 
 fname = 'chitwanABMrc' #TODO: write a function to find this
 def rc_params(fname):
@@ -80,11 +62,11 @@ def rc_params(fname):
 
     for key, (val, line, cnt) in rc_temp.iteritems():
         if defaultParams.has_key(key):
+            print key, val
             ret[key] = val # try to convert to proper type or raise
         else:
             print >> sys.stderr, """
-Bad key "%s" on line %d in
-%s.""" % (key, cnt, fname)
+Bad key "%s" on line %d in %s.""" % (key, cnt, fname)
 
     return ret
 
