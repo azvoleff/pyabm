@@ -72,15 +72,12 @@ class validate_nseq_float:
 def validate_boolean(s):
     if s in [True, False]:
         return s
+    elif s == 'True':
+        return True
+    elif s == 'False':
+        return False
     else:
-        try:
-            s + ''
-        except TypeError:
-            # s is not a string
-            raise TypeError("%s is not a boolean"%s)
-        else:
-            # s is a string
-            raise TypeError("'%s' is a string. It should be a boolean (either True or False with no quotes)."%s)
+        raise TypeError("%s is not a boolean"%s)
 
 def _get_home_dir():
     """Find user's home directory if possible.
