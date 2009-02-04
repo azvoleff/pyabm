@@ -254,10 +254,3 @@ def write_RCfile(outputFilename, docstring=None, updated_params=None):
                 comment = ' ' + comment
             line = ''.join([key, " : ", value, comment, "\n"])
             outFile.write(line)
-
-## Used for testing whether default values validate properly
-#if __name__ == '__main__':
-#    rc = defaultParams
-#    for key in rc:
-#        if not rc[key][1](rc[key][0]) == rc[key][0]:
-#            print "%s: %s != %s"%(key, rc[key][1](rc[key][0]), rc[key][0])
