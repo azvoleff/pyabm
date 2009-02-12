@@ -34,19 +34,17 @@ def validate_unit_interval(s):
 def validate_writable_dir(s):
     """Checks that a directory exists and is writable. Fails if the 
     directory does not exist or if s is not a string"""
-
-    try:
-        s = s + '' #check that it is a string
-    except TypeError:
+    if (type(s) != str):
         raise TypeError("%s is not a writable directory"%s)
     if not os.path.exists(s):
-        raise IOError("%s is not a writable directory"%s)
+        raise IOError("%s does not exist"%s)
     try:
         t = tempfile.TemporaryFile(dir=s)
         t.write('1')
         t.close()
     except OSError:
-        raise OSError("%s is not a writable directory"%s)
+        print 'except 3'
+        raise OSError("cannot write to model output directory %s"%s)
     return s
 
 class validate_nseq_float:
@@ -109,8 +107,9 @@ default_RCfile_docstring = """# Default values of parameters for the Chitwan Val
 # Alex Zvoleff, aiz2101@columbia.edu"""
 
 # defaultParams maps parameter keys to default values and to validation 
-# functions. Any comments after "START OF RC DEFINITION" will be included when 
-# the default rc file is build using the write_RCfile function.
+# functions. Any comments after "defaultParams = {" and before the closing 
+# brace will be included when the default rc file is build using the 
+# write_RCfile function.
 ##################################
 ###***START OF RC DEFINITION***###
 defaultParams = {
@@ -121,7 +120,7 @@ defaultParams = {
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
     'model.initial_num_neighborhoods' : [65, validate_int],
-    'model.datapath' : [_get_home_dir(), validate_writable_dir],
+    'model.datapath' : ["/home/azvoleff/chitwanABMresults", validate_writable_dir],
     'model.use_psyco': [True, validate_boolean],
     
     # Person agent parameters
@@ -166,7 +165,7 @@ class RcParams(dict):
 See rcParams.keys() for a list of valid parameters.'%key)
 
 def write_RCfile(outputFilename, docstring=None, updated_params=None):
-    """Write default rcParams to a file after optionally updateing them from an 
+    """Write default rcParams to a file after optionally updating them from an 
     rcParam dictionary."""
 
     # TODO: fix this to find the proper path for rcsetup.py
@@ -203,7 +202,7 @@ def write_RCfile(outputFilename, docstring=None, updated_params=None):
 
         # Now pull out value
         value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
-        value = value_validation_tuple.rpartition(",")[0].strip("[]")
+        value = value_validation_tuple.rpartition(",")[0].strip("[]\"\'")
         
         outputLines.append((key, value, comment, linenum))
 
@@ -217,7 +216,9 @@ def write_RCfile(outputFilename, docstring=None, updated_params=None):
         warnings.warn('failed to reach "END OF RC DEFINITION" block')
 
     # Remove opening and closing braces of the dictionary definition
+    assert outputLines[0][0] == "defaultParams = {", "error reading defaultParams opening brace"
     del outputLines[0]
+    assert outputLines[-1][0] == "}", "error reading defaultParams closing brace"
     del outputLines[-1]
 
     ret = RcParams([ (key, default) for key, (default, converter) in \
@@ -225,15 +226,15 @@ def write_RCfile(outputFilename, docstring=None, updated_params=None):
 
     # TODO: Fix this so it works
     # Check keys and values to make sure they validate
-#    for (key, value, comment, linenum) in outputLines:
-#        # Skip blank lines and comment lines
-#        if '' in [key, value]:
-#            continue
-#        if defaultParams.has_key(key):
-#            ret[key] = value # try to convert to proper type or raise
-#        else:
-#            print >> sys.stderr, """
-#Bad key "%s" on line %s in %s.""" % (key, linenum, "rcsetup.py")
+    for (key, value, comment, linenum) in outputLines:
+        # Skip blank lines and comment lines
+        if '' in [key, value]:
+            continue
+        if defaultParams.has_key(key):
+            ret[key] = value # try to convert to proper type or raise
+        else:
+            print >> sys.stderr, """
+Bad key "%s" on line %s in %s.""" % (key, linenum, "rcsetup.py")
 
     # Finally, write to outputFilename
     outFile = open(outputFilename, "w")
