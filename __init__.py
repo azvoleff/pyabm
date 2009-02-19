@@ -11,8 +11,28 @@ import os
 import sys
 import warnings
 
+import numpy as np
+
 from rcsetup import defaultParams
 from rcsetup import RcParams
+
+class IDGenerator(object):
+    "A generator class for consecutive unique ID numbers."
+    def __init__(self):
+        # Start at -1 so the first ID will be 0
+        self._PID = -1
+
+    def next(self):
+        self._PID += 1
+        return self._PID
+
+def boolean_choice(trueProb=.5):
+    """A function that returns true or false depending on whether a randomly
+    drawn float is less than trueProb"""
+    if np.random.rand() < trueProb:
+        return True
+    else:
+        return False
 
 def _is_writable_dir(p):
     """
