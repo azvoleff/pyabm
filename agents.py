@@ -8,8 +8,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import numpy as np
 
-from chitwanABM import rcParams
-from chitwanABM.agents import IDGenerator, boolean_choice
+from chitwanABM import rcParams, IDGenerator, boolean_choice
 
 PIDGen = IDGenerator()
 
@@ -106,6 +105,9 @@ class Household(object):
         "Returns the ID of this household"
         return self._HID
 
+    def get_persons(self):
+        return self._members.values()
+
     def add_person(self, person):
         "Adds a new person to the household, either from birth or marriage"
         if self._members.has_key(person.get_PID()):
@@ -153,18 +155,21 @@ class Neighborhood(object):
         "Returns the ID of this neighborhood."
         return self._NID
 
-    def add_household(self, person):
+    def get_households(self):
+        return self._members.values()
+
+    def add_household(self, household):
         "Adds a new household to the neighborhood."
         if self._members.has_key(household.get_HID()):
             raise KeyError("household %s is already a member of neighborhood %s"%(household.get_HID(), self._NID))
-        self._members[person.get_NID()] = household
+        self._members[household.get_HID()] = household
 
-    def remove_household(self, person):
+    def remove_household(self, household):
         "Removes a household from the neighborhood."
         try:
             self._members.pop(household.get_HID())
         except KeyError:
-            raise KeyError("household %s is not a member of neighborhood %s"%(household.get_HID(), self._HID))
+            raise KeyError("household %s is not a member of neighborhood %s"%(household.get_HID(), self._NID))
 
     def years_non_family_services(self):
         "Number of years non-family services have been available."
@@ -183,7 +188,7 @@ class Region(object):
         
         # This will store a dictionary of all persons in the population, keyed 
         # by PID
-        self._neighborhoods = {}
+        self._members = {}
 
         # Now setup the demographic variables for this population, based on the 
         # values given in the model rc file
@@ -191,12 +196,37 @@ class Region(object):
         self._hazard_death = rcParams['hazard_death']
         self._hazard_marriage = rcParams['hazard_marriage']
 
+    def __repr__(self):
+        #TODO: Finish this
+        return "__repr__ UNDEFINED"
+
+    def __str__(self):
+        return "Region(RID: %s. %s neighborhood(s), %s household(s), %s person(s))" %(self.get_RID(), len(self._members), self.get_num_households(), self.census())
+
+    def get_RID(self):
+        return self._RID
+    def get_neighborhoods(self):
+        return self._members.values()
+
+    def add_neighborhood(self, neighborhood):
+        "Adds a new neighborhood to the region."
+        if self._members.has_key(neighborhood.get_NID()):
+            raise KeyError("neighborhood %s is already a member of region %s"%(neighborhood.get_NID(), self._RID))
+        self._members[neighborhood.get_NID()] = neighborhood
+
+    def remove_neighborhood(self, neighborhood):
+        "Removes a neighborhood from the region."
+        try:
+            self._members.pop(neighborhood.get_NID())
+        except KeyError:
+            raise KeyError("neighborhood %s is not a member of region %s"%(neighborhood.get_NID(), self._RID))
+
     def births(self, time):
         """Runs through the population and agents give birth probabilistically 
         based on their sex, age and the hazard_birth for this population"""
         # TODO: This should take account of the last time the agent gave birth 
         # and adjust the hazard accordingly
-        for neighborhood in self._neighborhoods:
+        for neighborhood in self._members:
             for household in neighborhood.get_households():
                 for person in household.get_persons():
                     if (person.get_sex() == 'female') and (np.random.random()
@@ -212,7 +242,7 @@ class Region(object):
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
         on their age and the hazard_death for this population"""
-        for neighborhood in self._neighborhoods:
+        for neighborhood in self._members:
             for household in neighborhood.get_households():
                 for person in household.get_persons():
                     if (person.get_sex() == 'female') and (np.random.random()
@@ -224,7 +254,7 @@ class Region(object):
     def marriages(self, time):
         """Runs through the population and marries agents probabilistically 
         based on their age and the hazard_marriage for this population"""
-        for neighborhood in self._neighborhoods:
+        for neighborhood in self._members:
             for household in neighborhood.get_households():
                 for person in household.get_persons():
                     if (person.get_sex() == 'female') and (np.random.random()
@@ -235,7 +265,7 @@ class Region(object):
     def increment_age(self):
         """Adds one to the age of each agent. The units of age are dependent on 
         the units of the input rc parameters."""
-        for neighborhood in self._neighborhoods:
+        for neighborhood in self._members:
             for household in neighborhood.get_households():
                 for person in household.get_persons():
                     person._age += 1
@@ -246,7 +276,13 @@ class Region(object):
     def census(self):
         "Returns the number of persons in the population."
         total = 0
-        for neighborhood in self._neighborhoods:
+        for neighborhood in self.get_neighborhoods():
             for household in neighborhood.get_households():
                 total += household.num_members()
+        return total
+
+    def get_num_households(self):
+        total = 0
+        for neighborhood in self.get_neighborhoods():
+            total += len(neighborhood.get_households())
         return total
