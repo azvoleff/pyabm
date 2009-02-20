@@ -17,6 +17,9 @@ class Person(object):
     "Represents a single person agent"
     def __init__(self, birthdate, mother=None, father=None, age=0, 
             initial_agent=False):
+        # self._PID is unique ID number used to track each person agent.
+        self._PID = PIDGen.next()
+
         # birthdate is the timestep of the birth of the agent. It is used to 
         # calculate the age of the agent. Agents have a birthdate of 0 if they 
         # were BORN in the first timestep of the model.  If they were used to 
@@ -30,18 +33,15 @@ class Person(object):
         # initialize the model.
         self._initial_agent = initial_agent
 
-        # self._age is used as a convenience to avoid the need to calculate the 
-        # agent's age from self._birthdate each time it is needed. It is 
-        # important to remember though that all agent's ages must be incremented 
-        # with each model timestep. The age starts at 0 (it is zero for the 
-        # entire first timestep of the model).
+        # self._age is used as a convenience to avoid the need to calculate 
+        # the agent's age from self._birthdate each time it is needed. It is         
+        # important to remember though that all agent's ages must be 
+        # incremented with each model timestep. The age starts at 0 (it is 
+        # zero for the entire first timestep of the model).
         self._age = age
 
-        # self._PID is unique ID number used to track each person agent.
-        self._PID = PIDGen.next()
-
-        # Also need to store information on the agent's parents. For agents used 
-        # to initialize the model both parent fields are set to "None"
+        # Also need to store information on the agent's parents. For agents 
+        # used to initialize the model both parent fields are set to "None"
         if father == None:
             self._father_PID = None
         else:
@@ -59,6 +59,8 @@ class Person(object):
             self._sex = 'male'
 
         self._spousePID = None
+
+        self._children = []
 
     def get_PID(self):
         return self._PID
@@ -80,6 +82,8 @@ class Person(object):
         assert self.get_PID() != dad.get_PID(), "No immaculate conception"
         assert self.get_spouse_PID() == dad.get_PID(), "In Chitwan, all births are in marriages"
         baby = Person(birthdate=time, mother=self, father=dad)
+        for parent in [self, dad]:
+            parent._children.append(baby)
         return baby
 
     def is_married(self):
