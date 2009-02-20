@@ -11,14 +11,63 @@ import numpy as np
 from chitwanABM import rcParams, IDGenerator, boolean_choice
 from chitwanABM.landuse import LandUse
 
+#######################################################################3
+#######################################################################3
+#######################################################################3
+
+class agent(object):
+    "Superclass for agent objects"
+    #TODO: code this. It would simplify matters
+    def __init__(self, birthdate, PID=None, mother_PID=None, father_PID=None,
+            age=0, initial_agent=False):
+        # self._PID is unique ID number used to track each person agent.
+        if PID == None:
+            self._ID = IDGen.next()
+        else:
+            PIDGen.use_ID(ID) # Update the generator so PID will not be reused
+            self._ID = ID
+
+        # self._initial_agent is set to "True" for agents that were used to 
+        # initialize the model.
+        self._initial_agent = initial_agent
+
+    def get_ID(self):
+        return self._ID
+
+class agent_set(agent):
+    def get_persons(self):
+        return self._members.values()
+
+    def add_person(self, person):
+        "Adds a new person to the household, either from birth or marriage"
+        if self._members.has_key(person.get_PID()):
+            raise KeyError("person %s is already a member of household %s"%(person.get_PID(), self._HID))
+        self._members[person.get_PID()] = person
+
+    def remove_person(self, person):
+        """Removes a person from household, either from death, migration, or 
+        marriage to a member of another household."""
+        try:
+            self._members.pop(person.get_PID())
+        except KeyError:
+            raise KeyError("person %s is not a member of household %s"%(person.get_PID(), self._HID))
+
+#######################################################################3
+#######################################################################3
+#######################################################################3
+
 PIDGen = IDGenerator()
 
 class Person(object):
     "Represents a single person agent"
-    def __init__(self, birthdate, mother=None, father=None, age=0, 
-            initial_agent=False):
+    def __init__(self, birthdate, PID=None, mother_PID=None, father_PID=None,
+            age=0, initial_agent=False):
         # self._PID is unique ID number used to track each person agent.
-        self._PID = PIDGen.next()
+        if PID == None:
+            self._PID = PIDGen.next()
+        else:
+            PIDGen.use_ID(PID) # Update the generator so PID will not be reused
+            self._PID = PID
 
         # birthdate is the timestep of the birth of the agent. It is used to 
         # calculate the age of the agent. Agents have a birthdate of 0 if they 
@@ -42,12 +91,12 @@ class Person(object):
 
         # Also need to store information on the agent's parents. For agents 
         # used to initialize the model both parent fields are set to "None"
-        if father == None:
+        if father_PID == None:
             self._father_PID = None
         else:
             self._father_PID = father.get_PID()
 
-        if mother == None:
+        if mother_PID == None:
             self._mother_PID = None
         else:
             self._mother_PID = mother.get_PID()
