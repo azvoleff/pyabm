@@ -8,13 +8,15 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import numpy as np
 
-from chitwanABM import rcParams, IDGenerator, boolean_choice, LandUse
+from chitwanABM import rcParams, IDGenerator, boolean_choice
+from chitwanABM.landuse import LandUse
 
 PIDGen = IDGenerator()
 
 class Person(object):
     "Represents a single person agent"
-    def __init__(self, birthdate, mother=None, father=None, age=0, initial_agent=False):
+    def __init__(self, birthdate, mother=None, father=None, age=0, 
+            initial_agent=False):
         # birthdate is the timestep of the birth of the agent. It is used to 
         # calculate the age of the agent. Agents have a birthdate of 0 if they 
         # were BORN in the first timestep of the model.  If they were used to 
@@ -222,7 +224,8 @@ class Region(object):
         try:
             self._members.pop(neighborhood.get_NID())
         except KeyError:
-            raise KeyError("neighborhood %s is not a member of region %s"%(neighborhood.get_NID(), self._RID))
+            raise KeyError("neighborhood %s is not a member of region %s"
+                    %(neighborhood.get_NID(), self._RID))
 
     def births(self, time):
         """Runs through the population and agents give birth probabilistically 
@@ -237,10 +240,12 @@ class Region(object):
                                 # Agent gives birth. First find the father 
                                 # (assumed to be the spouse of the person 
                                 # giving birth).
-                                dad = household.get_person(person.get_spousePID())
+                                dad = household.get_person(
+                                        person.get_spousePID())
                                 # Now have the mother give birth, and add the 
                                 # new person to the mother's household.
-                                household.add_person(person.give_birth(time, father=dad))
+                                household.add_person(person.give_birth(time, 
+                                    father=dad))
                         
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
@@ -272,6 +277,10 @@ class Region(object):
             for household in neighborhood.get_households():
                 for person in household.get_persons():
                     person._age += 1
+
+    def update_landuse(self):
+        """Using the attributes of the neighborhoods in the region, update the 
+        landuse proportions using OLS"""
 
     def kill_agent(self):
         "Kills an agent, removing it from its household, and its marriage."
