@@ -16,15 +16,34 @@ import numpy as np
 from rcsetup import defaultParams
 from rcsetup import RcParams
 
+class IDError(Exception):
+    pass
+
 class IDGenerator(object):
-    "A generator class for consecutive unique ID numbers."
+    """A generator class for consecutive unique ID numbers. IDs can be assigned 
+    externally by other code, and tracked in this class with the use_ID 
+    function. The use_ID function will raise an error if called with an ID that has 
+    already been assigned."""
     def __init__(self):
         # Start at -1 so the first ID will be 0
-        self._PID = -1
+        self._last_ID = -1
+        self._used_IDs = []
 
     def next(self):
-        self._PID += 1
-        return self._PID
+        newID = self._last_ID + 1
+        while newID in self._used_IDs:
+            newID += 1
+        self._last_ID = newID
+        self._used_IDs.append(newID)
+        return self._last_ID
+
+    def use_ID(self, used_ID):
+        # TODO: This will get very slow when dealing with large numbers of IDs. 
+        # It might be better to just set _last_ID to the maximum value in 
+        # _used_IDs whenever the use_ID function is called
+        if used_ID in self._used_IDs:
+            raise IDError("ID %s has already been used"%(used_ID))
+        self._used_IDs.append(used_ID)
 
 def boolean_choice(trueProb=.5):
     """A function that returns true or false depending on whether a randomly
