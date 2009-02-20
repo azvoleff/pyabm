@@ -14,10 +14,10 @@ from chitwanABM.landuse import LandUse
 #######################################################################3
 #######################################################################3
 #######################################################################3
+#TODO: code these. It would simplify matters
 
 class agent(object):
     "Superclass for agent objects"
-    #TODO: code this. It would simplify matters
     def __init__(self, birthdate, PID=None, mother_PID=None, father_PID=None,
             age=0, initial_agent=False):
         # self._PID is unique ID number used to track each person agent.
