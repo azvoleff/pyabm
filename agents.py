@@ -8,7 +8,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import numpy as np
 
-from chitwanABM import rcParams, IDGenerator, boolean_choice
+from chitwanABM import rcParams, IDGenerator, boolean_choice, LandUse
 
 PIDGen = IDGenerator()
 
@@ -182,9 +182,12 @@ class Neighborhood(object):
 RIDGen = IDGenerator()
 
 class Region(object):
-    "Represents a set of neighborhoods sharing certain demographic characteristics."
+    """Represents a set of neighborhoods sharing a spatial area (and therefore 
+    land use data), and demographic characteristics."""
     def __init__(self):
         self._RID = RIDGen.next()
+
+        self._landuse = landuse.LandUse()
         
         # This will store a dictionary of all persons in the population, keyed 
         # by PID
