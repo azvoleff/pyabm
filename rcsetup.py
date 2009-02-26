@@ -31,6 +31,20 @@ def validate_unit_interval(s):
         raise ValueError('"%s" is not between 0 and 1'%s)
     return float(s)
 
+def validate_readable_file(s):
+    """Checks that a file exists and is readable."""
+    if (type(s) != str):
+        raise TypeError("%s is not a readable file"%s)
+    if not os.path.exists(s):
+        raise IOError("%s does not exist"%s)
+    try:
+        file = open(s, 'r')
+        file.readline()
+        file.close()
+    except OSError:
+        raise OSError("error reading file %s"%s)
+    return s
+
 def validate_writable_dir(s):
     """Checks that a directory exists and is writable. Fails if the 
     directory does not exist or if s is not a string"""
@@ -43,7 +57,6 @@ def validate_writable_dir(s):
         t.write('1')
         t.close()
     except OSError:
-        print 'except 3'
         raise OSError("cannot write to model output directory %s"%s)
     return s
 
@@ -121,7 +134,7 @@ defaultParams = {
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
     'model.initial_num_neighborhoods' : [65, validate_int],
-    'model.datapath' : ["/home/azvoleff/chitwanABMresults", validate_writable_dir],
+    'model.resultspath' : ["/home/azvoleff/chitwanABMresults", validate_writable_dir],
     'model.use_psyco': [True, validate_boolean],
     
     # Person agent parameters
