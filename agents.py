@@ -177,23 +177,22 @@ class Neighborhood(Agent_set):
     "Represents a single neighborhood agent"
     def __init__(self, ID=None, initial_agent=False):
         Agent_set.__init__(self, NIDGen, ID, initial_agent)
-        self._NumYearsNonFamilyServices = 15 #TODO
-        self._ElecAvailable = boolean_choice()
+        self._avg_years_nonfamily_services = None
+        self._elec_available = None
 
-    def years_non_family_services(self):
+    def avg_years_nonfamily_services(self):
         "Average number of years non-family services have been available."
-        return self._NumYearsNonFamilyServices
+        return self._avg_years_nonfamily_services
 
     def elec_available(self):
         "Boolean for whether neighborhood has electricity."
-        return self._ElecAvailable
+        return self._elec_available
 
 RIDGen = IDGenerator()
-
 class Region(Agent_set):
     """Represents a set of neighborhoods sharing a spatial area (and therefore 
     land use data), and demographic characteristics."""
-    def __init__(self):
+    def __init__(self, ID=None, initial_agent=False):
         Agent_set.__init__(self, RIDGen, ID, initial_agent)
 
         self._landuse = landuse.LandUse()
