@@ -117,6 +117,7 @@ defaultParams = {
     'model.timezero' : [1996, validate_float], # The beginning of the model
     'model.endtime' : [2020, validate_float], # When the model stops
     'model.timestep' : [1, validate_float], # The size of each timestep
+#    'model.RandomState' : [1], # Seeds the random number generator (useful for regenerating results later)
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
     'model.initial_num_neighborhoods' : [65, validate_int],
