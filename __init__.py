@@ -72,10 +72,9 @@ def rc_params(fname):
     'Return the default params updated from the values in the rc file'
 
     if not os.path.exists(fname):
-        message = 'could not find rc file; returning defaults'
+        warnings.warn('could not find rc file; returning defaults')
         ret = RcParams([ (key, default) for key, (default, converter) in \
                         defaultParams.iteritems() ])
-        warnings.warn(message)
         return ret
 
     cnt = 0
