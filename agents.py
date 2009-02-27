@@ -47,6 +47,9 @@ class Agent_set(Agent):
     def get_agents(self):
         return self._members.values()
 
+    def get_agent(self, ID):
+        return self._members[ID]
+
     def add_agent(self, agent):
         "Adds a new agent to the set."
         if self._members.has_key(agent.get_ID()):
@@ -195,7 +198,7 @@ class Region(Agent_set):
     def __init__(self, ID=None, initial_agent=False):
         Agent_set.__init__(self, RIDGen, ID, initial_agent)
 
-        self._landuse = landuse.LandUse()
+        self._landuse = LandUse()
         
         # Now setup the demographic variables for this population, based on the 
         # values given in the model rc file
