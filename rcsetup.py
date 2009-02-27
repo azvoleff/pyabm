@@ -138,10 +138,10 @@ defaultParams = {
     'model.use_psyco': [True, validate_boolean],
     
     # Location of input data (these are restricted data)
-    'input.census_file' : ["/mnt/Restricted/CVABM_initialization_data/DS0004_export.txt", validate_readable_file],
-    'input.relationships_grid_file' : ["/mnt/Restricted/CVABM_initialization_data/DDS0016_export.txt", validate_readable_file],
-    'input.households_file' : ["/mnt/Restricted/CVABM_initialization_data/DDS0002_export.txt", validate_readable_file],
-    'input.neighborhoods_file' : ["/mnt/Restricted/CVABM_initialization_data/DDS0014_export.txt", validate_readable_file],
+    'input.census_file' : ["/media/Restricted/CVABM_initialization_data/DS0004_export.csv", validate_readable_file],
+    'input.relationships_grid_file' : ["/media/Restricted/CVABM_initialization_data/DS0016_export.csv", validate_readable_file],
+    'input.households_file' : ["/media/Restricted/CVABM_initialization_data/DS0002_export.csv", validate_readable_file],
+    'input.neighborhoods_file' : ["/media/Restricted/CVABM_initialization_data/DS0014_export.csv", validate_readable_file],
     
     # Person agent parameters
     'hazard_birth' : [[0, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
