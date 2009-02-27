@@ -83,9 +83,9 @@ class validate_nseq_float:
 def validate_boolean(s):
     if s in [True, False]:
         return s
-    elif s == 'True':
+    elif s.lower() == 'true':
         return True
-    elif s == 'False':
+    elif s.lower() == 'false':
         return False
     else:
         raise TypeError("%s is not a boolean"%s)
@@ -137,6 +137,12 @@ defaultParams = {
     'model.resultspath' : ["/home/azvoleff/chitwanABMresults", validate_writable_dir],
     'model.use_psyco': [True, validate_boolean],
     
+    # Location of input data (these are restricted data)
+    'input.census_file' : ["/mnt/Restricted/CVABM_initialization_data/DS0004_export.txt", validate_readable_file],
+    'input.relationships_grid_file' : ["/mnt/Restricted/CVABM_initialization_data/DDS0016_export.txt", validate_readable_file],
+    'input.households_file' : ["/mnt/Restricted/CVABM_initialization_data/DDS0002_export.txt", validate_readable_file],
+    'input.neighborhoods_file' : ["/mnt/Restricted/CVABM_initialization_data/DDS0014_export.txt", validate_readable_file],
+    
     # Person agent parameters
     'hazard_birth' : [[0, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
     'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
@@ -163,8 +169,6 @@ defaultParams = {
 class RcParams(dict):
     """
     A dictionary object including validation
-
-    Validation functions are contained in rcsetup.py.
     """
 
     validate = dict([ (key, converter) for key, (default, converter) in \
