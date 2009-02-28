@@ -101,12 +101,12 @@ class Person(Agent):
         if father_ID == None:
             self._father_ID = None
         else:
-            self._father_ID = father.get_ID()
+            self._father_ID = father_ID
 
         if mother_ID == None:
             self._mother_ID = None
         else:
-            self._mother_ID = mother.get_ID()
+            self._mother_ID = mother_ID
 
         if sex==None:
             # Person agents are randomly assigned a sex
@@ -114,8 +114,10 @@ class Person(Agent):
                 self._sex = 'female'
             else:
                 self._sex = 'male'
-        else:
+        elif sex in ['male', 'female']:
             self._sex = sex
+        else:
+            raise ValueError("%s is not a valid gender"%(sex))
 
         self._spouseID = None
 
@@ -123,6 +125,9 @@ class Person(Agent):
 
     def get_sex(self):
         return self._sex
+
+    def get_age(self):
+        return self._age
 
     def get_spouse_ID(self):
         return self._spouseID
@@ -218,7 +223,7 @@ class Region(Agent_set):
         based on their sex, age and the hazard_birth for this population"""
         # TODO: This should take account of the last time the agent gave birth 
         # and adjust the hazard accordingly
-        for neighborhood in self._members:
+        for neighborhood in self._members.values():
             for household in neighborhood.get_agents():
                 for person in household.get_agents():
                     if (person.get_sex() == 'female') and (np.random.random()
