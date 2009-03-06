@@ -90,6 +90,14 @@ def validate_boolean(s):
     else:
         raise TypeError("%s is not a boolean"%s)
 
+def validate_time_units(s):
+    if (type(s) != str):
+        raise TypeError("%s is not a valid unit of time"%s)
+    if s.lower() in ['months', 'years']:
+        return s.lower()
+    else:
+        raise ValueError("%s is not a valid unit of time"%s)
+
 def _get_home_dir():
     """Find user's home directory if possible.
     Otherwise raise error.
@@ -130,6 +138,7 @@ defaultParams = {
     'model.timezero' : [1996, validate_float], # The beginning of the model
     'model.endtime' : [2020, validate_float], # When the model stops
     'model.timestep' : [1, validate_float], # The size of each timestep
+    'model.time_units' : ["months", validate_time_units], # The size of each timestep
 #    'model.RandomState' : [1], # Seeds the random number generator (useful for regenerating results later)
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
@@ -144,6 +153,7 @@ defaultParams = {
     'input.neighborhoods_file' : ["/media/Restricted/CVABM_initialization_data/DS0014_export.csv", validate_readable_file],
     
     # Person agent parameters
+    'hazard_time_units': ['months', validate_time_units], # Specifies the time period that precalculated hazards are calculated for
     'hazard_birth' : [[0, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
     'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
     'hazard_marriage' : [[0, 0, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
