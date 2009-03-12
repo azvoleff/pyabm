@@ -56,6 +56,10 @@ class Agent_set(Agent):
             raise KeyError("agent %s is already a member of agent set %s"%(agent.get_ID(), self._ID))
         self._members[agent.get_ID()] = agent
 
+    def iter_agents(self):
+        for agent in self.get_agents():
+            yield agent
+
     def remove_agent(self, person):
         "Removes an agent from agent set"
         try:
@@ -81,6 +85,7 @@ class Person(Agent):
         # were BORN in the first timestep of the model.  If they were used to 
         # initialize the model their birthdates will be negative.
         self._birthdate = birthdate
+
         # deathdate is used for tracking agent deaths in the results, mainly 
         # for debugging.
         self._deathdate = None
@@ -218,74 +223,84 @@ class Region(Agent_set):
     def __str__(self):
         return "Region(RID: %s. %s neighborhood(s), %s household(s), %s person(s))" %(self.get_ID(), len(self._members), self.get_num_households(), self.census())
 
+    def iter_households(self):
+        "Returns an iterator over all the households in the region"
+        for neighborhood in self.iter_agents():
+            for household in neighborhood.iter_agents():
+                yield household
+
+    def iter_persons(self):
+        "Returns an iterator over all the persons in the region"
+        for household in self.iter_households():
+            for person in household.iter_agents():
+                yield person
+
     def births(self, time):
         """Runs through the population and agents give birth probabilistically 
         based on their sex, age and the hazard_birth for this population"""
         # TODO: This should take account of the last time the agent gave birth 
-        # and adjust the hazard accordingly
-        for neighborhood in self._members.values():
-            for household in neighborhood.get_agents():
-                for person in household.get_agents():
-                    if (person.get_sex() == 'female') and (np.random.random()
-                            < self._hazard_birth[person.get_age()]):
-                                # Agent gives birth. First find the father 
-                                # (assumed to be the spouse of the person 
-                                # giving birth).
-                                dad = household.get_person(
-                                        person.get_spouseID())
-                                # Now have the mother give birth, and add the 
-                                # new person to the mother's household.
-                                household.add_person(person.give_birth(time, 
-                                    father=dad))
+        # and adjust the hazard accordingly.
+        for household in self.iter_households():
+            for person in household.iter_agents():
+                if (person.get_sex() == 'female') and (np.random.random()
+                        < self._hazard_birth[person.get_age()]):
+                            # Agent gives birth. First find the father 
+                            # (assumed to be the spouse of the person 
+                            # giving birth).
+                            dad = household.get_person(
+                                    person.get_spouseID())
+                            # Now have the mother give birth, and add the 
+                            # new person to the mother's household.
+                            household.add_person(person.give_birth(time, 
+                                father=dad))
                         
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
         on their age and the hazard_death for this population"""
-        for neighborhood in self._members:
-            for household in neighborhood.get_agents():
-                for person in household.get_agents():
-                    if (person.get_sex() == 'female') and (np.random.random()
-                            < self._hazard_death[person.get_age()]):
-                                # Agent dies:
-                                person.kill()
-                                household.remove_agent(person.give_birth(time))
+        for household in self.iter_households():
+            for person in household.iter_agents():
+                if np.random.random() < self._hazard_death[person.get_age()]:
+                    # Agent dies.
+                    person.kill()
+                    household.remove_agent(person.give_birth(time))
                         
+    def migration(self, time):
+        """Runs through the population and marries agents probabilistically 
+        based on their age and the hazard_marriage for this population"""
+        for household in self.iter_households():
+            for person in household.iter_agents():
+                if np.random.random() < self._hazard_migration[person.get_age()]:
+                    # Agent migrates.
+                    person.marry(person.get_ID())
+
     def marriages(self, time):
         """Runs through the population and marries agents probabilistically 
         based on their age and the hazard_marriage for this population"""
-        for neighborhood in self._members:
-            for household in neighborhood.get_agents():
-                for person in household.get_agents():
-                    if (person.get_sex() == 'female') and (np.random.random()
-                            < self._hazard_marriage[person.get_age()]):
-                                # Agent gets married:
-                                person.marry(person.get_ID())
+        for household in self.iter_households():
+            for person in household.iter_agents():
+                if np.random.random() < self._hazard_marriage[person.get_age()]:
+                    # Agent marries.
+                    person.marry(person.get_ID())
                         
     def increment_age(self):
         """Adds one to the age of each agent. The units of age are dependent on 
         the units of the input rc parameters."""
-        for neighborhood in self._members:
-            for household in neighborhood.get_agents():
-                for person in household.get_agents():
-                    person._age += 1
+        for person in self.iter_persons():
+            person._age += 1
 
     def update_landuse(self):
         """Using the attributes of the neighborhoods in the region, update the 
         landuse proportions using OLS"""
 
-    def kill_agent(self):
-        "Kills an agent, removing it from its household, and its marriage."
-
     def census(self):
         "Returns the number of persons in the population."
         total = 0
-        for neighborhood in self.get_agents():
-            for household in neighborhood.get_agents():
-                total += household.num_members()
+        for household in self.iter_households():
+            total += household.num_members()
         return total
 
     def get_num_households(self):
         total = 0
-        for neighborhood in self.get_agents():
+        for neighborhood in self.iter_agents():
             total += len(neighborhood.get_agents())
         return total
