@@ -93,7 +93,7 @@ def validate_boolean(s):
 def validate_time_units(s):
     if (type(s) != str):
         raise TypeError("%s is not a valid unit of time"%s)
-    if s.lower() in ['months', 'years']:
+    if s.lower() in ['months', 'years', 'decades']:
         return s.lower()
     else:
         raise ValueError("%s is not a valid unit of time"%s)
@@ -153,10 +153,10 @@ defaultParams = {
     'input.neighborhoods_file' : ["/media/Restricted/CVABM_initialization_data/DS0014_export.csv", validate_readable_file],
     
     # Person agent parameters
-    'hazard_time_units': ['months', validate_time_units], # Specifies the time period that precalculated hazards are calculated for
-    'hazard_birth' : [[0, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
+    'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
+    'hazard_birth' : [[0, .30, .8, .7, .3, .05, 0, 0, 0, 0], validate_nseq_float(-1)],
     'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
-    'hazard_marriage' : [[0, 0, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
+    'hazard_marriage' : [[0, .2, .5, .7, .3, .2, .1, .05, .05, .01], validate_nseq_float(-1)],
 
     # Household agent parameters
     'prob_any_non_wood_fuel' : [.5, validate_unit_interval],
