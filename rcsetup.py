@@ -157,6 +157,7 @@ defaultParams = {
     'hazard_birth' : [[0, .30, .8, .7, .3, .05, 0, 0, 0, 0], validate_nseq_float(-1)],
     'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
     'hazard_marriage' : [[0, .2, .5, .7, .3, .2, .1, .05, .05, .01], validate_nseq_float(-1)],
+    'hazard_migration' : [[0, .05, .1, .2, .05, .03, .03, .01, .01, .01], validate_nseq_float(-1)],
 
     # Household agent parameters
     'prob_any_non_wood_fuel' : [.5, validate_unit_interval],
