@@ -98,6 +98,10 @@ def validate_time_units(s):
     else:
         raise ValueError("%s is not a valid unit of time"%s)
 
+def novalidation(s):
+    "Performs no validation on object."
+    return s
+
 def _get_home_dir():
     """Find user's home directory if possible.
     Otherwise raise error.
@@ -139,11 +143,11 @@ defaultParams = {
     'model.endtime' : [2020, validate_float], # When the model stops
     'model.timestep' : [1, validate_float], # The size of each timestep
     'model.time_units' : ["months", validate_time_units], # The size of each timestep
-#    'model.RandomState' : [1], # Seeds the random number generator (useful for regenerating results later)
+    'model.RandomState' : [None, novalidation], # Seeds the random number generator (useful for regenerating results later)
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
     'model.initial_num_neighborhoods' : [65, validate_int],
-    'model.resultspath' : ["/home/azvoleff/chitwanABMresults", validate_writable_dir],
+    'model.resultspath' : ["/media/Restricted/chitwanABM_runs", validate_writable_dir],
     'model.use_psyco': [True, validate_boolean],
     
     # Location of input data (these are restricted data)
@@ -154,10 +158,10 @@ defaultParams = {
     
     # Person agent parameters
     'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
-    'hazard_birth' : [[0, .30, .8, .7, .3, .05, 0, 0, 0, 0], validate_nseq_float(-1)],
-    'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, 1], validate_nseq_float(-1)],
-    'hazard_marriage' : [[0, .2, .5, .7, .3, .2, .1, .05, .05, .01], validate_nseq_float(-1)],
-    'hazard_migration' : [[0, .05, .1, .2, .05, .03, .03, .01, .01, .01], validate_nseq_float(-1)],
+    'hazard_birth' : [[0, .30, .8, .7, .3, .05, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
+    'hazard_death' : [[.2, .03, .1, .2, .3, .6, .7, .8, .98, .99, 1], validate_nseq_float(-1)],
+    'hazard_marriage' : [[0, .2, .5, .7, .3, .2, .1, .05, .05, .01, .01], validate_nseq_float(-1)],
+    'hazard_migration' : [[0, .05, .1, .2, .05, .03, .03, .01, .01, .01, .01], validate_nseq_float(-1)],
 
     # Household agent parameters
     'prob_any_non_wood_fuel' : [.5, validate_unit_interval],

@@ -10,6 +10,7 @@ import numpy as np
 
 from chitwanABM import rcParams, IDGenerator, boolean_choice
 from chitwanABM.landuse import LandUse
+from chitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
 
 class Agent(object):
     "Superclass for agent objects."
@@ -60,10 +61,10 @@ class Agent_set(Agent):
         for agent in self.get_agents():
             yield agent
 
-    def remove_agent(self, person):
+    def remove_agent(self, ID):
         "Removes an agent from agent set"
         try:
-            self._members.pop(person.get_ID())
+            self._members.pop(ID)
         except KeyError:
             raise KeyError("agent %s is not a member of agent set %s"%(person.get_ID(), self._ID))
 
@@ -137,10 +138,16 @@ class Person(Agent):
     def get_spouse_ID(self):
         return self._spouseID
 
-    def marry(self, other):
+    def marry(self, spouseID):
         "Marries this agent to another Person instance."
-        self._spouseID = other.get_ID()
-        other._spouseID = self.get_ID()
+        spouse = get_agent(spouseID)
+        self._spouseID = spouseID
+        spouse._spouseID = self.get_ID()
+
+    def divorce(self, spouse):
+        spouse = get_agent(self._spouseID)
+        self._spouseID = None
+        spouse._spouseID = None
 
     def give_birth(self, time, dad):
         "Agent gives birth. New agent inherits characterists of parents."
@@ -242,43 +249,42 @@ class Region(Agent_set):
         # and adjust the hazard accordingly.
         for household in self.iter_households():
             for person in household.iter_agents():
-                if (person.get_sex() == 'female') and (np.random.random()
-                        < self._hazard_birth[person.get_age()]):
-                            # Agent gives birth. First find the father 
-                            # (assumed to be the spouse of the person 
-                            # giving birth).
-                            dad = household.get_person(
-                                    person.get_spouseID())
-                            # Now have the mother give birth, and add the 
-                            # new person to the mother's household.
-                            household.add_person(person.give_birth(time, 
-                                father=dad))
+                if (person.get_sex() == 'female') and person.is_married():
+                    if np.random.random() < calc_hazard_birth(person):
+                        # Agent gives birth. First find the father (assumed to 
+                        # be the spouse of the person giving birth).
+                        dad = household.get_agent(person.get_spouse_ID())
+                        # Now have the mother give birth, and add the 
+                        # new person to the mother's household.
+                        household.add_person(person.give_birth(time,
+                            father=dad))
                         
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
         on their age and the hazard_death for this population"""
         for household in self.iter_households():
             for person in household.iter_agents():
-                if np.random.random() < self._hazard_death[person.get_age()]:
+                if np.random.random() < calc_hazard_death(person):
                     # Agent dies.
-                    person.kill()
-                    household.remove_agent(person.give_birth(time))
+                    household.remove_agent(person.get_ID())
+                    if person.is_married():
+                        person.divorce()
                         
     def migration(self, time):
         """Runs through the population and marries agents probabilistically 
         based on their age and the hazard_marriage for this population"""
         for household in self.iter_households():
             for person in household.iter_agents():
-                if np.random.random() < self._hazard_migration[person.get_age()]:
+                if np.random.random() < calc_hazard_migration(person):
                     # Agent migrates.
-                    person.marry(person.get_ID())
+                    print "Agent %s migrated... write some code to handle this"%(person.get_ID())
 
     def marriages(self, time):
         """Runs through the population and marries agents probabilistically 
         based on their age and the hazard_marriage for this population"""
         for household in self.iter_households():
             for person in household.iter_agents():
-                if np.random.random() < self._hazard_marriage[person.get_age()]:
+                if np.random.random() < calc_hazard_marriage(person):
                     # Agent marries.
                     person.marry(person.get_ID())
                         
