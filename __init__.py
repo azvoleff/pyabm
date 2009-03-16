@@ -29,6 +29,9 @@ class IDGenerator(object):
         self._last_ID = -1
         self._used_IDs = []
 
+    def reset(self):
+        self.__init__()
+
     def next(self):
         newID = self._last_ID + 1
         while newID in self._used_IDs:
