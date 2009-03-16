@@ -29,12 +29,24 @@ class Agent(object):
         # initialize the model.
         self._initial_agent = initial_agent
 
+        # _parent_agentstores the parent agent if this agent is a member of an 
+        # Agent_set class instance. For example, for a person agent that is a 
+        # member of a household, the _parent_agent for that person agent would 
+        # be that household.
+        _parent_agent = None
+
     def get_ID(self):
         return self._ID
 
     def set_ID(self, ID):
         self._IDGen.use_ID(ID) # Update the generator so ID will not be reused
         self._ID = ID
+
+    def set_parent_agent(self, agent):
+        self._parent_agen = agent
+
+    def get_parent_agent(self):
+        return self._parent_agent
 
 class Agent_set(Agent):
     """Superclass for agents that contain a "set" of agents from a lower 
@@ -49,6 +61,7 @@ class Agent_set(Agent):
         return self._members.values()
 
     def get_agent(self, ID):
+        "Returns an an agent given the agent's ID"
         return self._members[ID]
 
     def add_agent(self, agent):
@@ -56,17 +69,23 @@ class Agent_set(Agent):
         if self._members.has_key(agent.get_ID()):
             raise KeyError("agent %s is already a member of agent set %s"%(agent.get_ID(), self._ID))
         self._members[agent.get_ID()] = agent
-
-    def iter_agents(self):
-        for agent in self.get_agents():
-            yield agent
+        # Set the agent's _parent_agent to reflect the parent of this Agent_set 
+        # instance
+        agent.set_parent_agent(agent)
 
     def remove_agent(self, ID):
-        "Removes an agent from agent set"
+        "Removes an agent from agent set given an ID."
         try:
             self._members.pop(ID)
         except KeyError:
             raise KeyError("agent %s is not a member of agent set %s"%(person.get_ID(), self._ID))
+        # Reset the agent's _parent_agent
+        assert agent.get_parent_agent() == self.get_ID(), "Removing agent from an Agent_set it does not appear to be assigned to."
+        agent.set_parent_agent(None)
+
+    def iter_agents(self):
+        for agent in self.get_agents():
+            yield agent
 
     def num_members(self):
         return len(self._members)
@@ -138,14 +157,12 @@ class Person(Agent):
     def get_spouse_ID(self):
         return self._spouseID
 
-    def marry(self, spouseID):
+    def marry(self, spouse):
         "Marries this agent to another Person instance."
-        spouse = get_agent(spouseID)
-        self._spouseID = spouseID
+        self._spouseID = spouseID.get_ID()
         spouse._spouseID = self.get_ID()
 
-    def divorce(self, spouse):
-        spouse = get_agent(self._spouseID)
+    def divorce(self):
         self._spouseID = None
         spouse._spouseID = None
 
@@ -247,10 +264,12 @@ class Region(Agent_set):
         based on their sex, age and the hazard_birth for this population"""
         # TODO: This should take account of the last time the agent gave birth 
         # and adjust the hazard accordingly.
+        num_births = 0
         for household in self.iter_households():
             for person in household.iter_agents():
                 if (person.get_sex() == 'female') and person.is_married():
                     if np.random.random() < calc_hazard_birth(person):
+                        num_births += 1
                         # Agent gives birth. First find the father (assumed to 
                         # be the spouse of the person giving birth).
                         dad = household.get_agent(person.get_spouse_ID())
@@ -258,36 +277,79 @@ class Region(Agent_set):
                         # new person to the mother's household.
                         household.add_person(person.give_birth(time,
                             father=dad))
+        return num_births
                         
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
         on their age and the hazard_death for this population"""
+        num_deaths = 0
         for household in self.iter_households():
             for person in household.iter_agents():
                 if np.random.random() < calc_hazard_death(person):
+                    num_deaths += 1
                     # Agent dies.
                     household.remove_agent(person.get_ID())
                     if person.is_married():
+                        # For divorce, can take advantage of the fact that the 
+                        # spouse will ALWAYS reside in the same household.
+                        household.get_agent(person.spouse_ID())
                         person.divorce()
+        return num_deaths
                         
-    def migration(self, time):
-        """Runs through the population and marries agents probabilistically 
-        based on their age and the hazard_marriage for this population"""
-        for household in self.iter_households():
-            for person in household.iter_agents():
-                if np.random.random() < calc_hazard_migration(person):
-                    # Agent migrates.
-                    print "Agent %s migrated... write some code to handle this"%(person.get_ID())
-
     def marriages(self, time):
         """Runs through the population and marries agents probabilistically 
         based on their age and the hazard_marriage for this population"""
+        # First find the eligible agents
+        eligible_male= []
+        eligible_females= []
         for household in self.iter_households():
             for person in household.iter_agents():
                 if np.random.random() < calc_hazard_marriage(person):
-                    # Agent marries.
-                    person.marry(person.get_ID())
-                        
+                    # Agent is eligible to marry.
+                    if person.get_sex == "male":
+                        eligible_males.append(person)
+                    else:
+                        eligible_females.append(person)
+
+        # Now pair up the eligible agents. Any extra males/females will not 
+        # marry this timestep.
+        num_marriages = 0
+        for male, female in zip(eligible_males, eligible_females):
+            num_marriages += 1
+             # First marry the agents.
+            male.marry(female)
+            # Now create a new household
+            # TODO: need to figure out how the new household has 
+            # characteristics assigned to it.
+            new_home = Household()
+            neighborhoods = [] # Possible neighborhoods for the new_home
+            for person in [male, female]:
+                old_house = person.get_parent_agent() # this person's old household
+                old_house.remove_agent(person)
+                new_home.add_agent(person)
+                neighborhoods.append(old_household.get_parent_agent()) # this persons old neighborhood
+
+            # For now, randomly assign the new household to the male or females 
+            # neighborhood.
+            if boolean_choice(.5) > .5:
+                neighborhoods[0].add_agent(new_home)
+            else:
+                neighborhoods[1].add_agent(new_home)
+        return num_marriages
+
+
+    def migrations(self, time):
+        """Runs through the population and marries agents probabilistically 
+        based on their age and the hazard_marriage for this population"""
+        num_migrations = 0
+        for household in self.iter_households():
+            for person in household.iter_agents():
+                if np.random.random() < calc_hazard_migration(person):
+                    num_migrations += 1
+                    # Agent migrates.
+                    # TODO: write code to handle migrations
+        return num_migrations
+
     def increment_age(self):
         """Adds one to the age of each agent. The units of age are dependent on 
         the units of the input rc parameters."""
@@ -297,6 +359,7 @@ class Region(Agent_set):
     def update_landuse(self):
         """Using the attributes of the neighborhoods in the region, update the 
         landuse proportions using OLS"""
+        pass
 
     def census(self):
         "Returns the number of persons in the population."
