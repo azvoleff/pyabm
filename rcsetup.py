@@ -11,7 +11,7 @@ import tempfile
 
 def validate_float(s):
     'convert s to float or raise'
-    try: return float(s)
+    try: return float(eval(s))
     except ValueError:
         raise ValueError('Could not convert "%s" to float' % s)
 
