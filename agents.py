@@ -33,7 +33,7 @@ class Agent(object):
         # Agent_set class instance. For example, for a person agent that is a 
         # member of a household, the _parent_agent for that person agent would 
         # be that household.
-        _parent_agent = None
+        self._parent_agent = None
 
     def get_ID(self):
         return self._ID
@@ -43,7 +43,7 @@ class Agent(object):
         self._ID = ID
 
     def set_parent_agent(self, agent):
-        self._parent_agen = agent
+        self._parent_agent = agent
 
     def get_parent_agent(self):
         return self._parent_agent
@@ -70,17 +70,17 @@ class Agent_set(Agent):
             raise KeyError("agent %s is already a member of agent set %s"%(agent.get_ID(), self._ID))
         self._members[agent.get_ID()] = agent
         # Set the agent's _parent_agent to reflect the parent of this Agent_set 
-        # instance
-        agent.set_parent_agent(agent)
+        # instance (self)
+        agent.set_parent_agent(self)
 
-    def remove_agent(self, ID):
-        "Removes an agent from agent set given an ID."
+    def remove_agent(self, agent):
+        "Removes agent from agent set."
         try:
-            self._members.pop(ID)
+            self._members.pop(agent.get_ID())
         except KeyError:
-            raise KeyError("agent %s is not a member of agent set %s"%(person.get_ID(), self._ID))
+            raise KeyError("agent %s is not a member of agent set %s"%(agent.get_ID(), self.get_ID()))
         # Reset the agent's _parent_agent
-        assert agent.get_parent_agent() == self.get_ID(), "Removing agent from an Agent_set it does not appear to be assigned to."
+        assert agent.get_parent_agent().get_ID() == self.get_ID(), "Removing agent from an Agent_set it does not appear to be assigned to."
         agent.set_parent_agent(None)
 
     def iter_agents(self):
@@ -96,7 +96,7 @@ class Agent_set(Agent):
 PIDGen = IDGenerator()
 class Person(Agent):
     "Represents a single person agent"
-    def __init__(self, birthdate, PID=None, mother_ID=None, father_ID=None,
+    def __init__(self, birthdate, PID=None, mother=None, father=None,
             age=0, sex=None, initial_agent=False):
         Agent.__init__(self, PIDGen, PID, initial_agent)
 
@@ -123,15 +123,15 @@ class Person(Agent):
 
         # Also need to store information on the agent's parents. For agents 
         # used to initialize the model both parent fields are set to "None"
-        if father_ID == None:
-            self._father_ID = None
+        if father == None:
+            self._father = None
         else:
-            self._father_ID = father_ID
+            self._father = father
 
-        if mother_ID == None:
-            self._mother_ID = None
+        if mother == None:
+            self._mother = None
         else:
-            self._mother_ID = mother_ID
+            self._mother = mother
 
         if sex==None:
             # Person agents are randomly assigned a sex
@@ -144,7 +144,7 @@ class Person(Agent):
         else:
             raise ValueError("%s is not a valid gender"%(sex))
 
-        self._spouseID = None
+        self._spouse = None
 
         self._children = []
 
@@ -154,31 +154,32 @@ class Person(Agent):
     def get_age(self):
         return self._age
 
-    def get_spouse_ID(self):
-        return self._spouseID
+    def get_spouse(self):
+        return self._spouse
 
     def marry(self, spouse):
         "Marries this agent to another Person instance."
-        self._spouseID = spouseID.get_ID()
-        spouse._spouseID = self.get_ID()
+        self._spouse = spouse
+        spouse._spouse = self
 
     def divorce(self):
-        self._spouseID = None
-        spouse._spouseID = None
+        spouse = self._spouse
+        spouse._spouse = None
+        self._spouse = None
 
-    def give_birth(self, time, dad):
+    def give_birth(self, time, father):
         "Agent gives birth. New agent inherits characterists of parents."
         assert self.get_sex() == 'female', "Men can't give birth"
-        assert self.get_ID() != dad.get_ID(), "No immaculate conception"
-        assert self.get_spouse_ID() == dad.get_ID(), "All births must be in marriages"
-        baby = Person(birthdate=time, mother=self, father=dad)
-        for parent in [self, dad]:
+        assert self.get_spouse().get_ID() == father.get_ID(), "All births must be in marriages"
+        assert self.get_ID() != father.get_ID(), "No immaculate conception (agent: %s)"%(self.get_ID())
+        baby = Person(birthdate=time, mother=self, father=father)
+        for parent in [self, father]:
             parent._children.append(baby)
         return baby
 
     def is_married(self):
         "Returns a boolean indicating if person is married or not."
-        if self._spouseID == None:
+        if self._spouse == None:
             return False
         else:
             return True
@@ -272,11 +273,11 @@ class Region(Agent_set):
                         num_births += 1
                         # Agent gives birth. First find the father (assumed to 
                         # be the spouse of the person giving birth).
-                        dad = household.get_agent(person.get_spouse_ID())
+                        father = person.get_spouse()
                         # Now have the mother give birth, and add the 
                         # new person to the mother's household.
-                        household.add_person(person.give_birth(time,
-                            father=dad))
+                        household.add_agent(person.give_birth(time,
+                            father=father))
         return num_births
                         
     def deaths(self, time):
@@ -288,20 +289,20 @@ class Region(Agent_set):
                 if np.random.random() < calc_hazard_death(person):
                     num_deaths += 1
                     # Agent dies.
-                    household.remove_agent(person.get_ID())
                     if person.is_married():
                         # For divorce, can take advantage of the fact that the 
                         # spouse will ALWAYS reside in the same household.
-                        household.get_agent(person.spouse_ID())
+                        spouse = person.get_spouse()
                         person.divorce()
+                    household.remove_agent(person)
         return num_deaths
                         
     def marriages(self, time):
         """Runs through the population and marries agents probabilistically 
         based on their age and the hazard_marriage for this population"""
         # First find the eligible agents
-        eligible_male= []
-        eligible_females= []
+        eligible_males = []
+        eligible_females = []
         for household in self.iter_households():
             for person in household.iter_agents():
                 if np.random.random() < calc_hazard_marriage(person):
@@ -356,7 +357,7 @@ class Region(Agent_set):
         for person in self.iter_persons():
             person._age += 1
 
-    def update_landuse(self):
+    def update_landuse(self, time):
         """Using the attributes of the neighborhoods in the region, update the 
         landuse proportions using OLS"""
         pass
