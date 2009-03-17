@@ -12,6 +12,8 @@ from chitwanABM import rcParams, IDGenerator, boolean_choice
 from chitwanABM.landuse import LandUse
 from chitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
 
+timestep = rcParams['model.timestep']
+
 class Agent(object):
     "Superclass for agent objects."
     def __init__(self, IDGen, ID=None, initial_agent=False):
@@ -355,7 +357,7 @@ class Region(Agent_set):
         """Adds one to the age of each agent. The units of age are dependent on 
         the units of the input rc parameters."""
         for person in self.iter_persons():
-            person._age += 1
+            person._age += timestep
 
     def update_landuse(self, time):
         """Using the attributes of the neighborhoods in the region, update the 
