@@ -137,7 +137,7 @@ class Person(Agent):
 
         if sex==None:
             # Person agents are randomly assigned a sex
-            if boolean_choice(.5):
+            if boolean_choice():
                 self._sex = 'female'
             else:
                 self._sex = 'male'
@@ -307,9 +307,9 @@ class Region(Agent_set):
         eligible_females = []
         for household in self.iter_households():
             for person in household.iter_agents():
-                if np.random.random() < calc_hazard_marriage(person):
+                if (not person.is_married()) and (np.random.random() < calc_hazard_marriage(person)):
                     # Agent is eligible to marry.
-                    if person.get_sex == "male":
+                    if person.get_sex() == "male":
                         eligible_males.append(person)
                     else:
                         eligible_females.append(person)
@@ -327,14 +327,14 @@ class Region(Agent_set):
             new_home = Household()
             neighborhoods = [] # Possible neighborhoods for the new_home
             for person in [male, female]:
-                old_house = person.get_parent_agent() # this person's old household
-                old_house.remove_agent(person)
+                old_household = person.get_parent_agent() # this person's old household
+                old_household.remove_agent(person)
                 new_home.add_agent(person)
                 neighborhoods.append(old_household.get_parent_agent()) # this persons old neighborhood
 
             # For now, randomly assign the new household to the male or females 
             # neighborhood.
-            if boolean_choice(.5) > .5:
+            if boolean_choice():
                 neighborhoods[0].add_agent(new_home)
             else:
                 neighborhoods[1].add_agent(new_home)
