@@ -8,7 +8,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import numpy as np
 
-from chitwanABM import rcParams, IDGenerator, boolean_choice
+from chitwanABM import rcParams, IDGenerator, boolean_choice, random_state
 from chitwanABM.landuse import LandUse
 from chitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
 
@@ -271,7 +271,7 @@ class Region(Agent_set):
         for household in self.iter_households():
             for person in household.iter_agents():
                 if (person.get_sex() == 'female') and person.is_married():
-                    if np.random.random() < calc_hazard_birth(person):
+                    if random_state.rand() < calc_hazard_birth(person):
                         num_births += 1
                         # Agent gives birth. First find the father (assumed to 
                         # be the spouse of the person giving birth).
@@ -288,7 +288,7 @@ class Region(Agent_set):
         num_deaths = 0
         for household in self.iter_households():
             for person in household.iter_agents():
-                if np.random.random() < calc_hazard_death(person):
+                if random_state.rand() < calc_hazard_death(person):
                     num_deaths += 1
                     # Agent dies.
                     if person.is_married():
@@ -307,7 +307,7 @@ class Region(Agent_set):
         eligible_females = []
         for household in self.iter_households():
             for person in household.iter_agents():
-                if (not person.is_married()) and (np.random.random() < calc_hazard_marriage(person)):
+                if (not person.is_married()) and (random_state.rand() < calc_hazard_marriage(person)):
                     # Agent is eligible to marry.
                     if person.get_sex() == "male":
                         eligible_males.append(person)
@@ -347,7 +347,7 @@ class Region(Agent_set):
         num_migrations = 0
         for household in self.iter_households():
             for person in household.iter_agents():
-                if np.random.random() < calc_hazard_migration(person):
+                if random_state.rand() < calc_hazard_migration(person):
                     num_migrations += 1
                     # Agent migrates.
                     # TODO: write code to handle migrations

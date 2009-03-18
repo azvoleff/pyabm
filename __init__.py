@@ -48,14 +48,6 @@ class IDGenerator(object):
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
 
-def boolean_choice(trueProb=.5):
-    """A function that returns true or false depending on whether a randomly
-    drawn float is less than trueProb"""
-    if np.random.rand() < trueProb:
-        return True
-    else:
-        return False
-
 def _is_writable_dir(p):
     """
     p is a string pointing to a putative writable dir -- return True p
@@ -106,9 +98,29 @@ def rc_params(fname):
             ret[key] = val # try to convert to proper type or raise
         else:
             print >> sys.stderr, """
-Bad key "%s" on line %d in %s.""" % (key, cnt, fname)
+Bad key "%s" on line %d in %s."""%(key, cnt, fname)
 
     return ret
 
 # this is the instance used by the model
 rcParams = rc_params(fname)
+
+# Check if a RandomDate was loaded from the rcfile. If not (if 
+# RandomState==None), then choose a random RandomState, and store it in 
+# rcParams so that it can be written to a file at the end of model runs, and 
+# saved for later reuse (for testing, etc.).
+if rcParams['model.RandomState'] == None:
+    # Seed the RandomState with a known random integer, and save the seed for 
+    # later reuse (for testing, etc.).
+    random_int = int(10**8 * np.random.random())
+    rcParams['model.RandomState'] = random_int
+random_state = np.random.RandomState(int(rcParams['model.RandomState']))
+
+def boolean_choice(trueProb=.5):
+    """A function that returns true or false depending on whether a randomly
+    drawn float is less than trueProb"""
+    if random_state.rand() < trueProb:
+        return True
+    else:
+        return False
+
