@@ -134,13 +134,13 @@ default_RCfile_docstring = """# Default values of parameters for the Chitwan Val
 # defaultParams maps parameter keys to default values and to validation 
 # functions. Any comments after "defaultParams = {" and before the closing 
 # brace will be included when the default rc file is build using the 
-# write_RCfile function.
+# write_RC_file function.
 ##################################
 ###***START OF RC DEFINITION***###
 defaultParams = {
     # Model-wide parameters
     'model.timezero' : [1996, validate_float], # The beginning of the model
-    'model.endtime' : [2006, validate_float], # When the model stops
+    'model.endtime' : [2002, validate_float], # When the model stops
     'model.timestep' : [1/12., validate_float], # The size of each timestep
     'model.time_units' : ["months", validate_time_units], # The size of each timestep
     'model.RandomState' : [None, novalidation], # Seeds the random number generator (useful for regenerating results later)
@@ -269,13 +269,33 @@ def write_RC_file(outputFilename, docstring=None, updated_params=None):
             print >> sys.stderr, """
 Bad key "%s" on line %s in %s.""" % (key, linenum, "rcsetup.py")
 
-    # Finally, write to outputFilename
+    # Update the parameters read from rcsetup.py with the updated_params 
+    # dictionary. Ignore any keys in updated_params that are not already 
+    # defined in rcsetup.py (as rcsetup.py would reject unknown keys anyways 
+    # when the rc file is read back in).
+    if updated_params != None:
+        for index in range(len(outputLines)):
+            key, value, comment, linenum = outputLines[index]
+            if key in updated_params.keys():
+                new_value = updated_params.pop(key)
+                # Convert new_value to a string, but remove brackets from lists 
+                # after doing so, so that rcsetup can read them in again 
+                # properly.
+                if type(new_value) == list:
+                    new_value = str(new_value).strip('[]')
+                else:
+                    new_value = str(new_value)
+                outputLines[index] = key, new_value, comment, linenum
+        if len(updated_params) != 0:
+            warnings.warn('%s invalid key(s) in updated_params were ignored'%(len(updated_params)))
+
+    # Finally, write rc file to outputFilename.
     outFile = open(outputFilename, "w")
     if docstring == None:
         outFile.writelines(default_RCfile_docstring + "\n\n")
     else:
         outFile.writelines(docstring + "\n\n")
-
+    
     for (key, value, comment, linenum) in outputLines:
         if key == "" and value == "":
             outFile.write(comment + "\n") # if comment is blank, just writes a blank line to the file
