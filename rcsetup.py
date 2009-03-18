@@ -140,7 +140,7 @@ default_RCfile_docstring = """# Default values of parameters for the Chitwan Val
 defaultParams = {
     # Model-wide parameters
     'model.timezero' : [1996, validate_float], # The beginning of the model
-    'model.endtime' : [2020, validate_float], # When the model stops
+    'model.endtime' : [2006, validate_float], # When the model stops
     'model.timestep' : [1/12., validate_float], # The size of each timestep
     'model.time_units' : ["months", validate_time_units], # The size of each timestep
     'model.RandomState' : [None, novalidation], # Seeds the random number generator (useful for regenerating results later)
@@ -158,9 +158,9 @@ defaultParams = {
     
     # Person agent parameters
     'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
-    'hazard_birth' : [[0, .30, 1.2, 1.2, .3, .05, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
-    'hazard_death' : [[.2, .03, .05, .07, .1, .2, .7, .8, .98, .99, 1], validate_nseq_float(-1)],
-    'hazard_marriage' : [[0, .2, .5, .7, .3, .2, .1, .05, .05, .01, .01], validate_nseq_float(-1)],
+    'hazard_birth' : [[0, .30, 1.25, 1.25, .3, .05, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
+    'hazard_death' : [[.2, .03, .05, .07, .1, .2, .7, .8, .98, .99, 100], validate_nseq_float(-1)],
+    'hazard_marriage' : [[0, .2, 3, 2, 1, .5, .1, .05, .05, .01, .01], validate_nseq_float(-1)],
     'hazard_migration' : [[0, .05, .1, .2, .05, .03, .03, .01, .01, .01, .01], validate_nseq_float(-1)],
 
     # Household agent parameters
@@ -197,7 +197,7 @@ class RcParams(dict):
             raise KeyError('%s is not a valid rc parameter.\
 See rcParams.keys() for a list of valid parameters.'%key)
 
-def write_RCfile(outputFilename, docstring=None, updated_params=None):
+def write_RC_file(outputFilename, docstring=None, updated_params=None):
     """Write default rcParams to a file after optionally updating them from an 
     rcParam dictionary."""
 
