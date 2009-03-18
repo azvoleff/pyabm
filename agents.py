@@ -248,7 +248,7 @@ class Region(Agent_set):
         return "__repr__ UNDEFINED"
 
     def __str__(self):
-        return "Region(RID: %s. %s neighborhood(s), %s household(s), %s person(s))" %(self.get_ID(), len(self._members), self.get_num_households(), self.census())
+        return "Region(RID: %s. %s neighborhood(s), %s household(s), %s person(s))" %(self.get_ID(), len(self._members), self.get_num_households(), self.num_persons())
 
     def iter_households(self):
         "Returns an iterator over all the households in the region"
@@ -364,15 +364,18 @@ class Region(Agent_set):
         landuse proportions using OLS"""
         pass
 
-    def census(self):
+    def num_persons(self):
         "Returns the number of persons in the population."
         total = 0
         for household in self.iter_households():
             total += household.num_members()
         return total
 
-    def get_num_households(self):
+    def num_households(self):
         total = 0
         for neighborhood in self.iter_agents():
             total += len(neighborhood.get_agents())
         return total
+
+    def num_neighborhoods(self):
+        return len(self._members.values())
