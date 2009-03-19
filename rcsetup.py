@@ -9,6 +9,8 @@ NOTE: Based off the rcsetup.py functions used in matplotlib.
 import os
 import tempfile
 
+import warnings
+
 def validate_float(s):
     'convert s to float or raise'
     try: 
@@ -16,6 +18,8 @@ def validate_float(s):
             return float(eval(s))
         else:
             return float(s)
+    except NameError:
+        raise ValueError('Could not convert "%s" to float'%s)
     except ValueError:
         raise ValueError('Could not convert "%s" to float'%s)
 
@@ -27,11 +31,8 @@ def validate_int(s):
 
 def validate_unit_interval(s):
     "Checks that s is a number between 0 and 1, inclusive, or raises an error."
-    try:
-        s = float(s)
-    except ValueError:
-        raise ValueError('Could not convert "%s" to float'%s)
-    if s < 0 and s > 1:
+    s = validate_float(s)
+    if s < 0 or s > 1:
         raise ValueError('"%s" is not between 0 and 1'%s)
     return s
 
@@ -79,7 +80,7 @@ class validate_nseq_float:
             except ValueError:
                 raise ValueError('Could not convert all entries to floats')
         else:
-            assert type(s) in (list,tuple)
+            assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
             if self.n != -1 and len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
             return [validate_float(val) for val in s]
@@ -102,8 +103,14 @@ def validate_time_units(s):
     else:
         raise ValueError("%s is not a valid unit of time"%s)
 
+def validate_RandomState(s):
+    if s == 'None' or s == None:
+        return None
+    else:
+        return validate_int(s)
+
 def novalidation(s):
-    "Performs no validation on object."
+    "Performs no validation on object. (used in testing)."
     return s
 
 def _get_home_dir():
@@ -135,19 +142,19 @@ default_RCfile_docstring = """# Default values of parameters for the Chitwan Val
 #
 # Alex Zvoleff, aiz2101@columbia.edu"""
 
-# defaultParams maps parameter keys to default values and to validation 
-# functions. Any comments after "defaultParams = {" and before the closing 
+# default_params maps parameter keys to default values and to validation 
+# functions. Any comments after "default_params = {" and before the closing 
 # brace will be included when the default rc file is build using the 
 # write_RC_file function.
 ##################################
 ###***START OF RC DEFINITION***###
-defaultParams = {
+default_params = {
     # Model-wide parameters
     'model.timezero' : [1996, validate_float], # The beginning of the model
-    'model.endtime' : [2002, validate_float], # When the model stops
+    'model.endtime' : [1998, validate_float], # When the model stops
     'model.timestep' : [1/12., validate_float], # The size of each timestep
     'model.time_units' : ["months", validate_time_units], # The size of each timestep
-    'model.RandomState' : [None, novalidation], # Seeds the random number generator (useful for regenerating results later)
+    'model.RandomState' : [None, validate_RandomState], # Seeds the random number generator (useful for regenerating results later)
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
     'model.initial_num_neighborhoods' : [65, validate_int],
@@ -189,36 +196,47 @@ class RcParams(dict):
     """
     A dictionary object including validation
     """
+    def __init__(self, *args):
+        dict.__init__(self, *args)
+        self.validate = dict([ (key, converter) for key, (default, converter) in \
+                     default_params.iteritems() ])
 
-    validate = dict([ (key, converter) for key, (default, converter) in \
-                     defaultParams.iteritems() ])
+        # original_strings stores the unconverted strings representing the 
+        # originally input values (prior to conversion). This allows printing to an 
+        # rc file the original values without running to problems with precision 
+        # from floating point -> string -> floating point conversions
+        self.original_strings = {}
 
     def __setitem__(self, key, val):
         try:
+            self.original_strings[key] = str(val)
             cval = self.validate[key](val)
             dict.__setitem__(self, key, cval)
         except KeyError:
             raise KeyError('%s is not a valid rc parameter.\
 See rcParams.keys() for a list of valid parameters.'%key)
 
-def write_RC_file(outputFilename, docstring=None, updated_params=None):
+def write_RC_file(outputFilename, docstring=None, updated_params=RcParams()):
     """Write default rcParams to a file after optionally updating them from an 
-    rcParam dictionary."""
+    RcParam dictionary. Any keys in updated_params that are not already defined 
+    in rcsetup.py are ignored (as rcsetup.py would reject unknown keys anyways 
+    when the rc file is read back in)."""
 
     # TODO: fix this to find the proper path for rcsetup.py
-    rcsetupFile = open("rcsetup.py", "r")
+    rcsetup_script = open("rcsetup.py", "r")
 
     linenum = 0
-    line = rcsetupFile.readline()
+    line = rcsetup_script.readline()
     while line:
         linenum += 1
         if line == "###***START OF RC DEFINITION***###\n":
             break
-        line = rcsetupFile.readline()
+        line = rcsetup_script.readline()
 
-    outputLines = []
+    output_lines = [] # Stores lines to output to new rc file
+    rcsetup_params = RcParams() # Build an RcParams dictionary object to validate
     defEnded = False # Flag for whether the "END OF RC DEFINITION" block is reached
-    line = rcsetupFile.readline()
+    line = rcsetup_script.readline()
     while line:
         linenum += 1
 
@@ -241,71 +259,45 @@ def write_RC_file(outputFilename, docstring=None, updated_params=None):
         value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
         value = value_validation_tuple.rpartition(",")[0].strip("[]\"\'")
         
-        outputLines.append((key, value, comment, linenum))
+        # Validate keys/values
+        if key != '' and value != '':
+            rcsetup_params[key] = value
+            #print "rcsetup_params key: %s, value: %s, origstring: %s"%(key, rcsetup_params[key], rcsetup_params.original_strings[key])
+            if key in updated_params.keys():
+                #print "updated_params key: %s, value: %s, origstring: %s\n"%(key, updated_params[key], updated_params.original_strings[key])
+                new_value = updated_params.original_strings[key]
+                conv = updated_params[key]
+                output_lines.append((key, new_value, comment, linenum))
+        else:
+            output_lines.append((key, value, comment, linenum))
 
         # TODO: Check for duplicate keys
         #if 
         #    warnings.warn("Duplicate values for %s are provided in rcsetup.py"%key)
 
-        line = rcsetupFile.readline()
+        line = rcsetup_script.readline()
 
     if not defEnded:
         warnings.warn('failed to reach "END OF RC DEFINITION" block')
 
     # Remove opening and closing braces of the dictionary definition
-    assert outputLines[0][0] == "defaultParams = {", "error reading defaultParams opening brace"
-    del outputLines[0]
-    assert outputLines[-1][0] == "}", "error reading defaultParams closing brace"
-    del outputLines[-1]
-
-    ret = RcParams([ (key, default) for key, (default, converter) in \
-                    defaultParams.iteritems() ])
-
-    # Check keys and values to make sure they validate
-    for (key, value, comment, linenum) in outputLines:
-        # Skip blank lines and comment lines
-        if '' in [key, value]:
-            continue
-        if defaultParams.has_key(key):
-            ret[key] = value # try to convert to proper type or raise
-        else:
-            print >> sys.stderr, """
-Bad key "%s" on line %s in %s.""" % (key, linenum, "rcsetup.py")
-
-    # Update the parameters read from rcsetup.py with the updated_params 
-    # dictionary. Ignore any keys in updated_params that are not already 
-    # defined in rcsetup.py (as rcsetup.py would reject unknown keys anyways 
-    # when the rc file is read back in).
-    if updated_params != None:
-        for index in range(len(outputLines)):
-            key, value, comment, linenum = outputLines[index]
-            if key in updated_params.keys():
-                new_value = updated_params.pop(key)
-                # Convert new_value to a string, but remove brackets from lists 
-                # after doing so, so that rcsetup can read them in again 
-                # properly.
-                if type(new_value) == list:
-                    new_value = str(new_value).strip('[]')
-                else:
-                    new_value = str(new_value)
-                print value, new_value
-                outputLines[index] = key, new_value, comment, linenum
-        if len(updated_params) != 0:
-            warnings.warn('%s invalid key(s) in updated_params were ignored'%(len(updated_params)))
+    assert output_lines[0][0] == "default_params = {", "error reading default_params opening brace"
+    del output_lines[0]
+    assert output_lines[-1][0] == "}", "error reading default_params closing brace"
+    del output_lines[-1]
 
     # Finally, write rc file to outputFilename.
     outFile = open(outputFilename, "w")
     if docstring == None:
-        outFile.writelines(default_RCfile_docstring + "\n\n")
+        outFile.writelines("%s\n\n"%(default_RCfile_docstring))
     else:
-        outFile.writelines(docstring + "\n\n")
+        outFile.writelines("%s\n\n"%(docstring))
     
-    for (key, value, comment, linenum) in outputLines:
+    for (key, value, comment, linenum) in output_lines:
         if key == "" and value == "":
-            outFile.write(comment + "\n") # if comment is blank, just writes a blank line to the file
+            outFile.write("%s\n"%(comment)) # if comment is blank, just writes a blank line to the file
         else:
             if comment != '':
                 # precede comment by a blank space
                 comment = ' ' + comment
-            line = ''.join([key, " : ", value, comment, "\n"])
-            outFile.write(line)
+            outFile.write("%s : %s %s \n"%(key, value, comment))
