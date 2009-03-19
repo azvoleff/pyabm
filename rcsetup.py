@@ -11,9 +11,13 @@ import tempfile
 
 def validate_float(s):
     'convert s to float or raise'
-    try: return float(eval(s))
+    try: 
+        if type(s) == str:
+            return float(eval(s))
+        else:
+            return float(s)
     except ValueError:
-        raise ValueError('Could not convert "%s" to float' % s)
+        raise ValueError('Could not convert "%s" to float'%s)
 
 def validate_int(s):
     'convert s to int or raise'
@@ -29,7 +33,7 @@ def validate_unit_interval(s):
         raise ValueError('Could not convert "%s" to float'%s)
     if s < 0 and s > 1:
         raise ValueError('"%s" is not between 0 and 1'%s)
-    return float(s)
+    return s
 
 def validate_readable_file(s):
     """Checks that a file exists and is readable."""
@@ -71,14 +75,14 @@ class validate_nseq_float:
             if self.n != -1 and len(ss) != self.n:
                 raise ValueError('You must supply exactly %d comma separated values'%self.n)
             try:
-                return [float(val) for val in ss]
+                return [validate_float(val) for val in ss]
             except ValueError:
                 raise ValueError('Could not convert all entries to floats')
         else:
             assert type(s) in (list,tuple)
             if self.n != -1 and len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
-            return [float(val) for val in s]
+            return [validate_float(val) for val in s]
 
 def validate_boolean(s):
     if s in [True, False]:
@@ -158,7 +162,7 @@ defaultParams = {
     
     # Person agent parameters
     'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
-    'hazard_birth' : [[0, .30, 1.25, 1.25, .3, .05, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
+    'hazard_birth' : [[0, .3, 1.25, 1.25, .3, .05, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
     'hazard_death' : [[.2, .03, .05, .07, .1, .2, .7, .8, .98, .99, 100], validate_nseq_float(-1)],
     'hazard_marriage' : [[0, .2, 3, 2, 1, .5, .1, .05, .05, .01, .01], validate_nseq_float(-1)],
     'hazard_migration' : [[0, .05, .1, .2, .05, .03, .03, .01, .01, .01, .01], validate_nseq_float(-1)],
@@ -285,6 +289,7 @@ Bad key "%s" on line %s in %s.""" % (key, linenum, "rcsetup.py")
                     new_value = str(new_value).strip('[]')
                 else:
                     new_value = str(new_value)
+                print value, new_value
                 outputLines[index] = key, new_value, comment, linenum
         if len(updated_params) != 0:
             warnings.warn('%s invalid key(s) in updated_params were ignored'%(len(updated_params)))
