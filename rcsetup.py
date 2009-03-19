@@ -174,7 +174,7 @@ defaultParams = {
     'prob_rented_out_land' : [.5, validate_unit_interval],
 
     # Neighborhood agent parameters
-    'prob_elec' : [.1, validate_float],
+    'prob_elec' : [.1, validate_unit_interval],
 
     # Landscape parameters
     'initial_proportion_veg' : [.3, validate_unit_interval],
@@ -261,7 +261,6 @@ def write_RC_file(outputFilename, docstring=None, updated_params=None):
     ret = RcParams([ (key, default) for key, (default, converter) in \
                     defaultParams.iteritems() ])
 
-    # TODO: Fix this so it works
     # Check keys and values to make sure they validate
     for (key, value, comment, linenum) in outputLines:
         # Skip blank lines and comment lines
