@@ -48,20 +48,6 @@ class IDGenerator(object):
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
 
-def _is_writable_dir(p):
-    """
-    p is a string pointing to a putative writable dir -- return True p
-    is such a string, else False
-    """
-    try: p + ''  # test is string like
-    except TypeError: return False
-    try:
-        t = tempfile.TemporaryFile(dir=p)
-        t.write('1')
-        t.close()
-    except OSError: return False
-    else: return True
-
 fname = 'chitwanABMrc' #TODO: write a function to find this
 def rc_params(fname):
     'Return the default params updated from the values in the rc file'
