@@ -13,7 +13,7 @@ import warnings
 
 import numpy as np
 
-from rcsetup import defaultParams
+from rcsetup import default_params
 from rcsetup import RcParams
 
 class IDError(Exception):
@@ -51,10 +51,14 @@ class IDGenerator(object):
 def read_rc_params(fname='chitwanABMrc'):
     'Return the default params updated from the values in the rc file'
 
+    # Make a new RcParams instance with the default values from rcsetup.py 
+    # stored in it.
+    ret = RcParams()
+    for key, (default, converter) in default_params.iteritems():
+            ret[key] = default
+
     if not os.path.exists(fname):
         warnings.warn('could not find rc file; returning defaults')
-        ret = RcParams([ (key, default) for key, (default, converter) in \
-                        defaultParams.iteritems() ])
         return ret
 
     cnt = 0
@@ -75,16 +79,12 @@ def read_rc_params(fname='chitwanABMrc'):
             warnings.warn('Duplicate key in file "%s", line #%d'%(fname,cnt))
         rc_temp[key] = (val, line, cnt)
 
-    ret = RcParams([ (key, default) for key, (default, converter) in \
-                    defaultParams.iteritems() ])
-
     for key, (val, line, cnt) in rc_temp.iteritems():
-        if defaultParams.has_key(key):
+        if default_params.has_key(key):
             ret[key] = val # try to convert to proper type or raise
         else:
             print >> sys.stderr, """
 Bad key "%s" on line %d in %s."""%(key, cnt, fname)
-
     return ret
 
 # this is the instance used by the model
@@ -108,4 +108,3 @@ def boolean_choice(trueProb=.5):
         return True
     else:
         return False
-

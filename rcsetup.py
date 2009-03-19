@@ -151,7 +151,7 @@ default_RCfile_docstring = """# Default values of parameters for the Chitwan Val
 default_params = {
     # Model-wide parameters
     'model.timezero' : [1996, validate_float], # The beginning of the model
-    'model.endtime' : [1998, validate_float], # When the model stops
+    'model.endtime' : [2020, validate_float], # When the model stops
     'model.timestep' : [1/12., validate_float], # The size of each timestep
     'model.time_units' : ["months", validate_time_units], # The size of each timestep
     'model.RandomState' : [None, validate_RandomState], # Seeds the random number generator (useful for regenerating results later)
