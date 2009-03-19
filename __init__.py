@@ -48,8 +48,7 @@ class IDGenerator(object):
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
 
-fname = 'chitwanABMrc' #TODO: write a function to find this
-def rc_params(fname):
+def read_rc_params(fname='chitwanABMrc'):
     'Return the default params updated from the values in the rc file'
 
     if not os.path.exists(fname):
@@ -89,7 +88,7 @@ Bad key "%s" on line %d in %s."""%(key, cnt, fname)
     return ret
 
 # this is the instance used by the model
-rcParams = rc_params(fname)
+rcParams = read_rc_params()
 
 # Check if a RandomDate was loaded from the rcfile. If not (if 
 # RandomState==None), then choose a random RandomState, and store it in 
