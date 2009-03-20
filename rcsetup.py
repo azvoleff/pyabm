@@ -158,21 +158,21 @@ default_params = {
     'model.initial_num_persons' : [5000, validate_int],
     'model.initial_num_households' : [750, validate_int],
     'model.initial_num_neighborhoods' : [65, validate_int],
-    'model.resultspath' : ["/media/Restricted/chitwanABM_runs", validate_writable_dir],
+    'model.resultspath' : ["/media/Restricted/chitwanABM_runs", novalidation],
     'model.use_psyco': [True, validate_boolean],
     
     # Location of input data (these are restricted data)
-    'input.census_file' : ["/media/Restricted/CVABM_initialization_data/DS0004_export.csv", validate_readable_file],
-    'input.relationships_grid_file' : ["/media/Restricted/CVABM_initialization_data/DS0016_export.csv", validate_readable_file],
-    'input.households_file' : ["/media/Restricted/CVABM_initialization_data/DS0002_export.csv", validate_readable_file],
-    'input.neighborhoods_file' : ["/media/Restricted/CVABM_initialization_data/DS0014_export.csv", validate_readable_file],
+    'input.census_file' : ["/media/Restricted/CVABM_initialization_data/DS0004_export.csv", novalidation],
+    'input.relationships_grid_file' : ["/media/Restricted/CVABM_initialization_data/DS0016_export.csv", novalidation],
+    'input.households_file' : ["/media/Restricted/CVABM_initialization_data/DS0002_export.csv", novalidation],
+    'input.neighborhoods_file' : ["/media/Restricted/CVABM_initialization_data/DS0014_export.csv", novalidation],
     
     # Person agent parameters
     'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
-    'hazard_birth' : [[0, .3, 1.25, 1.25, .3, .05, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
-    'hazard_death' : [[.2, .03, .05, .07, .1, .2, .7, .8, .98, .99, 100], validate_nseq_float(-1)],
-    'hazard_marriage' : [[0, .2, 3, 2, 1, .5, .1, .05, .05, .01, .01], validate_nseq_float(-1)],
-    'hazard_migration' : [[0, .05, .1, .2, .05, .03, .03, .01, .01, .01, .01], validate_nseq_float(-1)],
+    'hazard_birth' : [[0, 3.6, 15, 15, 3.6, .6, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
+    'hazard_death' : [[2.4, .36, .6, .8, 1.2, 2.4, 8.5, 9.6, 11.5, 12, 500], validate_nseq_float(-1)],
+    'hazard_marriage' : [[0, 2.4, 5, 2.5, 1.5, 1, 1, .5, .5, .1, .1], validate_nseq_float(-1)],
+    'hazard_migration' : [[0, .5, 1.2, 2.4, .6, .35, .35, .12, .12, .12, .12], validate_nseq_float(-1)],
 
     # Household agent parameters
     'prob_any_non_wood_fuel' : [.5, validate_unit_interval],
