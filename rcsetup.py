@@ -169,10 +169,10 @@ default_params = {
     
     # Person agent parameters
     'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
-    'hazard_birth' : [[0, 3.6, 15, 15, 3.6, .6, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
-    'hazard_death' : [[2.4, .36, .6, .8, 1.2, 2.4, 8.5, 9.6, 11.5, 12, 500], validate_nseq_float(-1)],
-    'hazard_marriage' : [[0, 2.4, 5, 2.5, 1.5, 1, 1, .5, .5, .1, .1], validate_nseq_float(-1)],
-    'hazard_migration' : [[0, .5, 1.2, 2.4, .6, .35, .35, .12, .12, .12, .12], validate_nseq_float(-1)],
+    'hazard_birth' : [[0, .2, .9, .9, .5, .1, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
+    'hazard_death' : [[.3, .05, .01, .02, .04, .1, .4, .9, .99, .999, 1], validate_nseq_float(-1)],
+    'hazard_marriage' : [[0, .4, .99, .99, .5, .3, .2, .05, .002, .01, .01], validate_nseq_float(-1)],
+    'hazard_migration' : [[0, .2, .2, .1, .1, .05, .02, .01, .01, 01], validate_nseq_float(-1)],
 
     # Household agent parameters
     'prob_any_non_wood_fuel' : [.5, validate_unit_interval],
