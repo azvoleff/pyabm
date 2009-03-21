@@ -191,10 +191,10 @@ class Household(Agent_set):
     "Represents a single household agent"
     def __init__(self, ID=None, initial_agent=False):
         Agent_set.__init__(self, HIDGen, ID, initial_agent)
-        self._any_non_wood_fuel = boolean_choice()
-        self._own_house_plot = boolean_choice()
-        self._own_land = boolean_choice()
-        self._rented_out_land = boolean_choice()
+        self._any_non_wood_fuel = boolean_choice(.93) # From DS0002$BAE15
+        self._own_house_plot = boolean_choice(.829)  # From DS0002$BAA43
+        self._own_land = boolean_choice(.61) # From Axinn, Ghimire (2007)
+        self._rented_out_land = boolean_choice(.11) # From Axinn, Ghimire (2007)
 
     def any_non_wood_fuel(self):
         "Boolean for whether household uses any non-wood fuel"
