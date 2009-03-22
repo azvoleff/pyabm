@@ -12,6 +12,10 @@ from chitwanABM import rcParams, IDGenerator, boolean_choice, random_state
 from chitwanABM.landuse import LandUse
 from chitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
 
+if rcParams['model.use_psyco'] == True:
+    import psyco
+    psyco.full()
+
 timestep = rcParams['model.timestep']
 
 class Agent(object):
