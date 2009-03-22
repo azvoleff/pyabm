@@ -170,7 +170,7 @@ default_params = {
     # Person agent parameters
     'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
     'hazard_birth' : [[0, .2, .99, .99, .5, .1, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
-    'hazard_death' : [[.4, .05, .05, .1, .3, .6, .7, .95, .99, .99, 1], validate_nseq_float(-1)],
+    'hazard_death' : [[.4, .05, .1, .2, .5, .6, .7, .95, .99, .99, 1], validate_nseq_float(-1)],
     'hazard_marriage' : [[0, .4, .8, .6, .5, .3, .2, .05, .002, .01, .01], validate_nseq_float(-1)],
     'hazard_migration' : [[0, .2, .2, .1, .1, .05, .02, .01, .01, 01], validate_nseq_float(-1)],
 
