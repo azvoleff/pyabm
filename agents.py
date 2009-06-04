@@ -35,7 +35,7 @@ class Agent(object):
         # initialize the model.
         self._initial_agent = initial_agent
 
-        # _parent_agentstores the parent agent if this agent is a member of an 
+        # _parent_agent stores the parent agent if this agent is a member of an 
         # Agent_set class instance. For example, for a person agent that is a 
         # member of a household, the _parent_agent for that person agent would 
         # be that household.
