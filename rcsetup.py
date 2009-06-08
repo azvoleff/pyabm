@@ -51,8 +51,10 @@ def validate_readable_file(s):
     return s
 
 def validate_writable_dir(s):
-    """Checks that a directory exists and is writable. Fails if the 
-    directory does not exist or if s is not a string"""
+    """
+    Checks that a directory exists and is writable. Fails if the directory does 
+    not exist or if s is not a string
+    """
     if (type(s) != str):
         raise TypeError("%s is not a writable directory"%s)
     if not os.path.exists(s):
@@ -69,8 +71,10 @@ class validate_nseq_float:
     def __init__(self, n):
         self.n = n
     def __call__(self, s):
-        """return a seq of n floats or raises error. If n == -1, then length 
-        doesn't matter"""
+        """
+        Return a seq of n floats or raises error. If n == -1, then length 
+        doesn't matter.
+        """
         if type(s) is str:
             ss = s.split(',')
             if self.n != -1 and len(ss) != self.n:
@@ -114,8 +118,8 @@ def novalidation(s):
     return s
 
 def _get_home_dir():
-    """Find user's home directory if possible.
-    Otherwise raise error.
+    """
+    Find user's home directory if possible. Otherwise raise error.
 
     :see:  http://mail.python.org/pipermail/python-list/2005-February/263921.html
     """
@@ -217,10 +221,12 @@ class RcParams(dict):
 See rcParams.keys() for a list of valid parameters.'%key)
 
 def write_RC_file(outputFilename, docstring=None, updated_params=RcParams()):
-    """Write default rcParams to a file after optionally updating them from an 
+    """
+    Write default rcParams to a file after optionally updating them from an 
     RcParam dictionary. Any keys in updated_params that are not already defined 
     in rcsetup.py are ignored (as rcsetup.py would reject unknown keys anyways 
-    when the rc file is read back in)."""
+    when the rc file is read back in).
+    """
 
     # TODO: fix this to find the proper path for rcsetup.py
     rcsetup_script = open("rcsetup.py", "r")
