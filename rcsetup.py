@@ -154,20 +154,21 @@ def validate_RandomState(s):
     else:
         return validate_int(s)
 
-def validate_hazard(s, (min, max)):
+class validate_hazard:
     """
     Validates a hazard specified as a dictionary where each key is a tuple 
     specifying the interval to which the hazard applies (in hazard_time_units). 
-    The interval tuple is specifed as:
+    The interval tuple is specified as:
         [lower, upper)
-    (open interval on the lower bound, closed on the upper), and the value 
-    specifed for each inteval tuple key is the hazard for that interval. 
+    (closed interval on the lower bound, open interval on the upper), and the 
+    value specified for each inteval tuple key is the hazard for that interval. 
     
-    The (min, max) tuple passed to the validate_hazard function gives the 
-    minimum and maximum value for which hazards must be specified. 
-    validate_hazard will check that hazards are specified for all values of t 
-    between this minimum and maximum value, including the minimum value ('min') 
-    in (min, max) and up to but excluding the maximum value 'max'.
+    The 'min', 'max' values passed to the validate_hazard function give the 
+    minimum (inclusive) and maximum values (exclusive) for which hazards must 
+    be specified.  validate_hazard will check that hazards are specified for 
+    all values of t between this minimum and maximum value, including the 
+    minimum value ('min') in [min, max) and up to but excluding the maximum 
+    value 'max'.
     
     This function validates the hazards lie on the unit interval, and then 
     returns a dictionary object where there is a key for each age value in the 
@@ -176,47 +177,56 @@ def validate_hazard(s, (min, max)):
     would be converted to:
         {0:.6, 1:.6, 2:.9, 3:.9, 4:.9}
     """
-    error_msg = """Invalid hazard parameter dictionary: %s
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+    def __call__(self, s):
+        error_msg = """Invalid hazard parameter dictionary: %s
 
-    Hazards must be specified in a dictionary of key values pairs in the 
-    following format:
+        Hazards must be specified in a dictionary of key, value pairs in the 
+        following format:
 
-        (lower_limit, upper_limit) : hazard
+            (lower_limit, upper_limit) : hazard
 
-    Hazards apply to the interval [lower_limit, upper_limit), including the 
-    lower limit, and excluding the upper limit. The units in which the lower 
-    and upper limits are specified should be consistent with the units of time 
-    specifed by the hazard_time_units rc parameter."""
+        Hazards apply to the interval [lower_limit, upper_limit), including the 
+        lower limit, and excluding the upper limit. The units in which the 
+        lower and upper limits are specified should be consistent with the 
+        units of time specified by the hazard_time_units rc parameter."""
 
-    try:
-        if type(s) == str:
-            input = eval(s)
-        else:
-            input = s
-    except TypeError:
-        raise TypeError(error_msg%(s))
-    except SyntaxError:
-        raise SyntaxError(error_msg%(s))
-    if type(input) != dict:
-        raise SyntaxError(error_msg%(s))
+        try:
+            if type(s) == str:
+                input = eval(s)
+            else:
+                input = s
+        except TypeError:
+            raise TypeError(error_msg%(s))
+        except SyntaxError:
+            raise SyntaxError(error_msg%(s))
+        if type(input) != dict:
+            raise SyntaxError(error_msg%(s))
 
-    hazard_dict = {}
-    # Create a converter that will validate that hazard limits are length 2 
-    # tuples
-    key_converter = validate_nseq_int(2) 
-    for item in input.iteritems():
-        key = key_converter(item[0]) # Validate that key is a length 2 tuple
-        lower_lim, upper_lim = validate_int(key[0]), validate_int(key[1])
-        if lower_lim > upper_lim:
-            raise KeyError("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
-        elif lower_lim == upper_lim:
-            raise KeyError("lower_lim = upper_lim for hazard dictionary key '(%s, %s)'."%(key))
-        hazard = validate_unit_interval(item[1])
-        for t in xrange(lower_lim, upper_lim):
-            if hazard_dict.has_key(t):
-                raise KeyError("Hazard dictionary key '%s' is specified twice."%(t))
-            hazard_dict[t] = hazard
-    return hazard_dict
+        hazard_dict = {}
+        # Create a converter that will validate that hazard limits are length 2 
+        # tuples
+        key_converter = validate_nseq_int(2) 
+        for item in input.iteritems():
+            key = key_converter(item[0]) # Validate that key is a length 2 tuple
+            lower_lim, upper_lim = validate_int(key[0]), validate_int(key[1])
+            if lower_lim > upper_lim:
+                raise ValueErro("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
+            elif lower_lim == upper_lim:
+                raise ValueError("lower_lim = upper_lim for hazard dictionary key '(%s, %s)'."%(key))
+            hazard = validate_unit_interval(item[1])
+            for t in xrange(lower_lim, upper_lim):
+                if hazard_dict.has_key(t):
+                    raise ValueError("Hazard is specified twice for dictionary key '%s'."%(t))
+                hazard_dict[t] = hazard
+        for key in hazard_dict.keys():
+            if key < self.min or key >= self.max:
+                raise ValueError("A hazard is given for a time outside the \
+specified overall hazard interval.\nA hazard is given for time %s, but the overall \
+hazard interval is [%s, %s)."%(key, self.min, self.max))
+        return hazard_dict
 
 def novalidation(s):
     "Performs no validation on object. (used in testing)."
@@ -273,8 +283,8 @@ def read_rcparams_defaults():
 
         # Now pull out value and converter
         value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
-        value = value_validation_tuple.rpartition(",")[0].strip("[]\"\'")
-        converter = value_validation_tuple.rpartition(",")[2].strip("[]\"\' ")
+        value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
+        converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
 
         if key != '' and value != '':
             if ret.has_key(key):
@@ -311,17 +321,21 @@ class RcParams(dict):
             self.original_value[key] = val
             cval = self.validate[key](val)
             dict.__setitem__(self, key, cval)
-        except KeyError:
-            raise KeyError('\'%s\' is not a valid rc parameter. \
-See default_params.keys() for a list of valid parameters.'%key)
+        except KeyError, msg:
+            raise KeyError('%s is not a valid rc parameter.\
+See rcParams.keys() for a list of valid parameters.\n\t%s'%(key, msg))
 
 # Convert the rcparams_defaults dictionary into an RcParams instance. This 
 # process will also validate that the values in rcparams_defaults are valid by 
-# using the validation function specifed in rcparams_defaults to convert each 
+# using the validation function specified in rcparams_defaults to convert each 
 # parameter value.
 default_params = RcParams()
 for key, (default, converter) in rcparams_defaults_dict.iteritems():
+    try:
         default_params[key] = default
+    except Exception, msg:
+        raise Exception("Error processing rcparams.default key '%s'.\n%s"%(key, msg))
+
 
 def read_rc_file(fname='chitwanABMrc'):
     """
@@ -400,7 +414,7 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
 
         # Now pull out value
         value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
-        value = value_validation_tuple.rpartition(",")[0].strip("[]\"\'")
+        value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
         
         if key != '' and value != '':
             # Validate keys / values
