@@ -119,6 +119,33 @@ def validate_RandomState(s):
     else:
         return validate_int(s)
 
+def validate_hazard(s, (min, max)):
+    """
+    Validates a hazard specified as a dictionary where each key is a tuple 
+    specifying the interval to which the hazard applies (in hazard_time_units) 
+    as: [lower, upper) and where each value is the hazard for that interval. 
+    
+    The (min, max) tuple input to validate_hazard give the minimum and maximum 
+    value for which the hazard must be specified. validate_hazard will check 
+    that hazards are specified for all values of t between this minimum and 
+    maximum value, including the minimum value in (min, max) and excluding the 
+    'max' value.
+    
+    This function validates the hazards lie on the unit interval, and then 
+    returns a dictionary object where there is a key for each age value in the 
+    interval specified. Therefore,
+        {(0,2):.6, (2,5):.9}
+    would be converted to:
+        {0:.6, 1:.6, 2:.9, 3:.9, 4:.9}
+    """
+    try:
+        input = dict(s)
+    except:
+
+    hazard_dict = {}
+    for item in 
+    return hazard_dict
+
 def novalidation(s):
     "Performs no validation on object. (used in testing)."
     return s
