@@ -13,8 +13,7 @@ import warnings
 
 import numpy as np
 
-from rcsetup import default_params
-from rcsetup import RcParams
+from rcsetup import get_rc_params
 
 class IDError(Exception):
     pass
@@ -48,47 +47,8 @@ class IDGenerator(object):
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
 
-def read_rc_params(fname='chitwanABMrc'):
-    'Return the default params updated from the values in the rc file'
-
-    # Make a new RcParams instance with the default values from rcsetup.py 
-    # stored in it.
-    ret = RcParams()
-    for key, (default, converter) in default_params.iteritems():
-            ret[key] = default
-
-    if not os.path.exists(fname):
-        warnings.warn('could not find rc file; returning defaults')
-        return ret
-
-    cnt = 0
-    rc_temp = {}
-    for line in file(fname):
-        cnt += 1
-        strippedline = line.split('#',1)[0].strip()
-        if not strippedline: continue
-        tup = strippedline.split(':',1)
-        if len(tup) !=2:
-            warnings.warn('Illegal line #%d\n\t%s\n\tin file "%s"'%\
-                          (cnt, line, fname))
-            continue
-        key, val = tup
-        key = key.strip()
-        val = val.strip()
-        if key in rc_temp:
-            warnings.warn('Duplicate key in file "%s", line #%d'%(fname,cnt))
-        rc_temp[key] = (val, line, cnt)
-
-    for key, (val, line, cnt) in rc_temp.iteritems():
-        if default_params.has_key(key):
-            ret[key] = val # try to convert to proper type or raise
-        else:
-            print >> sys.stderr, """
-Bad key "%s" on line %d in %s."""%(key, cnt, fname)
-    return ret
-
 # this is the instance used by the model
-rcParams = read_rc_params()
+rcParams = get_rc_params()
 
 # Check if a RandomDate was loaded from the rcfile. If not (if 
 # RandomState==None), then choose a random RandomState, and store it in 

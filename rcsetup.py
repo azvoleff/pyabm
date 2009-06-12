@@ -1,13 +1,19 @@
 """
+Part of Chitwan Valley agent-based model.
+
 Sets up parameters for a model run. Used to read in settings from any provided 
 rc file, and set default values for any parameters that are not provided in the 
 rc file.
 
 NOTE: Based off the rcsetup.py functions used in matplotlib.
+
+Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import os
+import sys
 import tempfile
+import copy
 
 import warnings
 
@@ -138,63 +144,57 @@ def _get_home_dir():
     if path:
         return path
     else:
-        raise RuntimeError('please define environment variable $HOME')
+        raise RuntimeError('Error finding user home directory: \
+                please define environment variable $HOME')
 
-default_RCfile_docstring = """# Default values of parameters for the Chitwan Valley Non-Spatial Agent-based 
-# Model. Values are read in to set defaults prior to initialization of the 
-# model by the runModel script.
-#
-# Alex Zvoleff, aiz2101@columbia.edu"""
+def read_rcparams_defaults():
+    try:
+        rcparams_file = open(os.path.join(sys.path[0], "rcparams.default"), "r")
+    except IOError:
+        raise IOError('could not find rcparams.defaults file')
 
-# default_params maps parameter keys to default values and to validation 
-# functions. Any comments after "default_params = {" and before the closing 
-# brace will be included when the default rc file is build using the 
-# write_RC_file function.
-##################################
-###***START OF RC DEFINITION***###
-default_params = {
-    # Model-wide parameters
-    'model.timezero' : [1996, validate_float], # The year the model starys (inclusive)
-    'model.endtime' : [2020, validate_float], # What year the model stops (inclusive)
-    'model.timestep' : [1, validate_int], # The size of each timestep (in model.time_units)
-    'model.time_units' : ["months", validate_time_units], # The size of each timestep
-    'model.RandomState' : [None, validate_RandomState], # Seeds the random number generator (useful for regenerating results later)
-    'model.initial_num_persons' : [5000, validate_int],
-    'model.initial_num_households' : [750, validate_int],
-    'model.initial_num_neighborhoods' : [65, validate_int],
-    'model.resultspath' : ["/media/Restricted/chitwanABM_runs", novalidation],
-    'model.use_psyco': [True, validate_boolean],
-    
-    # Location of input data (these are restricted data)
-    'input.census_file' : ["/media/Restricted/CVABM_initialization_data/DS0004_export.csv", novalidation],
-    'input.relationships_grid_file' : ["/media/Restricted/CVABM_initialization_data/DS0016_export.csv", novalidation],
-    'input.households_file' : ["/media/Restricted/CVABM_initialization_data/DS0002_export.csv", novalidation],
-    'input.neighborhoods_file' : ["/media/Restricted/CVABM_initialization_data/DS0014_export.csv", novalidation],
-    
-    # Person agent parameters
-    'hazard_time_units': ['decades', validate_time_units], # Specifies the time period for which precalculated hazards are specified
-    'hazard_birth' : [[0, .2, .99, .99, .5, .1, 0, 0, 0, 0, 0], validate_nseq_float(-1)],
-    'hazard_death' : [[.4, .05, .1, .2, .5, .6, .7, .95, .99, .99, 1], validate_nseq_float(-1)],
-    'hazard_marriage' : [[0, .4, .8, .6, .5, .3, .2, .05, .002, .01, .01], validate_nseq_float(-1)],
-    'hazard_migration' : [[0, .2, .2, .1, .1, .05, .02, .01, .01, 01], validate_nseq_float(-1)],
+    linenum = 0
+    line = rcparams_file.readline()
+    while line:
+        linenum += 1
+        if line == "###***START OF RC DEFINITION***###\n":
+            break
+        line = rcparams_file.readline()
 
-    # Household agent parameters
-    'prob_any_non_wood_fuel' : [.5, validate_unit_interval],
-    'prob_own_house_plot' : [.5, validate_unit_interval],
-    'prob_own_any_land' : [.5, validate_unit_interval],
-    'prob_rented_out_land' : [.5, validate_unit_interval],
+    ret = {}
+    line = rcparams_file.readline()
+    while line:
+        linenum += 1
 
-    # Neighborhood agent parameters
-    'prob_elec' : [.1, validate_unit_interval],
+        # Remove linebreak
+        line = line.rstrip("\n")
 
-    # Landscape parameters
-    'initial_proportion_veg' : [.3, validate_unit_interval],
-    'initial_proportion_ag' : [.3, validate_unit_interval],
-    'initial_proportion_private_infrastructure' : [.1, validate_unit_interval],
-    'initial_proportion_public_infrastructure' : [.05, validate_unit_interval],
-}
-###***END OF RC DEFINITION***###
-################################
+        # First pull out any comment, store the remaining back in line
+        #comment = ''.join(line.partition("#")[1:3])
+        #line = ''.join(line.partition("#")[0])
+
+        # Now pull out key, and strip single quotes, double quotes and blank 
+        # spaces
+        key = ''.join(line.partition(":")[0].strip("\'\" "))
+
+        # Now pull out value and converter
+        value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
+        value = value_validation_tuple.rpartition(",")[0].strip("[]\"\'")
+        converter = value_validation_tuple.rpartition(",")[2].strip("[]\"\' ")
+
+        if key != '' and value != '':
+            if ret.has_key(key):
+                warnings.warn("Duplicate values for %s are provided in rcsetup.py"%key)
+            # Convert 'converter' from a string to a reference to the 
+            # validationo object
+            converter = eval(converter)
+            ret[key] = (value, converter)
+
+        line = rcparams_file.readline()
+    return ret
+
+# Load the rcparams_defaults into a dictionary
+rcparams_defaults_dict = read_rcparams_defaults()
 
 class RcParams(dict):
     """
@@ -203,52 +203,95 @@ class RcParams(dict):
     def __init__(self, *args):
         dict.__init__(self, *args)
         self.validate = dict([ (key, converter) for key, (default, converter) in \
-                     default_params.iteritems() ])
-
-        # original_strings stores the unconverted strings representing the 
-        # originally input values (prior to conversion). This allows printing to an 
-        # rc file the original values without running to problems with precision 
-        # from floating point -> string -> floating point conversions
-        self.original_strings = {}
+                     rcparams_defaults_dict.iteritems() ])
+        # self.original_value stores the unconverted strings representing the 
+        # originally input values (prior to conversion). This allows printing 
+        # to an rc file the original values without running into problems with 
+        # errors due to machine precision while doing floating point -> string 
+        # -> floating point conversions
+        self.original_value = {}
 
     def __setitem__(self, key, val):
         try:
-            self.original_strings[key] = str(val)
+            self.original_value[key] = val
             cval = self.validate[key](val)
             dict.__setitem__(self, key, cval)
         except KeyError:
-            raise KeyError('%s is not a valid rc parameter.\
-See rcParams.keys() for a list of valid parameters.'%key)
+            raise KeyError('\'%s\' is not a valid rc parameter. \
+See default_params.keys() for a list of valid parameters.'%key)
 
-def write_RC_file(outputFilename, docstring=None, updated_params=RcParams()):
+# Convert the rcparams_defaults dictionary into an RcParams instance. This 
+# process will also validate that the values in rcparams_defaults are valid by 
+# using the validation function specifed in rcparams_defaults to convert each 
+# parameter value.
+default_params = RcParams()
+for key, (default, converter) in rcparams_defaults_dict.iteritems():
+        default_params[key] = default
+
+def read_rc_file(fname='chitwanABMrc'):
+    """
+    Returns an RcParams instance containing the the keys / value combinations 
+    read from an rc file.
+    """
+    # Make a deep copy of the default_params RcParams instance that will then 
+    # be updateed with the the values read in from the rc_file
+    rcfile_params = RcParams()
+    cnt = 0
+    for line in file(fname):
+        cnt += 1
+        strippedline = line.split('#',1)[0].strip()
+        if not strippedline: continue
+        tup = strippedline.split(':',1)
+        if len(tup) !=2:
+            warnings.warn('Illegal line #%d\n\t%s\n\tin file "%s"'%\
+                          (cnt, line, fname))
+            continue
+        key, val = tup
+        key = key.strip()
+        val = val.strip()
+        if rcfile_params.has_key(key):
+            warnings.warn('Duplicate key in file "%s", line #%d'%(fname,cnt))
+
+        # Validate the values read in from the rc file
+        try:
+            rcfile_params[key] = val # try to convert to proper type or raise
+        except:
+            print >> sys.stderr, """
+Bad key "%s" on line %d in %s."""%(key, cnt, fname)
+    return rcfile_params
+
+# The default string used as the header of rc_files (if an alternative one is 
+# not provided).
+default_RCfile_docstring = """# Default values of parameters for the Chitwan Valley Non-Spatial Agent-based 
+# Model. Values are read in to set defaults prior to initialization of the 
+# model by the runModel script.
+#
+# Alex Zvoleff, aiz2101@columbia.edu"""
+
+def write_RC_file(outputFilename, docstring=None, updated_params={}):
     """
     Write default rcParams to a file after optionally updating them from an 
     RcParam dictionary. Any keys in updated_params that are not already defined 
-    in rcsetup.py are ignored (as rcsetup.py would reject unknown keys anyways 
+    in rcsetup.py are ignored (as read_rc_file would reject unknown keys anyways 
     when the rc file is read back in).
     """
-
-    # TODO: fix this to find the proper path for rcsetup.py
-    rcsetup_script = open("rcsetup.py", "r")
+    try:
+        rcparams_file = open(os.path.join(sys.path[0], "rcparams.default"), "r")
+    except IOError:
+        raise IOError('could not find rcparams.defaults file')
 
     linenum = 0
-    line = rcsetup_script.readline()
+    line = rcparams_file.readline()
     while line:
         linenum += 1
         if line == "###***START OF RC DEFINITION***###\n":
             break
-        line = rcsetup_script.readline()
+        line = rcparams_file.readline()
 
     output_lines = [] # Stores lines to output to new rc file
-    rcsetup_params = RcParams() # Build an RcParams dictionary object to validate
-    defEnded = False # Flag for whether the "END OF RC DEFINITION" block is reached
-    line = rcsetup_script.readline()
+    line = rcparams_file.readline()
     while line:
         linenum += 1
-
-        if line == "###***END OF RC DEFINITION***###\n":
-            defEnded = True
-            break
 
         # Remove linebreak
         line = line.rstrip("\n")
@@ -265,32 +308,15 @@ def write_RC_file(outputFilename, docstring=None, updated_params=RcParams()):
         value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
         value = value_validation_tuple.rpartition(",")[0].strip("[]\"\'")
         
-        # Validate keys/values
         if key != '' and value != '':
-            rcsetup_params[key] = value
-            #print "rcsetup_params key: %s, value: %s, origstring: %s"%(key, rcsetup_params[key], rcsetup_params.original_strings[key])
+            # Validate keys / values
+            default_params.validate[key](value)
+            # Update key value from updated_params
             if key in updated_params.keys():
-                #print "updated_params key: %s, value: %s, origstring: %s\n"%(key, updated_params[key], updated_params.original_strings[key])
-                new_value = updated_params.original_strings[key]
-                conv = updated_params[key]
-                output_lines.append((key, new_value, comment, linenum))
-        else:
-            output_lines.append((key, value, comment, linenum))
+                value = updated_params.original_value[key]
+        output_lines.append((key, value, comment, linenum))
 
-        # TODO: Check for duplicate keys
-        #if 
-        #    warnings.warn("Duplicate values for %s are provided in rcsetup.py"%key)
-
-        line = rcsetup_script.readline()
-
-    if not defEnded:
-        warnings.warn('failed to reach "END OF RC DEFINITION" block')
-
-    # Remove opening and closing braces of the dictionary definition
-    assert output_lines[0][0] == "default_params = {", "error reading default_params opening brace"
-    del output_lines[0]
-    assert output_lines[-1][0] == "}", "error reading default_params closing brace"
-    del output_lines[-1]
+        line = rcparams_file.readline()
 
     # Finally, write rc file to outputFilename.
     outFile = open(outputFilename, "w")
@@ -307,3 +333,34 @@ def write_RC_file(outputFilename, docstring=None, updated_params=RcParams()):
                 # precede comment by a blank space
                 comment = ' ' + comment
             outFile.write("%s : %s %s \n"%(key, value, comment))
+
+def get_rc_params():
+    """
+    Loads rcParams by first starting with the default parameter values from 
+    rcparams.default (already stored in the RcParams instance 'default_params', 
+    and then by checking for a chitwanABMrc in:
+    
+        1) the current working directory
+        1) the user's home directory
+        2) the directory in which the chitwanABM module is located
+
+    If a chitwanABMrc is found, the default_params are updated with the values 
+    from the rc file. The rc_params are then returned.
+    """
+    rc_file_params = None
+    for path in [os.getcwd(), _get_home_dir(), sys.path[0]]:
+        rc_file = os.path.join(path, "chitwanABMrc")
+        if os.path.exists(rc_file):
+            rc_file_params = read_rc_file(rc_file)
+            print "Using rc file at %s"%(rc_file)
+            break
+    
+    # If an rc file was found, update the default_params with the values from 
+    # that rc file.
+    if rc_file_params != None:
+        for key in rc_file_params.iterkeys():
+            default_params[key] = rc_file_params[key]
+    else:
+        print "No rc file found. Using default model parameters."
+
+    return default_params
