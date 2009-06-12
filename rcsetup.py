@@ -31,9 +31,16 @@ def validate_float(s):
 
 def validate_int(s):
     'convert s to int or raise'
-    try: return int(s)
-    except ValueError:
-        raise ValueError('Could not convert "%s" to int' % s)
+    try:
+        if type(s) == str:
+            ret = int(eval(s))
+        else:
+            ret = int(s)
+    except NameError:
+        raise ValueError('Could not convert "%s" to int'%s)
+    if ret != float(s):
+        raise ValueError('"%s" is not an int'%s)
+    return ret
 
 def validate_unit_interval(s):
     "Checks that s is a number between 0 and 1, inclusive, or raises an error."
@@ -93,7 +100,35 @@ class validate_nseq_float:
             assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
             if self.n != -1 and len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
-            return [validate_float(val) for val in s]
+            if type(s)==list:
+                return [validate_float(val) for val in s]
+            if type(s)==tuple:
+                return (validate_float(val) for val in s)
+
+class validate_nseq_int:
+    def __init__(self, n):
+        self.n = n
+    def __call__(self, s):
+        """
+        Return a seq of n ints or raises error. If n == -1, then length 
+        doesn't matter.
+        """
+        if type(s) is str:
+            ss = s.split(',')
+            if self.n != -1 and len(ss) != self.n:
+                raise ValueError('You must supply exactly %d comma separated values'%self.n)
+            try:
+                return [validate_int(val) for val in ss]
+            except ValueError:
+                raise ValueError('Could not convert all entries to ints')
+        else:
+            assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
+            if self.n != -1 and len(s) != self.n:
+                raise ValueError('You must supply exactly %d values'%self.n)
+            if type(s)==list:
+                return [validate_int(val) for val in s]
+            if type(s)==tuple:
+                return tuple([validate_int(val) for val in s])
 
 def validate_boolean(s):
     if s in [True, False]:
@@ -122,14 +157,17 @@ def validate_RandomState(s):
 def validate_hazard(s, (min, max)):
     """
     Validates a hazard specified as a dictionary where each key is a tuple 
-    specifying the interval to which the hazard applies (in hazard_time_units) 
-    as: [lower, upper) and where each value is the hazard for that interval. 
+    specifying the interval to which the hazard applies (in hazard_time_units). 
+    The interval tuple is specifed as:
+        [lower, upper)
+    (open interval on the lower bound, closed on the upper), and the value 
+    specifed for each inteval tuple key is the hazard for that interval. 
     
-    The (min, max) tuple input to validate_hazard give the minimum and maximum 
-    value for which the hazard must be specified. validate_hazard will check 
-    that hazards are specified for all values of t between this minimum and 
-    maximum value, including the minimum value in (min, max) and excluding the 
-    'max' value.
+    The (min, max) tuple passed to the validate_hazard function gives the 
+    minimum and maximum value for which hazards must be specified. 
+    validate_hazard will check that hazards are specified for all values of t 
+    between this minimum and maximum value, including the minimum value ('min') 
+    in (min, max) and up to but excluding the maximum value 'max'.
     
     This function validates the hazards lie on the unit interval, and then 
     returns a dictionary object where there is a key for each age value in the 
@@ -138,12 +176,46 @@ def validate_hazard(s, (min, max)):
     would be converted to:
         {0:.6, 1:.6, 2:.9, 3:.9, 4:.9}
     """
+    error_msg = """Invalid hazard parameter dictionary: %s
+
+    Hazards must be specified in a dictionary of key values pairs in the 
+    following format:
+
+        (lower_limit, upper_limit) : hazard
+
+    Hazards apply to the interval [lower_limit, upper_limit), including the 
+    lower limit, and excluding the upper limit. The units in which the lower 
+    and upper limits are specified should be consistent with the units of time 
+    specifed by the hazard_time_units rc parameter."""
+
     try:
-        input = dict(s)
-    except:
+        if type(s) == str:
+            input = eval(s)
+        else:
+            input = s
+    except TypeError:
+        raise TypeError(error_msg%(s))
+    except SyntaxError:
+        raise SyntaxError(error_msg%(s))
+    if type(input) != dict:
+        raise SyntaxError(error_msg%(s))
 
     hazard_dict = {}
-    for item in 
+    # Create a converter that will validate that hazard limits are length 2 
+    # tuples
+    key_converter = validate_nseq_int(2) 
+    for item in input.iteritems():
+        key = key_converter(item[0]) # Validate that key is a length 2 tuple
+        lower_lim, upper_lim = validate_int(key[0]), validate_int(key[1])
+        if lower_lim > upper_lim:
+            raise KeyError("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
+        elif lower_lim == upper_lim:
+            raise KeyError("lower_lim = upper_lim for hazard dictionary key '(%s, %s)'."%(key))
+        hazard = validate_unit_interval(item[1])
+        for t in xrange(lower_lim, upper_lim):
+            if hazard_dict.has_key(t):
+                raise KeyError("Hazard dictionary key '%s' is specified twice."%(t))
+            hazard_dict[t] = hazard
     return hazard_dict
 
 def novalidation(s):
