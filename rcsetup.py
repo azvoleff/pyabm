@@ -46,7 +46,7 @@ def validate_unit_interval(s):
     "Checks that s is a number between 0 and 1, inclusive, or raises an error."
     s = validate_float(s)
     if s < 0 or s > 1:
-        raise ValueError('"%s" is not between 0 and 1'%s)
+        raise ValueError('"%s" is not on the closed unit interval [0,1]'%s)
     return s
 
 def validate_readable_file(s):
