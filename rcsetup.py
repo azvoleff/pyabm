@@ -169,12 +169,7 @@ def read_rcparams_defaults():
         # Remove linebreak
         line = line.rstrip("\n")
 
-        # First pull out any comment, store the remaining back in line
-        #comment = ''.join(line.partition("#")[1:3])
-        #line = ''.join(line.partition("#")[0])
-
-        # Now pull out key, and strip single quotes, double quotes and blank 
-        # spaces
+        # Pull out key, and strip single quotes, double quotes and blank spaces
         key = ''.join(line.partition(":")[0].strip("\'\" "))
 
         # Now pull out value and converter
@@ -193,7 +188,8 @@ def read_rcparams_defaults():
         line = rcparams_file.readline()
     return ret
 
-# Load the rcparams_defaults into a dictionary
+# Load the rcparams_defaults into a dictionary, which will be used to tie keys 
+# to converters in the definition of the RcParams class
 rcparams_defaults_dict = read_rcparams_defaults()
 
 class RcParams(dict):
@@ -206,9 +202,9 @@ class RcParams(dict):
                      rcparams_defaults_dict.iteritems() ])
         # self.original_value stores the unconverted strings representing the 
         # originally input values (prior to conversion). This allows printing 
-        # to an rc file the original values without running into problems with 
-        # errors due to machine precision while doing floating point -> string 
-        # -> floating point conversions
+        # to an rc file the original values given by a user or rc file without 
+        # running into problems with errors due to machine precision while 
+        # doing floating point -> string -> floating point conversions
         self.original_value = {}
 
     def __setitem__(self, key, val):
@@ -300,8 +296,7 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
         comment = ''.join(line.partition("#")[1:3])
         line = ''.join(line.partition("#")[0])
 
-        # Now pull out key, and strip single quotes, double quotes and blank 
-        # spaces
+        # Pull out key, and strip single quotes, double quotes and blank spaces
         key = ''.join(line.partition(":")[0].strip("\'\" "))
 
         # Now pull out value
@@ -311,8 +306,8 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
         if key != '' and value != '':
             # Validate keys / values
             default_params.validate[key](value)
-            # Update key value from updated_params
             if key in updated_params.keys():
+                # Update value from updated_params
                 value = updated_params.original_value[key]
         output_lines.append((key, value, comment, linenum))
 
@@ -327,7 +322,7 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
     
     for (key, value, comment, linenum) in output_lines:
         if key == "" and value == "":
-            outFile.write("%s\n"%(comment)) # if comment is blank, just writes a blank line to the file
+            outFile.write("%s\n"%(comment)) # if comment is blank, just writes a newline to the file
         else:
             if comment != '':
                 # precede comment by a blank space
@@ -361,6 +356,6 @@ def get_rc_params():
         for key in rc_file_params.iterkeys():
             default_params[key] = rc_file_params[key]
     else:
-        print "No rc file found. Using default model parameters."
+        print "No rc file found. Using parameters from rcparams.default."
 
     return default_params
