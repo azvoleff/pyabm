@@ -228,6 +228,60 @@ specified overall hazard interval.\nA hazard is given for time %s, but the overa
 hazard interval is [%s, %s)."%(key, self.min, self.max))
         return hazard_dict
 
+def validate_time_bounds(s):
+    """Converts and validates the start and stop time for the model. Check to 
+    ensure consistency, and rejects unlikely inputs, like years < 1950 or > 
+    2050."""
+    s = s.replace(' ', '')
+    error_msg= "Invalid model time bounds. Use the format ((start_year, \
+start_month), (end_year, end_month)) or ((start year), (end_year))."
+    try:
+        tuples = s.split('),(')
+    except IndexError:
+        raise IndexError(error_msg)
+    if len(tuples) > 2:
+        raise ValueError(error_msg)
+    bounds = []
+    for date in tuples:
+        date = date.strip('()').split(',')
+        bound = []
+        if len(date) > 2:
+            raise ValueError(error_msg)
+        for item in date:
+            try:
+                bound.append(validate_int(item))
+            except ValueError, msg:
+                raise ValueError("Invalid date. In model start/stop time, a [year, month] date of \
+%s is given. %s"%(date, msg))
+        if len(bound) == 2:
+            # len(bound)=2 means a year and month are specified, as (year, 
+            # month). So validate that the second item in bound, the number of  
+            # the month, is between 1 and 12
+            if bound[1] < 1 or bound[1] > 12:
+                raise ValueError("In model start/stop time, a month number of \
+%s is given. The month number must be an integer >=1 and <= 12"%bound[1])
+        if bound[0] < 1990 or bound[0] > 2050:
+            # These year limits are to avoid accidentally incorrect entries. If 
+            # the model is actually supposed to be run beyond these limits, 
+            # these limits on the max/min year can be changed.
+            raise ValueError("In model start/stop time, a year of \
+%s is given. The year must be an integer >=1990 and <= 2050"%bound[0])
+        bounds.append(bound)
+    if len(bounds[0]) != len(bounds[1]):
+        raise ValueError("In model start/stop time, a month is provided \
+for one bound, but not the other.")
+    elif len(bounds[0])==1:
+        # If no start/stop months are provided, assume the model starts and 
+        # stops in month zero
+        bounds[0].append(0)
+        bounds[1].append(0)
+
+    # Check that start and stop dates are valid:
+    if (bounds[0][0] == bounds[1][0] and bounds[0][1] >= bounds[1][1]) or \
+            (bounds[0][0] > bounds[1][0]):
+        raise ValueError("Specified model start time is >= model stop time.")
+    return bounds
+
 def novalidation(s):
     "Performs no validation on object. (used in testing)."
     return s
