@@ -213,7 +213,7 @@ class validate_hazard:
             key = key_converter(item[0]) # Validate that key is a length 2 tuple
             lower_lim, upper_lim = validate_int(key[0]), validate_int(key[1])
             if lower_lim > upper_lim:
-                raise ValueErro("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
+                raise ValueError("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
             elif lower_lim == upper_lim:
                 raise ValueError("lower_lim = upper_lim for hazard dictionary key '(%s, %s)'."%(key))
             hazard = validate_unit_interval(item[1])
