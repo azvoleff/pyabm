@@ -267,10 +267,7 @@ start_month), (end_year, end_month)) or ((start year), (end_year))."
             raise ValueError("In model start/stop time, a year of \
 %s is given. The year must be an integer >=1990 and <= 2050"%bound[0])
         bounds.append(bound)
-    if len(bounds[0]) != len(bounds[1]):
-        raise ValueError("In model start/stop time, a month is provided \
-for one bound, but not the other.")
-    elif len(bounds[0])==1:
+    if len(bounds[0])==1 or len(bounds[1])==1:
         # If no start/stop months are provided, assume the model starts and 
         # stops in month zero
         bounds[0].append(0)
