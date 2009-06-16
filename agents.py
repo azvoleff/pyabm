@@ -123,8 +123,9 @@ class Person(Agent):
         # self._age is used as a convenience to avoid the need to calculate 
         # the agent's age from self._birthdate each time it is needed. It is         
         # important to remember though that all agent's ages must be 
-        # incremented with each model timestep. The age starts at 0 (it is 
-        # zero for the entire first timestep of the model).
+        # incremented with each model timestep, and must be expressed in units 
+        # consistent with the units of model.timestep_units.  The age starts at 
+        # 0 (it is zero for the entire first timestep of the model).
         self._age = age
 
         # Also need to store information on the agent's parents. For agents 
@@ -243,9 +244,9 @@ class Region(Agent_set):
         
         # Now setup the demographic variables for this population, based on the 
         # values given in the model rc file
-        self._hazard_birth = rcParams['hazard_birth']
-        self._hazard_death = rcParams['hazard_death']
-        self._hazard_marriage = rcParams['hazard_marriage']
+        self._hazard_birth = rcParams['hazard.birth']
+        self._hazard_death = rcParams['hazard.death']
+        self._hazard_marriage = rcParams['hazard.marriage']
 
     def __repr__(self):
         #TODO: Finish this
@@ -344,6 +345,14 @@ class Region(Agent_set):
                 neighborhoods[1].add_agent(new_home)
         return num_marriages
 
+    def get_num_marriages(self):
+        num_marr = 0
+        spouses = []
+        for person in self.iter_persons():
+            if person.is_married() and (person.get_spouse() not in spouses):
+                    num_marr += 1
+                    spouses.append(person)
+        return num_marr
 
     def migrations(self, time):
         """Runs through the population and marries agents probabilistically 
