@@ -268,10 +268,7 @@ start_month), (end_year, end_month)) or ((start year), (end_year))."
 %s is given. The year must be an integer >=1990 and <= 2050"%bound[0])
         bounds.append(bound)
     if len(bounds[0])==1 or len(bounds[1])==1:
-        # If no start/stop months are provided, assume the model starts and 
-        # stops in month zero
-        bounds[0].append(0)
-        bounds[1].append(0)
+        raise ValueError("In model start/stop time, no month is specified.")
 
     # Check that start and stop dates are valid:
     if (bounds[0][0] == bounds[1][0] and bounds[0][1] >= bounds[1][1]) or \
@@ -385,7 +382,7 @@ for key, (default, converter) in rcparams_defaults_dict.iteritems():
     try:
         default_params[key] = default
     except Exception, msg:
-        raise Exception("Error processing rcparams.default key '%s'.\n%s"%(key, msg))
+        raise Exception("Error processing rcparams.default key '%s'. %s"%(key, msg))
 
 
 def read_rc_file(fname='chitwanABMrc'):
