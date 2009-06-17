@@ -20,7 +20,11 @@ timestep = rcParams['model.timestep']
 
 class Agent(object):
     "Superclass for agent objects."
-    def __init__(self, ID, initial_agent=False):
+    def __init__(self, world, ID, initial_agent=False):
+        # Keep a reference to the agent's world so that ID generators and other 
+        # world properties can be easily referenced
+        self._world = world
+
         # self._ID is unique ID number used to track each person agent.
         self._ID = ID
 
@@ -46,8 +50,8 @@ class Agent(object):
 class Agent_set(Agent):
     """Superclass for agents that contain a "set" of agents from a lower 
     hierarchical  level."""
-    def __init__(self, ID, initial_agent):
-        Agent.__init__(self, ID, initial_agent)
+    def __init__(self, world, ID, initial_agent):
+        Agent.__init__(self, world, ID, initial_agent)
 
         # _members stores agent set members in a dictionary keyed by ID
         self._members = {}
@@ -87,9 +91,9 @@ class Agent_set(Agent):
 
 class Person(Agent):
     "Represents a single person agent"
-    def __init__(self, birthdate, PID=None, mother=None, father=None,
+    def __init__(self, world, birthdate, PID=None, mother=None, father=None,
             age=0, sex=None, initial_agent=False):
-        Agent.__init__(self, PID, initial_agent)
+        Agent.__init__(self, world, PID, initial_agent)
 
         # birthdate is the timestep of the birth of the agent. It is used to 
         # calculate the age of the agent. Agents have a birthdate of 0 if they 
@@ -164,7 +168,7 @@ class Person(Agent):
         assert self.get_sex() == 'female', "Men can't give birth"
         assert self.get_spouse().get_ID() == father.get_ID(), "All births must be in marriages"
         assert self.get_ID() != father.get_ID(), "No immaculate conception (agent: %s)"%(self.get_ID())
-        baby = world.new_person(birthdate=time, mother=self, father=father)
+        baby = self._world.new_person(birthdate=time, mother=self, father=father)
         for parent in [self, father]:
             parent._children.append(baby)
         return baby
@@ -176,10 +180,13 @@ class Person(Agent):
         else:
             return True
 
+    def __str__(self):
+        return "Person(PID: %s. %s household(s))" %(self.get_ID(), self.num_members())
+
 class Household(Agent_set):
     "Represents a single household agent"
-    def __init__(self, ID=None, initial_agent=False):
-        Agent_set.__init__(self, ID, initial_agent)
+    def __init__(self, world, ID=None, initial_agent=False):
+        Agent_set.__init__(self, world, ID, initial_agent)
         self._any_non_wood_fuel = boolean_choice(.93) # From DS0002$BAE15
         self._own_house_plot = boolean_choice(.829)  # From DS0002$BAA43
         self._own_land = boolean_choice(.61) # From Axinn, Ghimire (2007)
@@ -201,10 +208,13 @@ class Household(Agent_set):
         "Boolean for whether household rented out any of its land"
         return self._rented_out_land
 
+    def __str__(self):
+        return "Household(HID: %s. %s household(s))" %(self.get_ID(), self.num_members())
+
 class Neighborhood(Agent_set):
     "Represents a single neighborhood agent"
-    def __init__(self, ID=None, initial_agent=False):
-        Agent_set.__init__(self, ID, initial_agent)
+    def __init__(self, world, ID=None, initial_agent=False):
+        Agent_set.__init__(self, world, ID, initial_agent)
         self._avg_years_nonfamily_services = None
         self._elec_available = None
 
@@ -216,11 +226,14 @@ class Neighborhood(Agent_set):
         "Boolean for whether neighborhood has electricity."
         return self._elec_available
 
+    def __str__(self):
+        return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
+
 class Region(Agent_set):
     """Represents a set of neighborhoods sharing a spatial area (and therefore 
     land use data), and demographic characteristics."""
-    def __init__(self, ID=None, initial_agent=False):
-        Agent_set.__init__(self, ID, initial_agent)
+    def __init__(self, world, ID=None, initial_agent=False):
+        Agent_set.__init__(self, world, ID, initial_agent)
 
         self._landuse = LandUse()
         
@@ -311,7 +324,7 @@ class Region(Agent_set):
             # Now create a new household
             # TODO: need to figure out how the new household has 
             # characteristics assigned to it.
-            new_home = world.new_household()
+            new_home = self._world.new_household()
             neighborhoods = [] # Possible neighborhoods for the new_home
             for person in [male, female]:
                 old_household = person.get_parent_agent() # this person's old household
@@ -402,7 +415,7 @@ class World():
         else:
             # Update the generator so the PID will not be reused
             self._PIDGen.use_ID(PID)
-        return Person(birthdate, PID, mother, father, age, sex, initial_agent)
+        return Person(self, birthdate, PID, mother, father, age, sex, initial_agent)
 
     def new_household(self, HID=None, initial_agent=False):
         "Returns a new household agent."
@@ -411,7 +424,7 @@ class World():
         else:
             # Update the generator so the HID will not be reused
             self._HIDGen.use_ID(HID)
-        return Household(HID, initial_agent)
+        return Household(self, HID, initial_agent)
 
     def new_neighborhood(self, NID=None, initial_agent=False):
         "Returns a new neighborhood agent."
@@ -420,7 +433,7 @@ class World():
         else:
             # Update the generator so the NID will not be reused
             self._NIDGen.use_ID(NID)
-        return Neighborhood(NID, initial_agent)
+        return Neighborhood(self, NID, initial_agent)
 
     def new_region(self, RID=None, initial_agent=False):
         "Returns a new region agent, and adds it to the world member list."
@@ -429,7 +442,7 @@ class World():
         else:
             # Update the generator so the RID will not be reused
             self._RIDGen.use_ID(RID)
-        region = Region(RID, initial_agent)
+        region = Region(self, RID, initial_agent)
         self._members[region.get_ID()] = region
         return region
 
@@ -446,7 +459,3 @@ class World():
         for region in self.iter_regions():
             for person in region.iter_persons():
                 yield person
-
-# The 'world' World class instance is used by all the agents in the model (all 
-# regions, neighborhoods, households, and persons).
-world = World()

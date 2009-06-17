@@ -37,7 +37,7 @@ class IDGenerator(object):
             newID += 1
         self._last_ID = newID
         self._used_IDs.append(newID)
-        return self._last_ID
+        return newID
 
     def use_ID(self, used_ID):
         # TODO: This will get very slow when dealing with large numbers of IDs. 
