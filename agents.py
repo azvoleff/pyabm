@@ -250,7 +250,7 @@ class Region(Agent_set):
         return "__repr__ UNDEFINED"
 
     def __str__(self):
-        return "Region(RID: %s. %s neighborhood(s), %s household(s), %s person(s))" %(self.get_ID(), len(self._members), self.get_num_households(), self.num_persons())
+        return "Region(RID: %s. %s neighborhood(s), %s household(s), %s person(s))" %(self.get_ID(), len(self._members), self.num_households(), self.num_persons())
 
     def iter_households(self):
         "Returns an iterator over all the households in the region"
