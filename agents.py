@@ -373,9 +373,9 @@ class Region(Agent_set):
     def update_landuse(self, time):
         """Using the attributes of the neighborhoods in the region, update the 
         landuse proportions using OLS"""
-        landuse = {'agveg':None, 'nonagveg':None, 'privgldg':None, 
-                'pubbldg':None, 'other':None}
-        for neighborhood in self.iter_agents:
+        landuse = {'agveg':0, 'nonagveg':0, 'privbldg':0, 'pubbldg':0,
+                'other':0}
+        for neighborhood in self.iter_agents():
             landuse['agveg'] += neighborhood._land_agveg
             landuse['nonagveg'] += neighborhood._land_nonagveg
             landuse['privbldg'] += neighborhood._land_privbldg
