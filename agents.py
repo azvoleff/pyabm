@@ -217,6 +217,11 @@ class Neighborhood(Agent_set):
         Agent_set.__init__(self, world, ID, initial_agent)
         self._avg_years_nonfamily_services = None
         self._elec_available = None
+        self._land_agveg = None
+        self._land_nonagveg = None
+        self._land_privbldg = None
+        self._land_pubbldg = None
+        self._land_other = None
 
     def avg_years_nonfamily_services(self):
         "Average number of years non-family services have been available."
