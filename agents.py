@@ -8,8 +8,8 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import numpy as np
 
-from chitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from chitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
+from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
+from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
 
 if rcParams['model.use_psyco'] == True:
     import psyco

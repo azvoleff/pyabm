@@ -385,7 +385,7 @@ for key, (default, converter) in rcparams_defaults_dict.iteritems():
         raise Exception("Error processing rcparams.default key '%s'. %s"%(key, msg))
 
 
-def read_rc_file(fname='chitwanABMrc'):
+def read_rc_file(fname='ChitwanABMrc'):
     """
     Returns an RcParams instance containing the the keys / value combinations 
     read from an rc file.
@@ -494,18 +494,18 @@ def get_rc_params():
     """
     Loads rcParams by first starting with the default parameter values from 
     rcparams.default (already stored in the RcParams instance 'default_params', 
-    and then by checking for a chitwanABMrc in:
+    and then by checking for a ChitwanABMrc in:
     
         1) the current working directory
         1) the user's home directory
-        2) the directory in which the chitwanABM module is located
+        2) the directory in which the ChitwanABM module is located
 
-    If a chitwanABMrc is found, the default_params are updated with the values 
+    If a ChitwanABMrc is found, the default_params are updated with the values 
     from the rc file. The rc_params are then returned.
     """
     rc_file_params = None
     for path in [os.getcwd(), _get_home_dir(), sys.path[0]]:
-        rc_file = os.path.join(path, "chitwanABMrc")
+        rc_file = os.path.join(path, "ChitwanABMrc")
         if os.path.exists(rc_file):
             rc_file_params = read_rc_file(rc_file)
             print "Using rc file at %s"%(rc_file)
