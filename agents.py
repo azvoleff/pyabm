@@ -59,7 +59,7 @@ class Agent_set(Agent):
         return self._members.values()
 
     def get_agent(self, ID):
-        "Returns an an agent given the agent's ID"
+        "Returns an agent given the agent's ID"
         return self._members[ID]
 
     def add_agent(self, agent):
