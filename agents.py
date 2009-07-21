@@ -9,7 +9,6 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 import numpy as np
 
 from chitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from chitwanABM.landuse import LandUse
 from chitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
 
 if rcParams['model.use_psyco'] == True:
@@ -240,8 +239,6 @@ class Region(Agent_set):
     def __init__(self, world, ID=None, initial_agent=False):
         Agent_set.__init__(self, world, ID, initial_agent)
 
-        self._landuse = LandUse()
-        
         # Now setup the demographic variables for this population, based on the 
         # values given in the model rc file
         self._hazard_birth = rcParams['hazard.birth']
@@ -376,7 +373,15 @@ class Region(Agent_set):
     def update_landuse(self, time):
         """Using the attributes of the neighborhoods in the region, update the 
         landuse proportions using OLS"""
-        pass
+        landuse = {'agveg':None, 'nonagveg':None, 'privgldg':None, 
+                'pubbldg':None, 'other':None}
+        for neighborhood in self.iter_agents:
+            landuse['agveg'] += neighborhood._land_agveg
+            landuse['nonagveg'] += neighborhood._land_nonagveg
+            landuse['privbldg'] += neighborhood._land_privbldg
+            landuse['pubbldg'] += neighborhood._land_pubbldg
+            landuse['other'] += neighborhood._land_other
+        return landuse
 
     def num_persons(self):
         "Returns the number of persons in the population."
