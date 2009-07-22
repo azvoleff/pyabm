@@ -50,7 +50,7 @@ class IDGenerator(object):
 # this is the instance used by the model
 rcParams = get_rc_params()
 
-# Check if a RandomDate was loaded from the rcfile. If not (if 
+# Check if a RandomState was loaded from the rcfile. If not (if 
 # RandomState==None), then choose a random RandomState, and store it in 
 # rcParams so that it can be written to a file at the end of model runs, and 
 # saved for later reuse (for testing, etc.).
