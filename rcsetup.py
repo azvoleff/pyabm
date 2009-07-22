@@ -206,11 +206,15 @@ class validate_hazard:
             raise SyntaxError(error_msg%(s))
 
         hazard_dict = {}
-        # Create a converter that will validate that hazard limits are length 2 
-        # tuples
-        key_converter = validate_nseq_int(2) 
+        key_converter_tuple = validate_nseq_int(2) 
         for item in input.iteritems():
-            key = key_converter(item[0]) # Validate that key is a length 2 tuple
+            # First convert the hazard interval tuple (item[0]) from a string 
+            # to a length 2 tuple of ints
+            # Validate that key is a length 2 tuple
+            key = key_converter_tuple(item[0])
+
+            # Now process the key and values, and check that they fall within 
+            # the specified overall interval for this hazard type
             lower_lim, upper_lim = validate_int(key[0]), validate_int(key[1])
             if lower_lim > upper_lim:
                 raise ValueError("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
@@ -228,21 +232,20 @@ specified overall hazard interval.\nA hazard is given for time %s, but the overa
 hazard interval is [%s, %s)."%(key, self.min, self.max))
         return hazard_dict
 
-def validate_time_bounds(s):
-    """Converts and validates the start and stop time for the model. Check to 
-    ensure consistency, and rejects unlikely inputs, like years < 1950 or > 
-    2050."""
-    s = s.replace(' ', '')
-    error_msg= "Invalid model time bounds. Use the format ((start_year, \
-start_month), (end_year, end_month)) or ((start year), (end_year))."
+def validate_time_bounds(values):
+    """Converts and validates the start and stop time for the model. Checks to 
+    ensure consistency, and rejects unlikely inputs, like years < minyear or > 
+    maxyear ."""
+    minyear, maxyear = 1990, 2050
+    values = values.replace(' ', '')
     try:
-        tuples = s.split('),(')
+        values = values.split('),(')
     except IndexError:
         raise IndexError(error_msg)
-    if len(tuples) > 2:
+    if len(values) > 2:
         raise ValueError(error_msg)
     bounds = []
-    for date in tuples:
+    for date in values:
         date = date.strip('()').split(',')
         bound = []
         if len(date) > 2:
@@ -260,12 +263,12 @@ start_month), (end_year, end_month)) or ((start year), (end_year))."
             if bound[1] < 1 or bound[1] > 12:
                 raise ValueError("In model start/stop time, a month number of \
 %s is given. The month number must be an integer >=1 and <= 12"%bound[1])
-        if bound[0] < 1990 or bound[0] > 2050:
+        if bound[0] < minyear or bound[0] > maxyear:
             # These year limits are to avoid accidentally incorrect entries. If 
             # the model is actually supposed to be run beyond these limits, 
             # these limits on the max/min year can be changed.
             raise ValueError("In model start/stop time, a year of \
-%s is given. The year must be an integer >=1990 and <= 2050"%bound[0])
+%s is given. The year must be an integer >=%sand <= %s"%(bound[0], minyear, maxyear))
         bounds.append(bound)
     if len(bounds[0])==1 or len(bounds[1])==1:
         raise ValueError("In model start/stop time, no month is specified.")
@@ -370,8 +373,8 @@ class RcParams(dict):
             cval = self.validate[key](val)
             dict.__setitem__(self, key, cval)
         except KeyError, msg:
-            raise KeyError('%s is not a valid rc parameter.\
-See rcParams.keys() for a list of valid parameters.\n\t%s'%(key, msg))
+            raise KeyError('%s is not a valid rc parameter. \
+See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
 
 # Convert the rcparams_defaults dictionary into an RcParams instance. This 
 # process will also validate that the values in rcparams_defaults are valid by 
@@ -390,8 +393,6 @@ def read_rc_file(fname='ChitwanABMrc'):
     Returns an RcParams instance containing the the keys / value combinations 
     read from an rc file.
     """
-    # Make a deep copy of the default_params RcParams instance that will then 
-    # be updateed with the the values read in from the rc_file
     rcfile_params = RcParams()
     cnt = 0
     for line in file(fname):
@@ -515,7 +516,7 @@ def get_rc_params():
     # that rc file.
     if rc_file_params != None:
         for key in rc_file_params.iterkeys():
-            default_params[key] = rc_file_params[key]
+            default_params[key] = rc_file_params.original_value[key]
     else:
         print "No rc file found. Using parameters from rcparams.default."
 
