@@ -139,6 +139,9 @@ class Person(Agent):
         else:
             raise ValueError("%s is not a valid gender"%(sex))
 
+        if self._sex=="female":
+            self._last_birth_time = None
+
         self._spouse = None
 
         self._children = []
@@ -168,6 +171,7 @@ class Person(Agent):
         assert self.get_spouse().get_ID() == father.get_ID(), "All births must be in marriages"
         assert self.get_ID() != father.get_ID(), "No immaculate conception (agent: %s)"%(self.get_ID())
         baby = self._world.new_person(birthdate=time, mother=self, father=father)
+        self._last_birth_time = time
         for parent in [self, father]:
             parent._children.append(baby)
         return baby
@@ -239,11 +243,8 @@ class Region(Agent_set):
     def __init__(self, world, ID=None, initial_agent=False):
         Agent_set.__init__(self, world, ID, initial_agent)
 
-        # Now setup the demographic variables for this population, based on the 
-        # values given in the model rc file
-        self._hazard_birth = rcParams['hazard.birth']
-        self._hazard_death = rcParams['hazard.death']
-        self._hazard_marriage = rcParams['hazard.marriage']
+        # TODO: Here demographic variables could be setup specific for each 
+        # population.
 
     def __repr__(self):
         #TODO: Finish this
@@ -267,26 +268,30 @@ class Region(Agent_set):
     def births(self, time):
         """Runs through the population and agents give birth probabilistically 
         based on their sex, age and the hazard_birth for this population"""
-        # TODO: This should take account of the last time the agent gave birth 
-        # and adjust the hazard accordingly.
+        min_birth_interval = rcParams['birth.minimum_interval']
         num_births = 0
         for household in self.iter_households():
             for person in household.iter_agents():
+                # Check that person is a married female
                 if (person.get_sex() == 'female') and person.is_married():
-                    if random_state.rand() < calc_hazard_birth(person):
-                        num_births += 1
-                        # Agent gives birth. First find the father (assumed to 
-                        # be the spouse of the person giving birth).
-                        father = person.get_spouse()
-                        # Now have the mother give birth, and add the 
-                        # new person to the mother's household.
-                        household.add_agent(person.give_birth(time,
-                            father=father))
+                    # Check that person didn't already give birth more recently 
+                    # than the minimum birth interval
+                    if (person._last_birth_time == None) or (time -
+                            person._last_birth_time) > min_birth_interval/12:
+                        if random_state.rand() < calc_hazard_birth(person):
+                            num_births += 1
+                            # Agent gives birth. First find the father (assumed to 
+                            # be the spouse of the person giving birth).
+                            father = person.get_spouse()
+                            # Now have the mother give birth, and add the 
+                            # new person to the mother's household.
+                            household.add_agent(person.give_birth(time,
+                                father=father))
         return num_births
                         
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
-        on their age and the hazard_death for this population"""
+        on their age and the hazard.death for this population"""
         num_deaths = 0
         for household in self.iter_households():
             for person in household.iter_agents():
