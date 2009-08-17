@@ -299,8 +299,6 @@ class Region(Agent_set):
                     num_deaths += 1
                     # Agent dies.
                     if person.is_married():
-                        # For divorce, can take advantage of the fact that the 
-                        # spouse will ALWAYS reside in the same household.
                         spouse = person.get_spouse()
                         person.divorce()
                     household.remove_agent(person)
