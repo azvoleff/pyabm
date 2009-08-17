@@ -311,7 +311,10 @@ def read_rcparams_defaults():
     try:
         rcparams_file = open(os.path.join(sys.path[0], "rcparams.default"), "r")
     except IOError:
-        raise IOError('could not find rcparams.defaults file')
+        try:
+            rcparams_file = open("/home/azvoleff/Code/Python/ChitwanABM/rcparams.default", "r")
+        except IOError:
+            raise IOError('could not find rcparams.defaults file')
 
     linenum = 0
     line = rcparams_file.readline()
