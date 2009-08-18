@@ -139,6 +139,8 @@ class Person(Agent):
         else:
             raise ValueError("%s is not a valid gender"%(sex))
 
+        self._desired_num_children = -1
+
         if self._sex=="female":
             self._last_birth_time = None
 
