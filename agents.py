@@ -277,18 +277,22 @@ class Region(Agent_set):
                 # Check that person is a married female
                 if (person.get_sex() == 'female') and person.is_married():
                     # Check that person didn't already give birth more recently 
-                    # than the minimum birth interval
+                    # than their minimum birth interval
                     if (person._last_birth_time == None) or (time -
                             person._last_birth_time) > min_birth_interval/12:
-                        if random_state.rand() < calc_hazard_birth(person):
-                            num_births += 1
-                            # Agent gives birth. First find the father (assumed to 
-                            # be the spouse of the person giving birth).
-                            father = person.get_spouse()
-                            # Now have the mother give birth, and add the 
-                            # new person to the mother's household.
-                            household.add_agent(person.give_birth(time,
-                                father=father))
+                        # Check that the person does not already have greater 
+                        # than their desired family size (using the average of 
+                        # both spouses desired family sizes).
+                        if (person._desired_num_children > len(person._children)):
+                            if random_state.rand() < calc_hazard_birth(person):
+                                num_births += 1
+                                # Agent gives birth. First find the father (assumed to 
+                                # be the spouse of the person giving birth).
+                                father = person.get_spouse()
+                                # Now have the mother give birth, and add the 
+                                # new person to the mother's household.
+                                household.add_agent(person.give_birth(time,
+                                    father=father))
         return num_births
                         
     def deaths(self, time):
