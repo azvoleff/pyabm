@@ -281,9 +281,10 @@ class Region(Agent_set):
                     if (person._last_birth_time == None) or (time -
                             person._last_birth_time) > min_birth_interval/12:
                         # Check that the person does not already have greater 
-                        # than their desired family size (using the average of 
-                        # both spouses desired family sizes).
-                        if (person._desired_num_children > len(person._children)):
+                        # than their desired family size. Note that 
+                        # desired_num_children=-1 means no preference.
+                        if (person._desired_num_children > len(person._children)
+                                or person._desired_num_children==-1):
                             if random_state.rand() < calc_hazard_birth(person):
                                 num_births += 1
                                 # Agent gives birth. First find the father (assumed to 
