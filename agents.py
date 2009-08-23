@@ -1,4 +1,4 @@
-# Copyright © 2009 Alex Zvoleff
+# Copyright 2009 Alex Zvoleff
 #
 # This file is part of the ChitwanABM agent-based model.
 # 
@@ -13,6 +13,10 @@
 # 
 # You should have received a copy of the GNU General Public License along with
 # ChitwanABM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact Alex Zvoleff in the Department of Geography at San Diego State 
+# University with any comments or questions. See the README.txt file for 
+# contact information.
 
 """
 Contains the classes for Person, Household, Neighborhood, and Region agents. 
