@@ -327,7 +327,7 @@ def _get_home_dir():
 
 def read_rcparams_defaults():
     try:
-        rcparams_file = open(os.path.join(sys.path[0], "rcparams.default"), "r")
+        rcparams_file = open(os.path.join(os.getcwd(), "rcparams.default"), "r")
     except IOError:
         try:
             rcparams_file = open("/home/azvoleff/Code/Python/ChitwanABM/rcparams.default", "r")
