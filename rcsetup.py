@@ -425,19 +425,12 @@ def read_rc_file(fname='ChitwanABMrc'):
             warnings.warn('Illegal line #%d\n\t%s\n\tin file "%s"'%\
                           (cnt, line, fname))
             continue
-        key, val_converter = tup
-        # Now key has the key name, and val_converter stores the key value and
-        # converter, as for example: "[True | validate_boolean]". The key still 
-        # has the quotes around it, so these need to be stripped off.
-        key = key.strip(" '\"")
-        val_converter = val_converter.strip(" []")
-        val, converter = val_converter.split("|")
-        val = val.strip(" '\"")
-
+        key, val = tup
+        key = key.strip()
+        val = val.strip()
         if rcfile_params.has_key(key):
             warnings.warn('Duplicate key in file "%s", line #%d'%(fname,cnt))
 
-        rcfile_params[key] = val # try to convert to proper type or raise
         # Validate the values read in from the rc file
         try:
             rcfile_params[key] = val # try to convert to proper type or raise
