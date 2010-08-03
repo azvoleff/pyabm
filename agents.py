@@ -248,6 +248,15 @@ class Neighborhood(Agent_set):
         self._land_pubbldg = None
         self._land_other = None
 
+    def add_agent(self, agent):
+        """
+        Subclass the Agent_set.add_agent function in order to account for LULC 
+        change with new househoold addition.
+        """
+        Agent_set.add_agent(self, agent)
+        self._land_agveg -= rcParams['LULC.hh_area']
+        self._land_privbldg += rcParams['LULC.hh_area']
+
     def avg_years_nonfamily_services(self):
         "Average number of years non-family services have been available."
         return self._avg_years_nonfamily_services
