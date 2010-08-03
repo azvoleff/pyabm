@@ -256,6 +256,13 @@ class Neighborhood(Agent_set):
         "Boolean for whether neighborhood has electricity."
         return self._elec_available
 
+    def get_num_psn(self):
+        "Returns the number of people in the neighborhood."
+        num_psn = 0
+        for household in self.iter_agents():
+            psn_pop += household.num_members()
+        return num_psn
+
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
 
@@ -422,6 +429,20 @@ class Region(Agent_set):
             landuse[neighborhood.get_ID()]['privbldg'] = neighborhood._land_privbldg
             landuse[neighborhood.get_ID()]['pubbldg'] = neighborhood._land_pubbldg
             landuse[neighborhood.get_ID()]['other'] = neighborhood._land_other
+        return landuse
+
+    def get_neighborhood_pop_stats(self):
+        # TODO: Finish this function, to be used for returning a dictionary of 
+        # population statistics at each timestep.
+        pop_stats = {}
+        for neighborhood in self.iter_agents():
+            # Calculate number of people in neighborhood
+            pop_stats[neighborhood.get_ID()]['pop_psn'] = neighborhood.get_num_psn()
+            pop_stats[neighborhood.get_ID()]['pop_hs'] = neighborhood.num_members()
+            pop_stats[neighborhood.get_ID()]['num_marr']
+            pop_stats[neighborhood.get_ID()]['num_births']
+            pop_stats[neighborhood.get_ID()]['num_deaths']
+            pop_stats[neighborhood.get_ID()]['num_migr']
         return landuse
 
     def num_persons(self):
