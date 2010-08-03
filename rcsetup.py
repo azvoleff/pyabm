@@ -88,13 +88,15 @@ def validate_readable_file_warning(s):
     """
     if (type(s) != str):
         print "WARNING: %s is not a readable file"%s
+        return s
     if not os.path.exists(s):
         print "WARNING: %s does not exist"%s
+        return s
     try:
         file = open(s, 'r')
         file.readline()
         file.close()
-    except OSError:
+    except IOError:
         print "WARNING: error reading file %s"%s
     return s
 
