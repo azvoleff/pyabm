@@ -323,13 +323,18 @@ class Region(Agent_set):
                                 or person._desired_num_children==-1):
                             if random_state.rand() < calc_hazard_birth(person):
                                 num_births += 1
-                                # Agent gives birth. First find the father (assumed to 
-                                # be the spouse of the person giving birth).
+                                # Agent gives birth. First find the father 
+                                # (assumed to be the spouse of the person 
+                                # giving birth).
                                 father = person.get_spouse()
                                 # Now have the mother give birth, and add the 
                                 # new person to the mother's household.
                                 household.add_agent(person.give_birth(time,
                                     father=father))
+                                if rcParams['feedback.birth.nonagveg']:
+                                    neighborhood = household.get_parent_agent()
+                                    neighborhood._land_agveg -= rcParams['feedback.birth.nonagveg.qty']
+                                    neighborhood._land_other += rcParams['feedback.birth.nonagveg.qty']
         return num_births
                         
     def deaths(self, time):
