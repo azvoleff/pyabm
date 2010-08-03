@@ -81,6 +81,23 @@ def validate_readable_file(s):
         raise OSError("error reading file %s"%s)
     return s
 
+def validate_readable_file_warning(s):
+    """
+    Checks that a file exists and is readable. Only prints a warning if the 
+    file is not readable (does not raise error).
+    """
+    if (type(s) != str):
+        print "WARNING: %s is not a readable file"%s
+    if not os.path.exists(s):
+        print "WARNING: %s does not exist"%s
+    try:
+        file = open(s, 'r')
+        file.readline()
+        file.close()
+    except OSError:
+        print "WARNING: error reading file %s"%s
+    return s
+
 def validate_writable_dir(s):
     """
     Checks that a directory exists and is writable. Fails if the directory does 
