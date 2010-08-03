@@ -413,6 +413,17 @@ class Region(Agent_set):
             landuse['other'] += neighborhood._land_other
         return landuse
 
+    def get_neighborhood_landuse(self):
+        landuse = {}
+        for neighborhood in self.iter_agents():
+            landuse[neighborhood.get_ID()] = {}
+            landuse[neighborhood.get_ID()]['agveg'] = neighborhood._land_agveg
+            landuse[neighborhood.get_ID()]['nonagveg'] = neighborhood._land_nonagveg
+            landuse[neighborhood.get_ID()]['privbldg'] = neighborhood._land_privbldg
+            landuse[neighborhood.get_ID()]['pubbldg'] = neighborhood._land_pubbldg
+            landuse[neighborhood.get_ID()]['other'] = neighborhood._land_other
+        return landuse
+
     def num_persons(self):
         "Returns the number of persons in the population."
         total = 0
