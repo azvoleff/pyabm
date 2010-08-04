@@ -269,8 +269,19 @@ class Neighborhood(Agent_set):
         "Returns the number of people in the neighborhood."
         num_psn = 0
         for household in self.iter_agents():
-            psn_pop += household.num_members()
+            num_psn += household.num_members()
         return num_psn
+
+    def get_num_marriages(self):
+        "Returns the total number of marriages in this neighborhood."
+        num_marr = 0
+        spouses = []
+        for household in self.iter_agents():
+            for person in household.iter_agents():
+                if person.is_married() and (person.get_spouse() not in spouses):
+                    num_marr += 1
+                    spouses.append(person)
+        return num_marr
 
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
@@ -307,7 +318,7 @@ class Region(Agent_set):
         """Runs through the population and agents give birth probabilistically 
         based on their sex, age and the hazard_birth for this population"""
         min_birth_interval = rcParams['birth.minimum_interval']
-        num_births = 0
+        births = {}
         for household in self.iter_households():
             for person in household.iter_agents():
                 # Check that person is a married female
@@ -322,7 +333,6 @@ class Region(Agent_set):
                         if (person._desired_num_children > len(person._children)
                                 or person._desired_num_children==-1):
                             if random_state.rand() < calc_hazard_birth(person):
-                                num_births += 1
                                 # Agent gives birth. First find the father 
                                 # (assumed to be the spouse of the person 
                                 # giving birth).
@@ -335,22 +345,30 @@ class Region(Agent_set):
                                     neighborhood = household.get_parent_agent()
                                     neighborhood._land_agveg -= rcParams['feedback.birth.nonagveg.area']
                                     neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
-        return num_births
+                                # Track the total number of births for each 
+                                # timestep by neighborhood.
+                                if not births.has_key(neighborhood.get_ID()):
+                                    births[neighborhood.get_ID()] = 0
+                                births[neighborhood.get_ID()] += 1
+        return births
                         
     def deaths(self, time):
         """Runs through the population and kills agents probabilistically based 
         on their age and the hazard.death for this population"""
-        num_deaths = 0
+        deaths = {}
         for household in self.iter_households():
             for person in household.iter_agents():
                 if random_state.rand() < calc_hazard_death(person):
-                    num_deaths += 1
                     # Agent dies.
                     if person.is_married():
                         spouse = person.get_spouse()
                         person.divorce()
                     household.remove_agent(person)
-        return num_deaths
+                    neighborhood = household.get_parent_agent()
+                    if not deaths.has_key(neighborhood.get_ID()):
+                        deaths[neighborhood.get_ID()] = 0
+                    deaths[neighborhood.get_ID()] += 1
+        return deaths
                         
     def marriages(self, time):
         """Runs through the population and marries agents probabilistically 
@@ -369,9 +387,8 @@ class Region(Agent_set):
 
         # Now pair up the eligible agents. Any extra males/females will not 
         # marry this timestep.
-        num_marriages = 0
+        marriages = {}
         for male, female in zip(eligible_males, eligible_females):
-            num_marriages += 1
              # First marry the agents.
             male.marry(female)
             # Now create a new household
@@ -388,10 +405,14 @@ class Region(Agent_set):
             # For now, randomly assign the new household to the male or females 
             # neighborhood.
             if boolean_choice():
-                neighborhoods[0].add_agent(new_home)
+                neighborhood = neighborhoods[0]
             else:
-                neighborhoods[1].add_agent(new_home)
-        return num_marriages
+                neighborhood = neighborhoods[1]
+            neighborhood.add_agent(new_home)
+            if not marriages.has_key(neighborhood.get_ID()):
+                marriages[neighborhood.get_ID()] = 0
+            marriages[neighborhood.get_ID()] += 1
+        return marriages
 
     def get_num_marriages(self):
         "Returns the total number of marriages in this region."
@@ -404,16 +425,33 @@ class Region(Agent_set):
         return num_marr
 
     def migrations(self, time):
-        """Runs through the population and marries agents probabilistically 
-        based on their age and the hazard_marriage for this population"""
-        num_migrations = 0
+        """
+        Runs through the population and makes agents probabilistically migrate
+        based on their age and the hazard_marriage for this population.
+        """
+        # First handle out-migrations
+        out_migr = {}
         for household in self.iter_households():
             for person in household.iter_agents():
                 if random_state.rand() < calc_hazard_migration(person):
-                    num_migrations += 1
                     # Agent migrates.
-                    # TODO: write code to handle migrations
-        return num_migrations
+                    neighborhood = household.get_parent_agent()
+                    if not out_migr.has_key(neighborhood.get_ID()):
+                        out_migr[neighborhood.get_ID()] = 0
+                    out_migr[neighborhood.get_ID()] += 1
+
+        in_migr = {}
+        # Now handle in-migrations
+        num_in_migr = int(np.random.normal(rcParams['migr.in.mean'],
+            rcParams['migr.in.sd']))
+        if num_in_migr < 0: num_in_migr = 0
+        # TODO: Fix this in-migration code, or eliminate it in favor of 
+        # in-migration through marriage.
+        in_migr[1] = num_in_migr
+        #if not in_migr.has_key(neighborhood.get_ID()):
+        #    in_migr[neighborhood.get_ID()] = 0
+        #in_migr[neighborhood.get_ID()] += 1
+        return out_migr, in_migr
 
     def increment_age(self):
         """Adds one to the age of each agent. The units of age are dependent on 
@@ -446,18 +484,18 @@ class Region(Agent_set):
         return landuse
 
     def get_neighborhood_pop_stats(self):
-        # TODO: Finish this function, to be used for returning a dictionary of 
-        # population statistics at each timestep.
-        pop_stats = {}
+        """
+        Used each timestep to return a dictionary of neighborhood-level 
+        population statistics.
+        """
+        pop_stats = {'num_psn':{}, 'num_hs':{}, 'num_marr':{}}
         for neighborhood in self.iter_agents():
-            # Calculate number of people in neighborhood
-            pop_stats[neighborhood.get_ID()]['pop_psn'] = neighborhood.get_num_psn()
-            pop_stats[neighborhood.get_ID()]['pop_hs'] = neighborhood.num_members()
-            pop_stats[neighborhood.get_ID()]['num_marr']
-            pop_stats[neighborhood.get_ID()]['num_births']
-            pop_stats[neighborhood.get_ID()]['num_deaths']
-            pop_stats[neighborhood.get_ID()]['num_migr']
-        return landuse
+            if not pop_stats.has_key(neighborhood.get_ID()):
+                pop_stats[neighborhood.get_ID()] = {}
+            pop_stats['num_psn'][neighborhood.get_ID()] = neighborhood.get_num_psn()
+            pop_stats['num_hs'][neighborhood.get_ID()] = neighborhood.num_members()
+            pop_stats['num_marr'][neighborhood.get_ID()] = neighborhood.get_num_marriages()
+        return pop_stats
 
     def num_persons(self):
         "Returns the number of persons in the population."
