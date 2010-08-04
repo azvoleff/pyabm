@@ -460,11 +460,11 @@ Bad key "%s" on line %d in %s."""%(key, cnt, fname)
 
 # The default string used as the header of rc_files (if an alternative one is 
 # not provided).
-default_RCfile_docstring = """# Default values of parameters for the Chitwan Valley Non-Spatial Agent-based 
-# Model. Values are read in to set defaults prior to initialization of the 
-# model by the runModel script.
+default_RCfile_docstring = """# Default values of parameters for the Chitwan Valley Agent-based Model. Values 
+# are read in to set defaults prior to initialization of the model by the 
+# runmodel script.
 #
-# Alex Zvoleff, aiz2101@columbia.edu"""
+# Alex Zvoleff, azvoleff@mail.sdsu.edu"""
 
 def write_RC_file(outputFilename, docstring=None, updated_params={}):
     """
