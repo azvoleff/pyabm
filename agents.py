@@ -251,7 +251,7 @@ class Neighborhood(Agent_set):
     def add_agent(self, agent):
         """
         Subclass the Agent_set.add_agent function in order to account for LULC 
-        change with new househoold addition.
+        change with new household addition.
         """
         Agent_set.add_agent(self, agent)
         self._land_agveg -= rcParams['LULC.hh_area']
@@ -333,8 +333,8 @@ class Region(Agent_set):
                                     father=father))
                                 if rcParams['feedback.birth.nonagveg']:
                                     neighborhood = household.get_parent_agent()
-                                    neighborhood._land_agveg -= rcParams['feedback.birth.nonagveg.qty']
-                                    neighborhood._land_other += rcParams['feedback.birth.nonagveg.qty']
+                                    neighborhood._land_agveg -= rcParams['feedback.birth.nonagveg.area']
+                                    neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
         return num_births
                         
     def deaths(self, time):
