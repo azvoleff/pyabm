@@ -233,6 +233,19 @@ class Household(Agent_set):
         "Boolean for whether household rented out any of its land"
         return self._rented_out_land
 
+    def fw_usage(self):
+        # Load coefficients from rcParams
+        coef.hh_size = rcParams['fw_demand.coef.hh_size']
+        coef.hh_size_sq = rcParams['fw_demand.coef.hh_size_sq']
+        coef.ethnic = rcParams['fw_demand.coef.ethnic']
+        coef.livestock = rcParams['fw_demand.coef.livestock']
+        coef.elec = rcParams['fw_demand.coef.elec']
+        coef.non_wood_stove = rcParams['fw_demand.coef.non_wood_stove']
+
+        hhsize = self._num_members()
+        fw_usage = hhsize * coef.hh_size + hhsize^2 * coef.hh_size
+        return fw_usage
+
     def __str__(self):
         return "Household(HID: %s. %s household(s))" %(self.get_ID(), self.num_members())
 
@@ -477,6 +490,12 @@ class Region(Agent_set):
             landuse['pubbldg'] += neighborhood._land_pubbldg
             landuse['other'] += neighborhood._land_other
         return landuse
+
+    def get_neighborhood_fw_usage(self):
+        for neighborhood in self.iter_agents():
+            for household in neighborhood.iter_agents():
+
+
 
     def get_neighborhood_landuse(self):
         landuse = {}
