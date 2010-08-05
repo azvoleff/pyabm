@@ -254,8 +254,14 @@ class Neighborhood(Agent_set):
         change with new household addition.
         """
         Agent_set.add_agent(self, agent)
-        self._land_agveg -= rcParams['LULC.hh_area']
-        self._land_privbldg += rcParams['LULC.hh_area']
+        # Calculate the area of the household using the gamma distribution.  
+        # NOTE: the 'rate' parameter as output by R is equal to the inverse of 
+        # the 'scale' parameter required by np.random.gamma, hence the 
+        # division.
+        hh_area = np.random.gamma(rcParams['LULC.hh_area_gamma_shape'],
+                1/rcParams['LULC.hh_area_gamma_rate'])
+        self._land_agveg -= hh_area
+        self._land_privbldg += hh_area
 
     def avg_years_nonfamily_services(self):
         "Average number of years non-family services have been available."
