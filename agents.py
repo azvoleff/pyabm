@@ -235,15 +235,15 @@ class Household(Agent_set):
 
     def fw_usage(self):
         # Load coefficients from rcParams
-        coef.hh_size = rcParams['fw_demand.coef.hh_size']
-        coef.hh_size_sq = rcParams['fw_demand.coef.hh_size_sq']
-        coef.ethnic = rcParams['fw_demand.coef.ethnic']
-        coef.livestock = rcParams['fw_demand.coef.livestock']
-        coef.elec = rcParams['fw_demand.coef.elec']
-        coef.non_wood_stove = rcParams['fw_demand.coef.non_wood_stove']
+        coef_hh_size = rcParams['fw_demand.coef.hh_size']
+        coef_hh_size_sq = rcParams['fw_demand.coef.hh_size_sq']
+        coef_ethnic = rcParams['fw_demand.coef.ethnic']
+        coef_livestock = rcParams['fw_demand.coef.livestock']
+        coef_elec = rcParams['fw_demand.coef.elec']
+        coef_non_wood_stove = rcParams['fw_demand.coef.non_wood_stove']
 
-        hhsize = self._num_members()
-        fw_usage = hhsize * coef.hh_size + hhsize^2 * coef.hh_size
+        hhsize = self.num_members()
+        fw_usage = hhsize * coef_hh_size + (hhsize**2) * coef_hh_size
         return fw_usage
 
     def __str__(self):
@@ -503,9 +503,11 @@ class Region(Agent_set):
             person._age += timestep
 
     def get_neighborhood_fw_usage(self):
-        fw_usage = {'fw_usage'}
+        fw_usage = {}
         for neighborhood in self.iter_agents():
+            fw_usage[neighborhood.get_ID()] = {'fwusage':0}
             for household in neighborhood.iter_agents():
+                fw_usage[neighborhood.get_ID()]['fwusage'] += household.fw_usage()
         return fw_usage
 
     def get_neighborhood_landuse(self):
