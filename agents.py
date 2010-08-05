@@ -242,8 +242,8 @@ class Household(Agent_set):
         coef_elec = rcParams['fw_demand.coef.elec']
         coef_non_wood_stove = rcParams['fw_demand.coef.non_wood_stove']
 
-        hhsize = self.num_members()
-        fw_usage = hhsize * coef_hh_size + (hhsize**2) * coef_hh_size
+        hh_size = self.num_members()
+        fw_usage = hh_size * coef_hh_size + (hh_size**2) * coef_hh_size
         return fw_usage
 
     def __str__(self):
@@ -301,6 +301,12 @@ class Neighborhood(Agent_set):
                     num_marr += 1
                     spouses.append(person)
         return num_marr
+
+    def get_hh_sizes(self):
+        hh_sizes = {}
+        for household in self.iter_agents():
+            hh_sizes[household.get_ID()] = household.num_members()
+        return hh_sizes
 
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
@@ -505,10 +511,10 @@ class Region(Agent_set):
     def get_neighborhood_fw_usage(self):
         fw_usage = {}
         for neighborhood in self.iter_agents():
-            fw_usage[neighborhood.get_ID()] = {'fwusage':0}
+            fw_usage[neighborhood.get_ID()] = 0
             for household in neighborhood.iter_agents():
-                fw_usage[neighborhood.get_ID()]['fwusage'] += household.fw_usage()
-        return fw_usage
+                fw_usage[neighborhood.get_ID()] += household.fw_usage()
+        return {'fw_usage': fw_usage}
 
     def get_neighborhood_landuse(self):
         landuse = {}
