@@ -305,6 +305,30 @@ class Neighborhood(Agent_set):
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
 
+def Agent_Store(Agent_set):
+    """
+    Agent_Store is a type of agent set used to store agents who have either left 
+    Chitwan to return later (migration) or are in school. It allows triggering 
+    their return or graduation during a later timestep of the model.
+    """
+    def __init__(self, world, ID=None, initial_agent=False):
+        Agent_set.__init__(self, world, ID, initial_agent)
+        # self._releases is a dictionary, keyed by timestep, that stores the 
+        # time at which each agent will be released back to their original 
+        # parent agent (when they return from school, or from their temporary 
+        # migration, for example.
+        self._releases = {}
+
+    def add_agent(self, agent):
+        """
+        Subclass the Agent_set.add_agent function in order to account for LULC 
+        change with new household addition.
+        """
+        Agent_set.add_agent(self, agent)
+
+    def release_agents(self, time):
+        pass
+
 class Region(Agent_set):
     """Represents a set of neighborhoods sharing a spatial area (and therefore 
     land use data), and demographic characteristics."""
@@ -478,24 +502,11 @@ class Region(Agent_set):
         for person in self.iter_persons():
             person._age += timestep
 
-    def update_landuse(self, time):
-        """Using the attributes of the neighborhoods in the region, update the 
-        landuse proportions using OLS"""
-        landuse = {'agveg':0, 'nonagveg':0, 'privbldg':0, 'pubbldg':0,
-                'other':0}
-        for neighborhood in self.iter_agents():
-            landuse['agveg'] += neighborhood._land_agveg
-            landuse['nonagveg'] += neighborhood._land_nonagveg
-            landuse['privbldg'] += neighborhood._land_privbldg
-            landuse['pubbldg'] += neighborhood._land_pubbldg
-            landuse['other'] += neighborhood._land_other
-        return landuse
-
     def get_neighborhood_fw_usage(self):
+        fw_usage = {'fw_usage'}
         for neighborhood in self.iter_agents():
             for household in neighborhood.iter_agents():
-
-
+        return fw_usage
 
     def get_neighborhood_landuse(self):
         landuse = {}
