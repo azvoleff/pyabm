@@ -29,7 +29,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 import numpy as np
 
 from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage
+from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, calc_first_birth_time
 
 if rcParams['model.use_psyco'] == True:
     import psyco
@@ -461,6 +461,9 @@ class Region(Agent_set):
             if not marriages.has_key(neighborhood.get_ID()):
                 marriages[neighborhood.get_ID()] = 0
             marriages[neighborhood.get_ID()] += 1
+
+            # And assign a first birth timing to the agents
+            female._first_birth_timing = calc_first_birth_time()
         return marriages
 
     def get_num_marriages(self):
