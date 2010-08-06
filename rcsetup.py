@@ -269,6 +269,42 @@ specified overall hazard interval.\nA hazard is given for time %s, but the overa
 hazard interval is [%s, %s)."%(key, self.min, self.max))
         return hazard_dict
 
+def validate_prob_dist(s):
+    # TODO: Finish documenting this section.
+    """
+    Validates a probability distribution specified as a dictionary where each 
+    key is a tuple specifying the interval to which the probability applies (in 
+    hazard_time_units). 
+    """
+    error_msg = """
+    Invalid probability distribution parameter tuple: %s
+
+    Probability distributions must be specified in a length two tuple
+    in the following format:
+
+        ([a, b, c, d], [1, 2, 3])
+
+    where a, b, c, and d are bin limits, and 1, 2, and 3 are the probabilities 
+    assigned to each bin. Notice one more bin limit must be specifed than the 
+    number of probabilities given (to close the interval).
+    """
+    try:
+        if type(s) == str:
+            prob_dist_tuple = eval(s)
+        else:
+            prob_dist_tuple = s
+    except TypeError:
+        raise TypeError(error_msg%(s))
+    except SyntaxError:
+        raise SyntaxError(error_msg%(s))
+    if type(prob_dist_tuple) != tuple:
+        raise SyntaxError(error_msg%(s))
+
+    if len(prob_dist_tuple[0]) != (len(prob_dist_tuple[1]) + 1):
+        raise SyntaxError
+
+    return prob_dist_tuple
+
 def validate_time_bounds(values):
     """Converts and validates the start and stop time for the model. Checks to 
     ensure consistency, and rejects unlikely inputs, like years < minyear or > 
