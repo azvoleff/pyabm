@@ -440,24 +440,35 @@ class Region(Agent_set):
         for male, female in zip(eligible_males, eligible_females):
              # First marry the agents.
             male.marry(female)
-            # Now create a new household
-            # TODO: need to figure out how the new household has 
-            # characteristics assigned to it.
-            new_home = self._world.new_household()
-            neighborhoods = [] # Possible neighborhoods for the new_home
-            for person in [male, female]:
-                old_household = person.get_parent_agent() # this person's old household
-                old_household.remove_agent(person)
-                new_home.add_agent(person)
-                neighborhoods.append(old_household.get_parent_agent()) # this persons old neighborhood
+            moveout_prob = rcParams['prob.marriage.moveout']
+            # Create a new household according to the moveout probability
+            if boolean_choice(moveout_prob):
+                # Now create a new household
+                # TODO: need to figure out how the new household has 
+                # characteristics assigned to it.
+                new_home = self._world.new_household()
+                neighborhoods = [] # Possible neighborhoods for the new_home
+                for person in [male, female]:
+                    old_household = person.get_parent_agent() # this person's old household
+                    old_household.remove_agent(person)
+                    new_home.add_agent(person)
+                    neighborhoods.append(old_household.get_parent_agent()) # this persons old neighborhood
 
-            # For now, randomly assign the new household to the male or females 
-            # neighborhood.
-            if boolean_choice():
-                neighborhood = neighborhoods[0]
+                # For now, randomly assign the new household to the male or females 
+                # neighborhood.
+                if boolean_choice():
+                    neighborhood = neighborhoods[0]
+                else:
+                    neighborhood = neighborhoods[1]
+                neighborhood.add_agent(new_home)
             else:
-                neighborhood = neighborhoods[1]
-            neighborhood.add_agent(new_home)
+                # Otherwise they stay in the male's household. So have the 
+                # female move in.
+                old_household = female.get_parent_agent() # this person's old household
+                old_household.remove_agent(female)
+                male_household = male.get_parent_agent()
+                male_household.add_agent(female)
+                neighborhood = male.get_parent_agent().get_parent_agent()
             if not marriages.has_key(neighborhood.get_ID()):
                 marriages[neighborhood.get_ID()] = 0
             marriages[neighborhood.get_ID()] += 1
