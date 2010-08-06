@@ -235,15 +235,15 @@ class Household(Agent_set):
 
     def fw_usage(self):
         # Load coefficients from rcParams
+        intercept = rcParams['fw_demand.coef.intercept']
         coef_hh_size = rcParams['fw_demand.coef.hh_size']
-        coef_hh_size_sq = rcParams['fw_demand.coef.hh_size_sq']
         coef_ethnic = rcParams['fw_demand.coef.ethnic']
-        coef_livestock = rcParams['fw_demand.coef.livestock']
-        coef_elec = rcParams['fw_demand.coef.elec']
-        coef_non_wood_stove = rcParams['fw_demand.coef.non_wood_stove']
+        coef_own_nw_stove = rcParams['fw_demand.coef.own_nw_stove']
 
         hh_size = self.num_members()
-        fw_usage = hh_size * coef_hh_size + (hh_size**2) * coef_hh_size
+        fw_usage = intercept + hh_size * coef_hh_size
+        # Conver daily fw_usage to monthly
+        fw_usage = fw_usage * 30
         return fw_usage
 
     def __str__(self):
