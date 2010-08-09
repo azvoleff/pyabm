@@ -301,7 +301,7 @@ def validate_prob_dist(s):
         raise SyntaxError(error_msg%(s))
 
     if len(prob_dist_tuple[0]) != (len(prob_dist_tuple[1]) + 1):
-        raise SyntaxError
+        raise SyntaxError("Length of probability tuple must be 1 greater than the length of the bin limit tuple")
 
     return prob_dist_tuple
 
@@ -462,7 +462,6 @@ for key, (default, converter) in rcparams_defaults_dict.iteritems():
         default_params[key] = default
     except Exception, msg:
         raise Exception("Error processing rcparams.default key '%s'. %s"%(key, msg))
-
 
 def read_rc_file(fname='ChitwanABMrc'):
     """

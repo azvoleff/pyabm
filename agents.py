@@ -29,7 +29,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 import numpy as np
 
 from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, calc_first_birth_time
+from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, calc_first_birth_time, calc_hh_area
 
 if rcParams['model.use_psyco'] == True:
     import psyco
@@ -267,12 +267,7 @@ class Neighborhood(Agent_set):
         change with new household addition.
         """
         Agent_set.add_agent(self, agent)
-        # Calculate the area of the household using the gamma distribution.  
-        # NOTE: the 'rate' parameter as output by R is equal to the inverse of 
-        # the 'scale' parameter required by np.random.gamma, hence the 
-        # division.
-        hh_area = np.random.gamma(rcParams['LULC.hh_area_gamma_shape'],
-                1/rcParams['LULC.hh_area_gamma_rate'])
+        hh_area = calc_hh_area()
         self._land_agveg -= hh_area
         self._land_privbldg += hh_area
 
@@ -433,6 +428,21 @@ class Region(Agent_set):
                         eligible_males.append(person)
                     else:
                         eligible_females.append(person)
+        # As a VERY crude model of in-migration, append to the list additional 
+        # agents, according to a parameter specifying the proportion of persons 
+        # who marry in-migrants.
+        num_new_females = np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_females))
+        # Get a reference to world instance to generate new person agents
+        for n in xrange(1, num_new_females):
+            # Choose the age randomly from the ages of the eligible males
+            agent_age = eligible_females[np.random.randint(len(eligible_females))].get_age()
+            eligible_females.append(self._world.new_person(time, sex="female", age=agent_age))
+
+        num_new_males = np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_males))
+        for n in xrange(1, num_new_females):
+            # Choose the age randomly from the ages of the eligible males
+            agent_age = eligible_males[np.random.randint(len(eligible_males))].get_age()
+            eligible_males.append(self._world.new_person(time, sex="male", age=agent_age))
 
         # Now pair up the eligible agents. Any extra males/females will not 
         # marry this timestep.
