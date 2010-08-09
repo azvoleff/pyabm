@@ -29,7 +29,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 import numpy as np
 
 from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, calc_first_birth_time, calc_hh_area
+from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, calc_first_birth_time, calc_hh_area, calc_des_num_children
 
 if rcParams['model.use_psyco'] == True:
     import psyco
@@ -159,7 +159,9 @@ class Person(Agent):
         else:
             raise ValueError("%s is not a valid gender"%(sex))
 
-        self._desired_num_children = -1
+        # If not defined at birth, self._des_num_children will be defined at 
+        # marriage in the "marry" function.
+        self._des_num_children = None
 
         if self._sex=="female":
             self._last_birth_time = None
@@ -181,6 +183,16 @@ class Person(Agent):
         "Marries this agent to another Person instance."
         self._spouse = spouse
         spouse._spouse = self
+        # Also assign first birth timing and desired number of children to the 
+        # female (if not already defined, which it will be for initial agents).
+        if self.get_sex()=="female":
+            female=self
+        else:
+            female=spouse
+        female._first_birth_timing = calc_first_birth_time()
+        if female._des_num_children == None:
+            female._des_num_children = calc_des_num_children()
+
 
     def divorce(self):
         spouse = self._spouse
@@ -373,9 +385,9 @@ class Region(Agent_set):
                             person._last_birth_time) > min_birth_interval/12:
                         # Check that the person does not already have greater 
                         # than their desired family size. Note that 
-                        # desired_num_children=-1 means no preference.
-                        if (person._desired_num_children > len(person._children)
-                                or person._desired_num_children==-1):
+                        # des_num_children=-1 means no preference.
+                        if (person._des_num_children > len(person._children)
+                                or person._des_num_children==-1):
                             if random_state.rand() < calc_hazard_birth(person):
                                 # Agent gives birth. First find the father 
                                 # (assumed to be the spouse of the person 
@@ -405,7 +417,6 @@ class Region(Agent_set):
                 if random_state.rand() < calc_hazard_death(person):
                     # Agent dies.
                     if person.is_married():
-                        spouse = person.get_spouse()
                         person.divorce()
                     household.remove_agent(person)
                     neighborhood = household.get_parent_agent()
@@ -493,9 +504,6 @@ class Region(Agent_set):
             if not marriages.has_key(neighborhood.get_ID()):
                 marriages[neighborhood.get_ID()] = 0
             marriages[neighborhood.get_ID()] += 1
-
-            # And assign a first birth timing to the agents
-            female._first_birth_timing = calc_first_birth_time()
         return marriages
 
     def get_num_marriages(self):
