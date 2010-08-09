@@ -254,7 +254,7 @@ class Household(Agent_set):
 
         hh_size = self.num_members()
         fw_usage = intercept + hh_size * coef_hh_size
-        # Conver daily fw_usage to monthly
+        # Convert daily fw_usage to monthly
         fw_usage = fw_usage * 30
         return fw_usage
 
@@ -399,7 +399,7 @@ class Region(Agent_set):
                                     father=father))
                                 if rcParams['feedback.birth.nonagveg']:
                                     neighborhood = household.get_parent_agent()
-                                    neighborhood._land_agveg -= rcParams['feedback.birth.nonagveg.area']
+                                    neighborhood._land_nonagveg -= rcParams['feedback.birth.nonagveg.area']
                                     neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
                                 # Track the total number of births for each 
                                 # timestep by neighborhood.
