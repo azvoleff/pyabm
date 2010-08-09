@@ -432,7 +432,6 @@ class Region(Agent_set):
         # agents, according to a parameter specifying the proportion of persons 
         # who marry in-migrants.
         num_new_females = np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_females))
-        # Get a reference to world instance to generate new person agents
         for n in xrange(1, num_new_females):
             # Choose the age randomly from the ages of the eligible males
             agent_age = eligible_females[np.random.randint(len(eligible_females))].get_age()
@@ -452,30 +451,42 @@ class Region(Agent_set):
             male.marry(female)
             moveout_prob = rcParams['prob.marriage.moveout']
             # Create a new household according to the moveout probability
-            if boolean_choice(moveout_prob):
-                # Now create a new household
+            if boolean_choice(moveout_prob) or male.get_parent_agent()==None:
+                # Create a new household. male.get_parent_agent() is equal to 
+                # None for in-migrants, as they are not a member of a 
+                # household.
                 # TODO: need to figure out how the new household has 
                 # characteristics assigned to it.
                 new_home = self._world.new_household()
                 neighborhoods = [] # Possible neighborhoods for the new_home
                 for person in [male, female]:
                     old_household = person.get_parent_agent() # this person's old household
+                    if old_household == None:
+                        # old_household will equal none for in-migrants, as 
+                        # they are not tracked in the model until after this 
+                        # timestep. This means they also will not have a 
+                        # neighborhood.
+                        continue
                     old_household.remove_agent(person)
                     new_home.add_agent(person)
                     neighborhoods.append(old_household.get_parent_agent()) # this persons old neighborhood
-
-                # For now, randomly assign the new household to the male or females 
-                # neighborhood.
-                if boolean_choice():
-                    neighborhood = neighborhoods[0]
+                # For now, randomly assign the new household to the male or 
+                # females neighborhood. Or randomly pick new neighborhood if 
+                # both members of the couple are in-migrants.
+                if len(neighborhoods)>0:
+                    neighborhood = neighborhoods[np.random.randint(len(neighborhoods))]
                 else:
-                    neighborhood = neighborhoods[1]
+                    poss_neighborhoods = self.get_agents()
+                    neighborhood = poss_neighborhoods[np.random.randint( \
+                        len(poss_neighborhoods))]
                 neighborhood.add_agent(new_home)
             else:
                 # Otherwise they stay in the male's household. So have the 
                 # female move in.
                 old_household = female.get_parent_agent() # this person's old household
-                old_household.remove_agent(female)
+                # old_household will equal none for in-migrants, as they are 
+                # not tracked in the model until after this timestep.
+                if old_household != None: old_household.remove_agent(female)
                 male_household = male.get_parent_agent()
                 male_household.add_agent(female)
                 neighborhood = male.get_parent_agent().get_parent_agent()
