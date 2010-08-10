@@ -518,7 +518,15 @@ class Region(Agent_set):
                     poss_neighborhoods = self.get_agents()
                     neighborhood = poss_neighborhoods[np.random.randint( \
                         len(poss_neighborhoods))]
-                neighborhood.add_agent(new_home)
+                # Try to add the household to the chosen neighborhood. If it 
+                # the add_agent function returns false it means there is no 
+                # available land in the chosen neighborhood, so randomly pick 
+                # another neighborhood.
+                while neighborhood.add_agent(new_home) == False:
+                    poss_neighborhoods = self.get_agents()
+                    neighborhood = poss_neighborhoods[np.random.randint( \
+                        len(poss_neighborhoods))]
+
             else:
                 # Otherwise they stay in the male's household. So have the 
                 # female move in.
