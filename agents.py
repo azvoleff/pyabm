@@ -26,6 +26,9 @@ and Region agents are all subclasses of the Agent_set object.
 Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
+import os
+import csv
+
 import numpy as np
 
 from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
@@ -159,8 +162,8 @@ class Person(Agent):
         else:
             raise ValueError("%s is not a valid gender"%(sex))
 
-        # If not defined at birth, self._des_num_children will be defined at 
-        # marriage in the "marry" function.
+        # If not defined at birth, self._des_num_children will be defined (for 
+        # women) at marriage in the "marry" function.
         self._des_num_children = None
 
         if self._sex=="female":
@@ -169,6 +172,11 @@ class Person(Agent):
         self._spouse = None
 
         self._children = []
+
+        if self._sex == "female":
+            self._first_birth_timing = calc_first_birth_time()
+        else:
+            self._first_birth_timing = None
 
     def get_sex(self):
         return self._sex
@@ -272,6 +280,9 @@ class Neighborhood(Agent_set):
         self._land_privbldg = None
         self._land_pubbldg = None
         self._land_other = None
+        self._X = None # X coordinate in UTM45N
+        self._Y = None # Y coordinate in UTM45N
+        self._elev = None # Elevation of neighborhood from SRTM DEM
 
     def add_agent(self, agent):
         """
@@ -670,3 +681,39 @@ class World():
         for region in self.iter_regions():
             for person in region.iter_persons():
                 yield person
+
+    def write_persons_to_csv(self, timestep, results_path):
+        """
+        Returns a list of persons, with a header row, suitable for writing to CSV.
+        """
+        psn_csv_file = os.path.join(results_path, "psns_time_%s.txt"%timestep)
+        out_file = open(psn_csv_file, "w")
+        csv_writer = csv.writer(out_file)
+        print "Writing person list to CSV file %s..."%psn_csv_file
+        csv_writer.writerow(["pid", "hid", "nid", "rid", "gender", "age", "spouseid", "father_id", "mother_id", "des_num_children", "first_birth_timing"])
+        for region in self.iter_regions():
+            for person in region.iter_persons():
+                new_row = []
+                new_row.append(person.get_ID())
+                new_row.append(person.get_parent_agent().get_ID())
+                new_row.append(person.get_parent_agent().get_parent_agent().get_ID())
+                new_row.append(person.get_parent_agent().get_parent_agent().get_parent_agent().get_ID())
+                new_row.append(person.get_sex())
+                new_row.append(person.get_age())
+                spouse = person.get_spouse()
+                if spouse != None:
+                    new_row.append(person.get_spouse().get_ID())
+                else:
+                    new_row.append(None)
+                if person._mother != None:
+                    new_row.append(person._mother.get_ID())
+                else: 
+                    new_row.append(None)
+                if person._father != None:
+                    new_row.append(person._father.get_ID())
+                else: 
+                    new_row.append(None)
+                new_row.append(person._des_num_children)
+                new_row.append(person._first_birth_timing)
+                csv_writer.writerow(new_row)
+        out_file.close()
