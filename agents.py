@@ -178,6 +178,8 @@ class Person(Agent):
         else:
             self._first_birth_timing = None
 
+        self._marriage_time = -999
+
     def get_sex(self):
         return self._sex
 
@@ -187,7 +189,7 @@ class Person(Agent):
     def get_spouse(self):
         return self._spouse
 
-    def marry(self, spouse):
+    def marry(self, spouse, time):
         "Marries this agent to another Person instance."
         self._spouse = spouse
         spouse._spouse = self
@@ -200,6 +202,7 @@ class Person(Agent):
         female._first_birth_timing = calc_first_birth_time()
         if female._des_num_children == None:
             female._des_num_children = calc_des_num_children()
+        self._marriage_time = time
 
     def divorce(self):
         spouse = self._spouse
@@ -407,9 +410,11 @@ class Region(Agent_set):
                 # Check that person is a married female
                 if (person.get_sex() == 'female') and person.is_married():
                     # Check that person didn't already give birth more recently 
-                    # than their minimum birth interval
-                    if (person._last_birth_time == None) or (time -
-                            person._last_birth_time) > min_birth_interval/12:
+                    # than the minimum birth interval, or their first birth 
+                    # time.
+                    if ((person._last_birth_time == None) or ((time -
+                            person._last_birth_time) > min_birth_interval/12)) and \
+                            ((time - person._marriage_time) > person._first_birth_timing):
                         # Check that the person does not already have greater 
                         # than their desired family size. Note that 
                         # des_num_children=-1 means no preference.
@@ -486,7 +491,7 @@ class Region(Agent_set):
         marriages = {}
         for male, female in zip(eligible_males, eligible_females):
              # First marry the agents.
-            male.marry(female)
+            male.marry(female, time)
             moveout_prob = rcParams['prob.marriage.moveout']
             # Create a new household according to the moveout probability
             if boolean_choice(moveout_prob) or male.get_parent_agent()==None:
