@@ -689,7 +689,6 @@ class World():
         psn_csv_file = os.path.join(results_path, "psns_time_%s.txt"%timestep)
         out_file = open(psn_csv_file, "w")
         csv_writer = csv.writer(out_file)
-        print "Writing person list to CSV file %s..."%psn_csv_file
         csv_writer.writerow(["pid", "hid", "nid", "rid", "gender", "age", "spouseid", "father_id", "mother_id", "des_num_children", "first_birth_timing"])
         for region in self.iter_regions():
             for person in region.iter_persons():
