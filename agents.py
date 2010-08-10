@@ -284,15 +284,32 @@ class Neighborhood(Agent_set):
         self._Y = None # Y coordinate in UTM45N
         self._elev = None # Elevation of neighborhood from SRTM DEM
 
-    def add_agent(self, agent):
+    def add_agent(self, agent, initializing=False):
         """
         Subclass the Agent_set.add_agent function in order to account for LULC 
         change with new household addition.
         """
-        Agent_set.add_agent(self, agent)
-        hh_area = calc_hh_area()
-        self._land_agveg -= hh_area
-        self._land_privbldg += hh_area
+        # The "initializing" variable allows ignoring the land cover 
+        # addition/subtraction while initializing the model with the CVFS data.
+        if initializing==True:
+            Agent_set.add_agent(self, agent)
+        else:
+            hh_area = calc_hh_area()
+            if self._land_agveg - hh_area < 0:
+                if self._land_nonagveg - hh_area < 0:
+                    return False
+                else:
+                    self._land_nonagveg -= hh_area
+                    self._land_privbldg += hh_area
+                    Agent_set.add_agent(self, agent)
+                    return True
+            else:
+                self._land_agveg -= hh_area
+                self._land_privbldg += hh_area
+                Agent_set.add_agent(self, agent)
+                return True
+            # Should never get to this line:
+            return False
 
     def avg_years_nonfamily_services(self):
         "Average number of years non-family services have been available."
