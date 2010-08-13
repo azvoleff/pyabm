@@ -414,7 +414,7 @@ class Region(Agent_set):
                     # time.
                     if ((person._last_birth_time == None) or ((time -
                             person._last_birth_time) > min_birth_interval/12)) and \
-                            ((time - person._marriage_time) > person._first_birth_timing):
+                            ((time - person._marriage_time) > person._first_birth_timing/12):
                         # Check that the person does not already have greater 
                         # than their desired family size. Note that 
                         # des_num_children=-1 means no preference.
