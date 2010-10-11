@@ -60,6 +60,19 @@ def validate_int(s):
         raise ValueError('"%s" is not an int'%s)
     return ret
 
+def validate_string(s):
+    'convert s to string'
+    try:
+        if type(s) == str:
+            ret = s
+        else:
+            ret = str(s)
+    except NameError:
+        raise ValueError('Could not convert "%s" to string'%s)
+    if ret != str(s):
+        raise ValueError('"%s" is not a string'%s)
+    return ret
+
 def validate_unit_interval(s):
     "Checks that s is a number between 0 and 1, inclusive, or raises an error."
     s = validate_float(s)
