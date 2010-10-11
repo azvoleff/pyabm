@@ -496,13 +496,13 @@ class Region(Agent_set):
         # As a VERY crude model of in-migration, append to the list additional 
         # agents, according to a parameter specifying the proportion of persons 
         # who marry in-migrants.
-        num_new_females = np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_females))
+        num_new_females = int(np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_females)))
         for n in xrange(1, num_new_females):
             # Choose the age randomly from the ages of the eligible males
             agent_age = eligible_females[np.random.randint(len(eligible_females))].get_age()
             eligible_females.append(self._world.new_person(time, sex="female", age=agent_age))
 
-        num_new_males = np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_males))
+        num_new_males = int(np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_males)))
         for n in xrange(1, num_new_females):
             # Choose the age randomly from the ages of the eligible males
             agent_age = eligible_males[np.random.randint(len(eligible_males))].get_age()
@@ -588,7 +588,9 @@ class Region(Agent_set):
         for household in self.iter_households():
             for person in household.iter_agents():
                 if random_state.rand() < calc_hazard_migration(person):
-                    # Agent migrates.
+                    # Agent migrates. Choose how long the agent is migrating 
+                    # for from a probability distribution. Consider a migration
+                    # of longer than TODO years as permanent.
                     neighborhood = household.get_parent_agent()
                     if not out_migr.has_key(neighborhood.get_ID()):
                         out_migr[neighborhood.get_ID()] = 0
