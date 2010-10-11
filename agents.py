@@ -32,7 +32,9 @@ import csv
 import numpy as np
 
 from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from ChitwanABM.statistical_models import calc_hazard_birth, calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, calc_first_birth_time, calc_hh_area, calc_des_num_children
+from ChitwanABM.statistical_models import calc_hazard_birth, \
+        calc_hazard_death, calc_hazard_migration, calc_hazard_marriage, \
+        calc_first_birth_time, calc_hh_area, calc_des_num_children
 
 if rcParams['model.use_psyco'] == True:
     import psyco
@@ -126,6 +128,7 @@ class Person(Agent):
         # deathdate is used for tracking agent deaths in the results, mainly 
         # for debugging.
         self._deathdate = None
+        self._alive = True
 
         # self._initial_agent is set to "True" for agents that were used to 
         # initialize the model.
@@ -188,6 +191,15 @@ class Person(Agent):
 
     def get_spouse(self):
         return self._spouse
+
+    def kill(self, time):
+        self._alive = False
+        self._deathdate = time
+        if self.is_married():
+            self.divorce()
+        household = self.get_parent_agent()
+        household.remove_agent(self)
+        return household
 
     def marry(self, spouse, time):
         "Marries this agent to another Person instance."
@@ -348,29 +360,40 @@ class Neighborhood(Agent_set):
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
 
-def Agent_Store(Agent_set):
+class Agent_Store(object):
     """
-    Agent_Store is a type of agent set used to store agents who have either left 
+    Agent_Store is a class used to store agents who have either left 
     Chitwan to return later (migration) or are in school. It allows triggering 
     their return or graduation during a later timestep of the model.
     """
     def __init__(self, world, ID=None, initial_agent=False):
-        Agent_set.__init__(self, world, ID, initial_agent)
         # self._releases is a dictionary, keyed by timestep, that stores the 
         # time at which each agent will be released back to their original 
         # parent agent (when they return from school, or from their temporary 
         # migration, for example.
         self._releases = {}
+        self._parents = {}
 
-    def add_agent(self, agent):
+    def add_agent(self, agent, release_time):
         """
-        Subclass the Agent_set.add_agent function in order to account for LULC 
-        change with new household addition.
+        Adds a new agent to the agent store. Also remove the agent from it's 
+        parent Agent_set instance.
         """
-        Agent_set.add_agent(self, agent)
+        if self._releases.has_key(release_time):
+            self._releases[release_time].append(agent)
+        else:
+            self._releases[release_time] = [agent]
+        self._parents[agent] = agent.get_parent_agent()
+        agent.get_parent_agent().remove_agent(agent)
 
     def release_agents(self, time):
-        pass
+        for agents in self._releases[time]:
+            # If parent_agent is no longer part of the model, then don't 
+            # release the agent (currently online person agents).
+            d
+            parent_agent = self._parents(agent)
+            agent.get_parent_agent().remove_agent(agent)
+
 
 class Region(Agent_set):
     """Represents a set of neighborhoods sharing a spatial area (and therefore 
@@ -379,14 +402,15 @@ class Region(Agent_set):
         Agent_set.__init__(self, world, ID, initial_agent)
 
         # TODO: Here demographic variables could be setup specific for each 
-        # population.
+        # region - these could be used to represent different strata.
 
     def __repr__(self):
         #TODO: Finish this
         return "__repr__ UNDEFINED"
 
     def __str__(self):
-        return "Region(RID: %s, %s neighborhood(s), %s household(s), %s person(s))" %(self.get_ID(), len(self._members), self.num_households(), self.num_persons())
+        return "Region(RID: %s, %s neighborhood(s), %s household(s), %s person(s))"%(self.get_ID(), \
+                len(self._members), self.num_households(), self.num_persons())
 
     def iter_households(self):
         "Returns an iterator over all the households in the region"
@@ -448,9 +472,7 @@ class Region(Agent_set):
             for person in household.iter_agents():
                 if random_state.rand() < calc_hazard_death(person):
                     # Agent dies.
-                    if person.is_married():
-                        person.divorce()
-                    household.remove_agent(person)
+                    household = person.kill(time)
                     neighborhood = household.get_parent_agent()
                     if not deaths.has_key(neighborhood.get_ID()):
                         deaths[neighborhood.get_ID()] = 0
