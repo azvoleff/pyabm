@@ -40,8 +40,6 @@ if rcParams['model.use_psyco'] == True:
     import psyco
     psyco.full()
 
-timestep = rcParams['model.timestep']
-
 class Agent(object):
     "Superclass for agent objects."
     def __init__(self, world, ID, initial_agent=False):
@@ -357,6 +355,9 @@ class Neighborhood(Agent_set):
             hh_sizes[household.get_ID()] = household.num_members()
         return hh_sizes
 
+    def get_coords(self):
+        return self._X, self._Y
+
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
 
@@ -366,7 +367,7 @@ class Agent_Store(object):
     Chitwan to return later (migration) or are in school. It allows triggering 
     their return or graduation during a later timestep of the model.
     """
-    def __init__(self, world, ID=None, initial_agent=False):
+    def __init__(self):
         # self._releases is a dictionary, keyed by timestep, that stores the 
         # time at which each agent will be released back to their original 
         # parent agent (when they return from school, or from their temporary 
@@ -400,6 +401,10 @@ class Region(Agent_set):
     land use data), and demographic characteristics."""
     def __init__(self, world, ID=None, initial_agent=False):
         Agent_set.__init__(self, world, ID, initial_agent)
+
+        # The agent_store instance is used to store migrants while they are 
+        # away from their household (prior to their return).
+        self.agent_store = Agent_Store()
 
         # TODO: Here demographic variables could be setup specific for each 
         # region - these could be used to represent different strata.
@@ -455,8 +460,10 @@ class Region(Agent_set):
                                     father=father))
                                 if rcParams['feedback.birth.nonagveg']:
                                     neighborhood = household.get_parent_agent()
-                                    neighborhood._land_nonagveg -= rcParams['feedback.birth.nonagveg.area']
-                                    neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
+
+                                    if neighborhood._land_nonagveg - rcParams['feedback.birth.nonagveg.area'] >= 0:
+                                        neighborhood._land_nonagveg -= rcParams['feedback.birth.nonagveg.area']
+                                        neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
                                 # Track the total number of births for each 
                                 # timestep by neighborhood.
                                 if not births.has_key(neighborhood.get_ID()):
@@ -498,12 +505,12 @@ class Region(Agent_set):
         # who marry in-migrants.
         num_new_females = int(np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_females)))
         for n in xrange(1, num_new_females):
-            # Choose the age randomly from the ages of the eligible males
+            # Choose the age randomly from the ages of the eligible females
             agent_age = eligible_females[np.random.randint(len(eligible_females))].get_age()
             eligible_females.append(self._world.new_person(time, sex="female", age=agent_age))
 
         num_new_males = int(np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_males)))
-        for n in xrange(1, num_new_females):
+        for n in xrange(1, num_new_males):
             # Choose the age randomly from the ages of the eligible males
             agent_age = eligible_males[np.random.randint(len(eligible_males))].get_age()
             eligible_males.append(self._world.new_person(time, sex="male", age=agent_age))
@@ -589,8 +596,13 @@ class Region(Agent_set):
             for person in household.iter_agents():
                 if random_state.rand() < calc_hazard_migration(person):
                     # Agent migrates. Choose how long the agent is migrating 
-                    # for from a probability distribution. Consider a migration
-                    # of longer than TODO years as permanent.
+                    # for from a probability distribution.
+                    # TODO: Consider a migration of longer than years as 
+                    # permanent.
+                    # The add_agent function of the agent_store class handles 
+                    # removing the agent from its parent (the household).
+                    self.agent_store.add_agent(person, time+10)
+
                     neighborhood = household.get_parent_agent()
                     if not out_migr.has_key(neighborhood.get_ID()):
                         out_migr[neighborhood.get_ID()] = 0
@@ -613,6 +625,7 @@ class Region(Agent_set):
         """Adds one to the age of each agent. The units of age are dependent on 
         the units of the input rc parameters."""
         for person in self.iter_persons():
+            timestep = rcParams['model.timestep']
             person._age += timestep
 
     def get_neighborhood_fw_usage(self):
