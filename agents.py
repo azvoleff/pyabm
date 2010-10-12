@@ -750,7 +750,7 @@ class World():
 
     def write_persons_to_csv(self, timestep, results_path):
         """
-        Returns a list of persons, with a header row, suitable for writing to CSV.
+        Writes a list of persons, with a header row, to CSV.
         """
         psn_csv_file = os.path.join(results_path, "psns_time_%s.txt"%timestep)
         out_file = open(psn_csv_file, "w")
@@ -780,5 +780,51 @@ class World():
                     new_row.append(None)
                 new_row.append(person._des_num_children)
                 new_row.append(person._first_birth_timing)
+                csv_writer.writerow(new_row)
+        out_file.close()
+
+    def write_NBHs_to_csv(self, timestep, results_path):
+        """
+        Writes a list of neighborhoods, with a header row, to CSV.
+        """
+        NBH_csv_file = os.path.join(results_path, "NBHs_time_%s.txt"%timestep)
+        out_file = open(NBH_csv_file, "w")
+        csv_writer = csv.writer(out_file)
+        csv_writer.writerow(["nid", "rid", "X", "Y", "numpsns", "numhs", "agveg",
+            "nonagveg", "pubbldg", "privbldg", "other", "total_area",
+            "perc_agveg", "perc_veg", "perc_bldg"])
+        for region in self.iter_regions():
+            for neighborhood in region.iter_agents():
+                new_row = []
+                new_row.append(neighborhood.get_ID())
+                new_row.append(neighborhood.get_parent_agent().get_ID())
+
+                x, y = neighborhood.get_coords()
+                new_row.append(x)
+                new_row.append(y)
+
+                new_row.append(neighborhood.get_num_psn())
+                new_row.append(neighborhood.num_members())
+
+                new_row.append(neighborhood._land_agveg)
+                new_row.append(neighborhood._land_nonagveg)
+                new_row.append(neighborhood._land_pubbldg)
+                new_row.append(neighborhood._land_privbldg)
+                new_row.append(neighborhood._land_other)
+
+                total_area = neighborhood._land_agveg + neighborhood._land_nonagveg + \
+                        neighborhood._land_pubbldg + neighborhood._land_privbldg + \
+                        neighborhood._land_other
+                perc_agveg = neighborhood._land_agveg / total_area
+                perc_veg = (neighborhood._land_agveg + neighborhood._land_nonagveg) \
+                        / total_area
+                perc_bldg = (neighborhood._land_privbldg + neighborhood._land_pubbldg) \
+                        / total_area
+
+                new_row.append(total_area)
+                new_row.append(perc_agveg)
+                new_row.append(perc_veg)
+                new_row.append(perc_bldg)
+
                 csv_writer.writerow(new_row)
         out_file.close()
