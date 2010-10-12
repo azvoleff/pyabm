@@ -752,7 +752,7 @@ class World():
         """
         Writes a list of persons, with a header row, to CSV.
         """
-        psn_csv_file = os.path.join(results_path, "psns_time_%s.txt"%timestep)
+        psn_csv_file = os.path.join(results_path, "psns_time_%s.csv"%timestep)
         out_file = open(psn_csv_file, "w")
         csv_writer = csv.writer(out_file)
         csv_writer.writerow(["pid", "hid", "nid", "rid", "gender", "age", "spouseid", "father_id", "mother_id", "des_num_children", "first_birth_timing"])
@@ -787,7 +787,7 @@ class World():
         """
         Writes a list of neighborhoods, with a header row, to CSV.
         """
-        NBH_csv_file = os.path.join(results_path, "NBHs_time_%s.txt"%timestep)
+        NBH_csv_file = os.path.join(results_path, "NBHs_time_%s.csv"%timestep)
         out_file = open(NBH_csv_file, "w")
         csv_writer = csv.writer(out_file)
         csv_writer.writerow(["nid", "rid", "X", "Y", "numpsns", "numhs", "agveg",
