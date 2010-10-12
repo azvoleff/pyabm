@@ -35,11 +35,11 @@ def write_NBH_shapefile(neighborhoods, output_file):
     shpDriver = ogr.GetDriverByName('ESRI Shapefile')
     ds = shpDriver.CreateDataSource(output_file)
     
-    # By default create the polygon shapefile in WGS-84 - UTM 44 North
+    # By default create the polygon shapefile in WGS-84 - UTM 45 North
     outcs = osr.SpatialReference()
-    outcs.SetProjCS("UTM 44N (WGS84)")
+    outcs.SetProjCS("UTM 45N (WGS84)")
     outcs.SetWellKnownGeogCS("WGS84")
-    outcs.SetUTM(44, True)
+    outcs.SetUTM(45, True)
     layer = ds.CreateLayer('ChitwanABM', srs=outcs, geom_type=ogr.wkbPoint)
 
     # setup fields
