@@ -292,8 +292,8 @@ class Neighborhood(Agent_set):
         self._land_privbldg = None
         self._land_pubbldg = None
         self._land_other = None
-        self._X = None # X coordinate in UTM45N
-        self._Y = None # Y coordinate in UTM45N
+        self._x = None # x coordinate in UTM45N
+        self._y = None # y coordinate in UTM45N
         self._elev = None # Elevation of neighborhood from SRTM DEM
 
     def add_agent(self, agent, initializing=False):
@@ -356,7 +356,7 @@ class Neighborhood(Agent_set):
         return hh_sizes
 
     def get_coords(self):
-        return self._X, self._Y
+        return self._x, self._y
 
     def __str__(self):
         return "Neighborhood(NID: %s. %s household(s))" %(self.get_ID(), self.num_members())
@@ -388,13 +388,15 @@ class Agent_Store(object):
         agent.get_parent_agent().remove_agent(agent)
 
     def release_agents(self, time):
-        for agents in self._releases[time]:
-            # If parent_agent is no longer part of the model, then don't 
-            # release the agent (currently online person agents).
-            d
-            parent_agent = self._parents(agent)
-            agent.get_parent_agent().remove_agent(agent)
-
+        if not self._releases.has_key(time):
+            return 
+        for agent in self._releases[time]:
+            # TODO: If parent_agent (a household when Agent_Store is used to 
+            # store people) is no longer part of the model, then don't release 
+            # the agent (currently agent_store is designed to handle person 
+            # agents only, though it should be fairly flexible).
+            parent_agent = self._parents[agent]
+            parent_agent.add_agent(agent)
 
 class Region(Agent_set):
     """Represents a set of neighborhoods sharing a spatial area (and therefore 
@@ -602,11 +604,14 @@ class Region(Agent_set):
                     # The add_agent function of the agent_store class handles 
                     # removing the agent from its parent (the household).
                     self.agent_store.add_agent(person, time+10)
-
                     neighborhood = household.get_parent_agent()
                     if not out_migr.has_key(neighborhood.get_ID()):
                         out_migr[neighborhood.get_ID()] = 0
                     out_migr[neighborhood.get_ID()] += 1
+
+        # Now handle the returning migrants (based on the return times assigned 
+        # to them when they initially outmigrated)
+        self.agent_store.release_agents(time)
 
         in_migr = {}
         # Now handle in-migrations
@@ -790,7 +795,7 @@ class World():
         NBH_csv_file = os.path.join(results_path, "NBHs_time_%s.csv"%timestep)
         out_file = open(NBH_csv_file, "w")
         csv_writer = csv.writer(out_file)
-        csv_writer.writerow(["nid", "rid", "X", "Y", "numpsns", "numhs", "agveg",
+        csv_writer.writerow(["nid", "rid", "x", "y", "numpsns", "numhs", "agveg",
             "nonagveg", "pubbldg", "privbldg", "other", "total_area",
             "perc_agveg", "perc_veg", "perc_bldg"])
         for region in self.iter_regions():
