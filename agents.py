@@ -603,7 +603,7 @@ class Region(Agent_set):
                     # permanent.
                     # The add_agent function of the agent_store class handles 
                     # removing the agent from its parent (the household).
-                    self.agent_store.add_agent(person, time+10)
+                    self.agent_store.add_agent(person, time+1)
                     neighborhood = household.get_parent_agent()
                     if not out_migr.has_key(neighborhood.get_ID()):
                         out_migr[neighborhood.get_ID()] = 0
