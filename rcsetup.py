@@ -314,8 +314,15 @@ def validate_prob_dist(s):
     if type(prob_dist_tuple) != tuple:
         raise SyntaxError(error_msg%(s))
 
-    if len(prob_dist_tuple[0]) != (len(prob_dist_tuple[1]) + 1):
-        raise SyntaxError("Length of probability tuple must be 1 greater than the length of the bin limit tuple")
+    if not (len(prob_dist_tuple[0])==2 and type(prob_dist_tuple[1])==int) and \
+            (len(prob_dist_tuple[0]) != (len(prob_dist_tuple[1]) + 1)):
+                # The first clause of the above if statement is to catch the 
+                # case where the probability distribution is over a single 
+                # interval.  Here we need to make sure the probability (for 
+                # which there is only one value in this case) is stored as a 
+                # length 1 tuple as this is the format expected by the 
+                # statistics functions.
+                raise SyntaxError("Length of probability tuple must be 1 greater than the length of the bin limit tuple")
 
     return prob_dist_tuple
 
