@@ -32,9 +32,10 @@ import csv
 import numpy as np
 
 from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
-from ChitwanABM.statistical_models import calc_hazard_death, \
+from ChitwanABM.statistics import calc_hazard_death, \
         calc_hazard_migration, calc_hazard_marriage, \
-        calc_first_birth_time, calc_hh_area, calc_des_num_children
+        calc_first_birth_time, calc_birth_interval, calc_hh_area, \
+        calc_des_num_children
 
 if rcParams['model.use_psyco'] == True:
     import psyco
@@ -176,6 +177,7 @@ class Person(Agent):
 
         if self._sex == "female":
             self._first_birth_timing = calc_first_birth_time()
+            self._birth_interval = calc_birth_intervals()
         else:
             self._first_birth_timing = None
 
@@ -434,40 +436,44 @@ class Region(Agent_set):
     def births(self, time):
         """Runs through the population and agents give birth probabilistically 
         based on their birth interval and desired family size."""
-        min_birth_interval = rcParams['birth.minimum_interval']
+        most_recent_poss_birth_time = time - rcParams['birth.minimum_interval']/12.
         max_age = rcParams['birth.max_age']
         births = {}
         for household in self.iter_households():
             for person in household.iter_agents():
-                # Check that person is a married female and not too old.
-                if person.get_sex() == 'female' and person.is_married() and \
-                        person._age/12 <= max_age:
-                    # Check that person didn't already give birth more recently 
-                    # than their first birth time.
-                    if (person._last_birth_time == None or person._last_birth_time >= (time - 24)) \
-                            and ((time - person._marriage_time) > person._first_birth_timing/12):
-                        # Check that the person does not already have greater 
-                        # than their desired family size. Note that 
-                        # des_num_children=-1 means no preference.
-                        if (person._des_num_children > len(person._children) \
-                                or person._des_num_children==-1):
-                            # Agent gives birth. First find the father (assumed 
-                            # to be the spouse of the person giving birth).
-                            father = person.get_spouse()
-                            # Now have the mother give birth, and add the 
-                            # new person to the mother's household.
-                            household.add_agent(person.give_birth(time,
-                                father=father))
-                            if rcParams['feedback.birth.nonagveg']:
-                                neighborhood = household.get_parent_agent()
-                                if neighborhood._land_nonagveg - rcParams['feedback.birth.nonagveg.area'] >= 0:
-                                    neighborhood._land_nonagveg -= rcParams['feedback.birth.nonagveg.area']
-                                    neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
-                            # Track the total number of births for each 
-                            # timestep by neighborhood.
-                            if not births.has_key(neighborhood.get_ID()):
-                                births[neighborhood.get_ID()] = 0
-                            births[neighborhood.get_ID()] += 1
+                is_married_female = (person.get_sex() == 'female') and person.is_married()
+                is_young_enough = person._age <= max_age*12
+                # Check that person is a female, married, and not too old.
+                if  is_married_female and is_young_enough:
+                    # Check that the woman has been married long_enough, didn't 
+                    # already give birth more recently than the minimum birth 
+                    # interval, and does not already have greater than their 
+                    # desired family size.  Note that des_num_children=-1 means 
+                    # no preference ("god's will").
+                    is_married_long_enough = (time - person._marriage_time) >= \
+                            person._first_birth_timing/12.
+                    is_able_to_birth = (person._last_birth_time == None) or \
+                            person._last_birth_time <= most_recent_poss_birth_time
+                    if is_married_long_enough and is_able_to_birth and \
+                            (len(person._children) < person._des_num_children) \
+                            or person._des_num_children==-1:
+                        # Agent gives birth. First find the father (assumed 
+                        # to be the spouse of the person giving birth).
+                        father = person.get_spouse()
+                        # Now have the mother give birth, and add the 
+                        # new person to the mother's household.
+                        household.add_agent(person.give_birth(time,
+                            father=father))
+                        if rcParams['feedback.birth.nonagveg']:
+                            neighborhood = household.get_parent_agent()
+                            if neighborhood._land_nonagveg - rcParams['feedback.birth.nonagveg.area'] >= 0:
+                                neighborhood._land_nonagveg -= rcParams['feedback.birth.nonagveg.area']
+                                neighborhood._land_other += rcParams['feedback.birth.nonagveg.area']
+                        # Track the total number of births for each 
+                        # timestep by neighborhood.
+                        if not births.has_key(neighborhood.get_ID()):
+                            births[neighborhood.get_ID()] = 0
+                        births[neighborhood.get_ID()] += 1
         return births
                         
     def deaths(self, time):
