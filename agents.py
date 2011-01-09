@@ -176,8 +176,8 @@ class Person(Agent):
         self._children = []
 
         if self._sex == "female":
-            self._first_birth_timing = calc_first_birth_time()
-            self._birth_interval = calc_birth_intervals()
+            self._first_birth_timing = calc_first_birth_time(self)
+            self._birth_interval = calc_birth_interval(self)
         else:
             self._first_birth_timing = None
 
@@ -211,9 +211,9 @@ class Person(Agent):
             female=self
         else:
             female=spouse
-        female._first_birth_timing = calc_first_birth_time()
+        female._first_birth_timing = calc_first_birth_time(self)
         if female._des_num_children == None:
-            female._des_num_children = calc_des_num_children()
+            female._des_num_children = calc_des_num_children(self)
         self._marriage_time = time
 
     def divorce(self):
