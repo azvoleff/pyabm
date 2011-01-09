@@ -215,6 +215,7 @@ class Person(Agent):
         if female._des_num_children == None:
             female._des_num_children = calc_des_num_children(self)
         self._marriage_time = time
+        spouse._marriage_time = time
 
     def divorce(self):
         spouse = self._spouse
