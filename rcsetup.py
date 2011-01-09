@@ -605,7 +605,6 @@ def get_rc_params():
         rc_file = os.path.join(path, "ChitwanABMrc")
         if os.path.exists(rc_file):
             rc_file_params = read_rc_file(rc_file)
-            print "Using rc file at %s"%(rc_file)
             break
     
     # If an rc file was found, update the default_params with the values from 
@@ -613,6 +612,7 @@ def get_rc_params():
     if rc_file_params != None:
         for key in rc_file_params.iterkeys():
             default_params[key] = rc_file_params.original_value[key]
+            print "Custom '%s' parameter loaded from %s"%(key, rc_file)
     else:
         print "No rc file found. Using parameters from rcparams.default."
 
