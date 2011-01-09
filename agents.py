@@ -227,18 +227,23 @@ class Person(Agent):
         # give birth more recently than the minimum birth interval, and does 
         # not already have greater than their desired family size.  Note that 
         # des_num_children=-1 means no preference ("god's will").
-        most_recent_poss_birth_time = time - rcParams['birth.minimum_interval']/12.
-        max_age = rcParams['birth.max_age']
         is_married_female = (self.get_sex() == 'female') and self.is_married()
         if not is_married_female:
             return False
+
+        max_age = rcParams['birth.max_age']
         is_young_enough = self._age <= max_age*12
+
         is_below_des_num_children = (len(self._children) < \
                 self._des_num_children) or self._des_num_children==-1
+
         is_married_long_enough = (time - self._marriage_time) >= \
                 self._first_birth_timing/12.
+
+        most_recent_poss_birth_time = time - rcParams['birth.minimum_interval']/12.
         is_able_to_birth = (self._last_birth_time == None) or \
                 self._last_birth_time <= most_recent_poss_birth_time
+
         if is_young_enough and is_below_des_num_children \
                 and is_married_long_enough and is_able_to_birth:
             return True
