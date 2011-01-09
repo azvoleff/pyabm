@@ -240,7 +240,7 @@ class Person(Agent):
         is_married_long_enough = (time - self._marriage_time) >= \
                 self._first_birth_timing/12.
 
-        most_recent_poss_birth_time = time - rcParams['birth.minimum_interval']/12.
+        most_recent_poss_birth_time = time - self._birth_interval/12.
         is_able_to_birth = (self._last_birth_time == None) or \
                 self._last_birth_time <= most_recent_poss_birth_time
 
