@@ -657,14 +657,13 @@ class Region(Agent_set):
         return {'fw_usage': fw_usage}
 
     def get_neighborhood_landuse(self):
-        landuse = {}
+        landuse = {'agveg':{}, 'nonagveg':{}, 'privbldg':{}, 'pubbldg':{}, 'other':{}}
         for neighborhood in self.iter_agents():
-            landuse[neighborhood.get_ID()] = {}
-            landuse[neighborhood.get_ID()]['agveg'] = neighborhood._land_agveg
-            landuse[neighborhood.get_ID()]['nonagveg'] = neighborhood._land_nonagveg
-            landuse[neighborhood.get_ID()]['privbldg'] = neighborhood._land_privbldg
-            landuse[neighborhood.get_ID()]['pubbldg'] = neighborhood._land_pubbldg
-            landuse[neighborhood.get_ID()]['other'] = neighborhood._land_other
+            landuse['agveg'][neighborhood.get_ID()] = neighborhood._land_agveg
+            landuse['nonagveg'][neighborhood.get_ID()] = neighborhood._land_nonagveg
+            landuse['privbldg'][neighborhood.get_ID()] = neighborhood._land_privbldg
+            landuse['pubbldg'][neighborhood.get_ID()] = neighborhood._land_pubbldg
+            landuse['other'][neighborhood.get_ID()] = neighborhood._land_other
         return landuse
 
     def get_neighborhood_pop_stats(self):
