@@ -181,7 +181,7 @@ class Person(Agent):
         else:
             self._first_birth_timing = None
 
-        self._marriage_time = -999
+        self._marriage_time = None
 
     def get_sex(self):
         return self._sex
@@ -231,7 +231,7 @@ class Person(Agent):
         if not is_married_female:
             return False
 
-        max_age = rcParams['birth.max_age']
+        max_age = rcParams['birth.max_age.years']
         is_young_enough = self._age <= max_age*12
 
         is_below_des_num_children = (len(self._children) < \
