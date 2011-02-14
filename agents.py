@@ -115,7 +115,7 @@ class Agent_set(Agent):
 class Person(Agent):
     "Represents a single person agent"
     def __init__(self, world, birthdate, PID=None, mother=None, father=None,
-            age=0, sex=None, initial_agent=False):
+            age=0, sex=None, initial_agent=False, ethnicity=None):
         Agent.__init__(self, world, PID, initial_agent)
 
         # birthdate is the timestep of the birth of the agent. It is used to 
@@ -164,6 +164,12 @@ class Person(Agent):
         else:
             raise ValueError("%s is not a valid gender"%(sex))
 
+        # The agent's ethnicity in the CVFS data as 1: High Caste Hindu, 2: 
+        # Hill Tibetoburmese, 3: Low Caste Hindu, 4: Newar, 5: Terai 
+        # Tibetoburmese, 6: Other. Here it is converted to a textual 
+        # representation for clarity (see the preprocessing code).
+        self._ethnicity = ethnicity
+
         # If not defined at birth, self._des_num_children will be defined (for 
         # women) at marriage in the "marry" function.
         self._des_num_children = None
@@ -188,6 +194,9 @@ class Person(Agent):
 
     def get_age(self):
         return self._age
+
+    def get_ethnicity(self):
+        return self._ethnicity
 
     def get_spouse(self):
         return self._spouse
@@ -255,7 +264,7 @@ class Person(Agent):
         assert self.get_sex() == 'female', "Men can't give birth"
         assert self.get_spouse().get_ID() == father.get_ID(), "All births must be in marriages"
         assert self.get_ID() != father.get_ID(), "No immaculate conception (agent: %s)"%(self.get_ID())
-        baby = self._world.new_person(birthdate=time, mother=self, father=father)
+        baby = self._world.new_person(birthdate=time, mother=self, father=father, ethnicity=self.get_ethnicity())
         self._last_birth_time = time
         for parent in [self, father]:
             parent._children.append(baby)
@@ -524,13 +533,15 @@ class Region(Agent_set):
         for n in xrange(1, num_new_females):
             # Choose the age randomly from the ages of the eligible females
             agent_age = eligible_females[np.random.randint(len(eligible_females))].get_age()
-            eligible_females.append(self._world.new_person(time, sex="female", age=agent_age))
+            agent_ethnicity = eligible_females[np.random.randint(len(eligible_females))].get_ethnicity()
+            eligible_females.append(self._world.new_person(time, sex="female", age=agent_age, ethnicity=agent_ethnicity))
 
         num_new_males = int(np.floor(rcParams['prob.marry.inmigrant'] * len(eligible_males)))
         for n in xrange(1, num_new_males):
             # Choose the age randomly from the ages of the eligible males
             agent_age = eligible_males[np.random.randint(len(eligible_males))].get_age()
-            eligible_males.append(self._world.new_person(time, sex="male", age=agent_age))
+            agent_ethnicity = eligible_males[np.random.randint(len(eligible_males))].get_ethnicity()
+            eligible_males.append(self._world.new_person(time, sex="male", age=agent_age, ethnicity=agent_ethnicity))
 
         # Now pair up the eligible agents. Any extra males/females will not 
         # marry this timestep.
@@ -715,14 +726,14 @@ class World():
         self._RIDGen = IDGenerator()
 
     def new_person(self, birthdate, PID=None, mother=None, father=None, age=0,
-            sex=None, initial_agent=False):
+            sex=None, initial_agent=False, ethnicity=None):
         "Returns a new person agent."
         if PID == None:
             PID = self._PIDGen.next()
         else:
             # Update the generator so the PID will not be reused
             self._PIDGen.use_ID(PID)
-        return Person(self, birthdate, PID, mother, father, age, sex, initial_agent)
+        return Person(self, birthdate, PID, mother, father, age, sex, initial_agent, ethnicity)
 
     def new_household(self, HID=None, initial_agent=False):
         "Returns a new household agent."
