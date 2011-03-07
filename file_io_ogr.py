@@ -1,11 +1,28 @@
 #!/usr/bin/python
+# Copyright 2009 Alex Zvoleff
+#
+# This file is part of the ChitwanABM agent-based model.
+# 
+# ChitwanABM is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+# 
+# ChitwanABM is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# ChitwanABM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact Alex Zvoleff in the Department of Geography at San Diego State 
+# University with any comments or questions. See the README.txt file for 
+# contact information.
 """
-Functions for reading coordinate and segment files from ArcGIS, and for
-converting generated networks into an ArcGIS coverage or shapefile. Also
-handles writing network statistics fields to a given shapefile. Uses OGR
-to process shapefiles.
+Functions for writing shapefiles of model results, using OGR to process 
+shapefiles.
 
-Alex Zvoleff, aiz2101@columbia.edu
+Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import sys
@@ -31,7 +48,7 @@ def getFieldType(fieldValue):
         return ogr.OFTString
 
 def write_NBH_shapefile(neighborhoods, output_file):
-    'Generates a shapefile from a network class instance.'
+    'Generates a shapefile from a set of neighborhoods.'
     shpDriver = ogr.GetDriverByName('ESRI Shapefile')
     ds = shpDriver.CreateDataSource(output_file)
     
