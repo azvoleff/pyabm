@@ -631,8 +631,6 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
         value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
         
         if key != '' and value != '':
-            # Validate keys / values
-            default_params.validate[key](value)
             if key in updated_params.keys():
                 # Update value from updated_params
                 value = updated_params.original_value[key]
