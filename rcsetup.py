@@ -438,7 +438,7 @@ def read_rcparams_defaults():
             if ret.has_key(key):
                 warnings.warn("Duplicate values for %s are provided in rcsetup.py"%key)
             # Convert 'converter' from a string to a reference to the 
-            # validationo object
+            # validation object
             converter = eval(converter)
             ret[key] = (value, converter)
 
@@ -473,17 +473,6 @@ class RcParams(dict):
             raise KeyError('%s is not a valid rc parameter. \
 See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
 
-# Convert the rcparams_defaults dictionary into an RcParams instance. This 
-# process will also validate that the values in rcparams_defaults are valid by 
-# using the validation function specified in rcparams_defaults to convert each 
-# parameter value.
-default_params = RcParams()
-for key, (default, converter) in rcparams_defaults_dict.iteritems():
-    try:
-        default_params[key] = default
-    except Exception, msg:
-        raise Exception("Error processing rcparams.default key '%s'. %s"%(key, msg))
-
 def read_rc_file(fname='ChitwanABMrc'):
     """
     Returns an RcParams instance containing the the keys / value combinations 
@@ -513,6 +502,48 @@ def read_rc_file(fname='ChitwanABMrc'):
             print >> sys.stderr, """
 Bad key "%s" on line %d in %s."""%(key, cnt, fname)
     return rcfile_params
+
+# Convert the rcparams_defaults dictionary into an RcParams instance. This 
+# process will also validate that the values in rcparams_defaults are valid by 
+# using the validation function specified in rcparams_defaults to convert each 
+# parameter value.
+default_params = RcParams()
+for key, (default, converter) in rcparams_defaults_dict.iteritems():
+    try:
+        default_params[key] = default
+    except Exception, msg:
+        raise Exception("Error processing rcparams.default key '%s'. %s"%(key, msg))
+
+def get_rc_params():
+    """
+    Loads rcParams by first starting with the default parameter values from 
+    rcparams.default (already stored in the RcParams instance 'default_params', 
+    and then by checking for a ChitwanABMrc in:
+    
+        1) the current working directory
+        1) the user's home directory
+        2) the directory in which the ChitwanABM module is located
+
+    If a ChitwanABMrc is found, the default_params are updated with the values 
+    from the rc file. The rc_params are then returned.
+    """
+    rc_file_params = None
+    for path in [os.getcwd(), _get_home_dir(), sys.path[0]]:
+        rc_file = os.path.join(path, "ChitwanABMrc")
+        if os.path.exists(rc_file):
+            rc_file_params = read_rc_file(rc_file)
+            break
+    
+    # If an rc file was found, update the default_params with the values from 
+    # that rc file.
+    if rc_file_params != None:
+        for key in rc_file_params.iterkeys():
+            default_params[key] = rc_file_params.original_value[key]
+            print "Custom '%s' parameter loaded from %s"%(key, rc_file)
+    else:
+        print "No rc file found. Using parameters from rcparams.default."
+
+    return default_params
 
 # The default string used as the header of rc_files (if an alternative one is 
 # not provided).
@@ -586,34 +617,3 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
                 # precede comment by a blank space
                 comment = ' ' + comment
             outFile.write("%s : %s %s \n"%(key, value, comment))
-
-def get_rc_params():
-    """
-    Loads rcParams by first starting with the default parameter values from 
-    rcparams.default (already stored in the RcParams instance 'default_params', 
-    and then by checking for a ChitwanABMrc in:
-    
-        1) the current working directory
-        1) the user's home directory
-        2) the directory in which the ChitwanABM module is located
-
-    If a ChitwanABMrc is found, the default_params are updated with the values 
-    from the rc file. The rc_params are then returned.
-    """
-    rc_file_params = None
-    for path in [os.getcwd(), _get_home_dir(), sys.path[0]]:
-        rc_file = os.path.join(path, "ChitwanABMrc")
-        if os.path.exists(rc_file):
-            rc_file_params = read_rc_file(rc_file)
-            break
-    
-    # If an rc file was found, update the default_params with the values from 
-    # that rc file.
-    if rc_file_params != None:
-        for key in rc_file_params.iterkeys():
-            default_params[key] = rc_file_params.original_value[key]
-            print "Custom '%s' parameter loaded from %s"%(key, rc_file)
-    else:
-        print "No rc file found. Using parameters from rcparams.default."
-
-    return default_params
