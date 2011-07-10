@@ -120,6 +120,21 @@ def validate_readable_file_warning(s):
         print "WARNING: error reading file %s"%s
     return s
 
+def validate_readable_dir(s):
+    """
+    Checks that a directory exists and is readable. Fails if the directory does 
+    not exist or if s is not a string.
+    """
+    if (type(s) != str):
+        raise TypeError("%s is not a readable directory"%s)
+    if not os.path.isdir(s):
+        raise TypeError("%s is not a directory"%s)
+    try:
+        ls = os.listdir(s)
+    except:
+        raise OSError("cannot read directory %s"%s)
+    return s
+
 def validate_writable_dir(s):
     """
     Checks that a directory exists and is writable. Fails if the directory does 
@@ -134,7 +149,7 @@ def validate_writable_dir(s):
         t.write('1')
         t.close()
     except OSError:
-        raise OSError("cannot write to model output directory %s"%s)
+        raise OSError("cannot write to directory %s"%s)
     return s
 
 class validate_nseq_float:
