@@ -35,6 +35,12 @@ import copy
 
 import warnings
 
+class KeyError(Exception):
+    def __init__(self, value):
+        self.parameter = value
+    def __str__(self):
+        return repr(self.parameter)
+
 def validate_float(s):
     'convert s to float or raise'
     try: 
@@ -381,7 +387,7 @@ def _get_home_dir():
     """
     Find user's home directory if possible. Otherwise raise error.
 
-    :see:  http://mail.python.org/pipermail/python-list/2005-February/263921.html
+    see:  http://mail.python.org/pipermail/python-list/2005-February/263921.html
     """
     path=''
     try:
@@ -400,6 +406,40 @@ def _get_home_dir():
     else:
         raise RuntimeError('Error finding user home directory: \
                 please define environment variable $HOME')
+
+class RcParams(dict):
+    """
+    A dictionary object including validation
+    """
+    def __init__(self, validation=True, *args):
+        self._validation = validation
+        dict.__init__(self, *args)
+        self.validate = dict([ (key, converter) for key, (default, converter) in \
+                     rcparams_defaults_dict.iteritems() ])
+        # self.original_value stores the unconverted strings representing the 
+        # originally input values (prior to conversion). This allows printing 
+        # to an rc file the original values given by a user or rc file without 
+        # running into problems with errors due to machine precision while 
+        # doing floating point -> string -> floating point conversions
+        self.original_value = {}
+
+    def __setitem__(self, key, val):
+        self.original_value[key] = val
+        if self._validation:
+            try:
+                cval = self.validate[key](val)
+                dict.__setitem__(self, key, cval)
+            except KeyError, msg:
+                raise KeyError('%s is not a valid rc parameter. \
+See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
+
+    def validate_items(self):
+        for key, val in self.original_value.iteritems():
+            try:
+                cval = self.validate[key](val)
+                dict.__setitem__(self, key, cval)
+            except KeyError, msg:
+                print 'ERROR: Problem processing %s rc parameter. %s'%(key, msg)
 
 def read_rcparams_defaults():
     try:
@@ -445,40 +485,12 @@ def read_rcparams_defaults():
         line = rcparams_file.readline()
     return ret
 
-# Load the rcparams_defaults into a dictionary, which will be used to tie keys 
-# to converters in the definition of the RcParams class
-rcparams_defaults_dict = read_rcparams_defaults()
-
-class RcParams(dict):
-    """
-    A dictionary object including validation
-    """
-    def __init__(self, *args):
-        dict.__init__(self, *args)
-        self.validate = dict([ (key, converter) for key, (default, converter) in \
-                     rcparams_defaults_dict.iteritems() ])
-        # self.original_value stores the unconverted strings representing the 
-        # originally input values (prior to conversion). This allows printing 
-        # to an rc file the original values given by a user or rc file without 
-        # running into problems with errors due to machine precision while 
-        # doing floating point -> string -> floating point conversions
-        self.original_value = {}
-
-    def __setitem__(self, key, val):
-        try:
-            self.original_value[key] = val
-            cval = self.validate[key](val)
-            dict.__setitem__(self, key, cval)
-        except KeyError, msg:
-            raise KeyError('%s is not a valid rc parameter. \
-See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
-
 def read_rc_file(fname='ChitwanABMrc'):
     """
     Returns an RcParams instance containing the the keys / value combinations 
     read from an rc file.
     """
-    rcfile_params = RcParams()
+    rcfile_params = RcParams(validation=True)
     cnt = 0
     for line in file(fname):
         cnt += 1
@@ -498,21 +510,28 @@ def read_rc_file(fname='ChitwanABMrc'):
         # Validate the values read in from the rc file
         try:
             rcfile_params[key] = val # try to convert to proper type or raise
-        except:
-            print >> sys.stderr, """
-Bad key "%s" on line %d in %s."""%(key, cnt, fname)
+        except Exception, msg:
+            print """WARNING: While reading rc parameter "%s" on line %d in %s. %s. Will revert to default parameter value."""%(key, cnt, fname, msg)
     return rcfile_params
+
+# Load the rcparams_defaults into a dictionary, which will be used to tie keys 
+# to converters in the definition of the RcParams class
+rcparams_defaults_dict = read_rcparams_defaults()
 
 # Convert the rcparams_defaults dictionary into an RcParams instance. This 
 # process will also validate that the values in rcparams_defaults are valid by 
 # using the validation function specified in rcparams_defaults to convert each 
 # parameter value.
-default_params = RcParams()
+default_params = RcParams(validation=False)
 for key, (default, converter) in rcparams_defaults_dict.iteritems():
     try:
         default_params[key] = default
     except Exception, msg:
-        raise Exception("Error processing rcparams.default key '%s'. %s"%(key, msg))
+        raise Exception("ERROR: Problem processing rcparams.default key '%s'. %s"%(key, msg))
+# Now turn on validation to validate any further changes made (don't validate 
+# the originals read from rcparams.defaults in the first place, as default 
+# paths and input/ouput file locations will almost always fail.)
+default_params._validation = True
 
 def get_rc_params():
     """
@@ -521,8 +540,8 @@ def get_rc_params():
     and then by checking for a ChitwanABMrc in:
     
         1) the current working directory
-        1) the user's home directory
-        2) the directory in which the ChitwanABM module is located
+        2) the user's home directory
+        3) the directory in which the ChitwanABM module is located
 
     If a ChitwanABMrc is found, the default_params are updated with the values 
     from the rc file. The rc_params are then returned.
@@ -539,9 +558,13 @@ def get_rc_params():
     if rc_file_params != None:
         for key in rc_file_params.iterkeys():
             default_params[key] = rc_file_params.original_value[key]
-            print "Custom '%s' parameter loaded from %s"%(key, rc_file)
+            print "INFO: Custom '%s' parameter loaded from %s"%(key, rc_file)
     else:
-        print "No rc file found. Using parameters from rcparams.default."
+        print "INFO: No rc file found. Using parameters from rcparams.default."
+
+    # Now run the validation on all the items in the default_params instance 
+    # (as values read from rcparams.defaults have not yet been validated).
+    default_params.validate_items()
 
     return default_params
 
@@ -563,7 +586,7 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
     try:
         rcparams_file = open(os.path.join(sys.path[0], "rcparams.default"), "r")
     except IOError:
-        raise IOError('could not find rcparams.defaults file')
+        raise IOError('ERROR: Could not find rcparams.defaults file')
 
     linenum = 0
     line = rcparams_file.readline()
