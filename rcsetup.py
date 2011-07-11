@@ -489,7 +489,7 @@ def read_rcparams_defaults():
         value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
         converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
 
-        if key != '' and value != '':
+        if key != '' and value != '' and key[0]!='#':
             if ret.has_key(key):
                 warnings.warn("Duplicate values for %s are provided in rcsetup.py"%key)
             # Convert 'converter' from a string to a reference to the 
