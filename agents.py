@@ -31,7 +31,8 @@ import csv
 
 import numpy as np
 
-from ChitwanABM import rcParams, IDGenerator, boolean_choice, random_state
+from PyABM import rcParams, IDGenerator, boolean_choice, random_state
+
 from ChitwanABM.statistics import calc_hazard_death, \
         calc_hazard_migration, calc_hazard_marriage, \
         calc_first_birth_time, calc_birth_interval, calc_hh_area, \

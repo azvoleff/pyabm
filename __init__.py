@@ -67,19 +67,19 @@ class IDGenerator(object):
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
 
-# this is the instance used by the model
+# this is the instance used by the PyABM module, and by the calling module
 rcParams = get_rc_params()
 
 # Check if a RandomState was loaded from the rcfile. If not (if 
 # RandomState==None), then choose a random RandomState, and store it in 
 # rcParams so that it can be written to a file at the end of model runs, and 
 # saved for later reuse (for testing, etc.).
-if rcParams['model.RandomState'] == None:
+if rcParams['RandomState'] == None:
     # Seed the RandomState with a known random integer, and save the seed for 
     # later reuse (for testing, etc.).
     random_int = int(10**8 * np.random.random())
-    rcParams['model.RandomState'] = random_int
-random_state = np.random.RandomState(int(rcParams['model.RandomState']))
+    rcParams['RandomState'] = random_int
+random_state = np.random.RandomState(int(rcParams['RandomState']))
 
 def boolean_choice(trueProb=.5):
     """A function that returns true or false depending on whether a randomly

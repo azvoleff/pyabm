@@ -93,6 +93,8 @@ def validate_readable_file(s):
         raise TypeError("%s is not a readable file"%s)
     if not os.path.exists(s):
         raise IOError("%s does not exist"%s)
+    if not os.path.isfile(s):
+        raise IOError("%s is not a readable file"%s)
     try:
         file = open(s, 'r')
         file.readline()
@@ -455,55 +457,83 @@ See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
                 dict.__setitem__(self, key, cval)
             except KeyError, msg:
                 print 'ERROR: Problem processing %s rc parameter. %s'%(key, msg)
-
 def read_rcparams_defaults():
-    try:
-        rcparams_file = open(os.path.join(os.getcwd(), "rcparams.default"), "r")
-    except IOError:
+    pass
+    return 0
+
+def parse_rcparams_defaults():
+    """
+    Parses the PyABM rcparams.defaults file as well as the rcparams.defaults 
+    file (if any) for the calling module. Returns a list of tuples:
+
+        (filename, linenum, key, value, comment)
+    """
+
+    # It is important that the PyABM rcparams.default file be read first, so 
+    # that modules calling PyABM can override these defaults with their own 
+    # local rcparams.default file.
+    rcparams_defaults_files = [os.path.join(os.path.dirname(os.path.realpath(__file__)), "rcparams.default"),
+            os.path.join(os.getcwd(), "rcparams.default")]
+    if rcparams_defaults_files[0]==rcparams_defaults_files[1]:
+        rcparams_defaults_files.pop()
+    elif not os.path.isfile(rcparams_defaults_files[1]):
+        # The second rcparams.defaults file in the list (the one that is local 
+        # to the calling module) is not required, and is optional. Remove it 
+        # from the list if it does not exist.
+        rcparams_defaults_files.pop()
+
+    parsed_lines = []
+    key_dict = {}
+    for rcparams_defaults_file in rcparams_defaults_files:
         try:
-            rcparams_file = open("/home/azvoleff/Code/Python/ChitwanABM/rcparams.default", "r")
+            fid = open(rcparams_defaults_file, "r")
         except IOError:
-            raise IOError('could not find rcparams.defaults file')
+            raise IOError('ERROR: Could not open rcparams.defaults file "%s"'%rcparams_defaults_file)
 
-    linenum = 0
-    line = rcparams_file.readline()
-    while line:
-        linenum += 1
-        if line == "###***START OF RC DEFINITION***###\n":
-            break
-        line = rcparams_file.readline()
+        linenum = 0
+        line = fid.readline()
+        while line:
+            linenum += 1
+            if line == "###***START OF RC DEFINITION***###\n":
+                break
+            line = fid.readline()
 
-    ret = {}
-    line = rcparams_file.readline()
-    while line:
-        linenum += 1
+        line = fid.readline()
+        while line:
+            linenum += 1
 
-        # Remove linebreak
-        line = line.rstrip("\n")
+            # Remove linebreak
+            line = line.rstrip("\n")
 
-        # Pull out key, and strip single quotes, double quotes and blank spaces
-        key = ''.join(line.partition(":")[0].strip("\'\" "))
+            # Pull out key, and strip single quotes, double quotes and blank spaces
+            comment = ''.join(line.partition("#")[1:3])
+            line = ''.join(line.partition("#")[0])
 
-        # Now pull out value and converter
-        value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
-        value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
-        converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
+            key = ''.join(line.partition(":")[0].strip("\'\" "))
 
-        if key != '' and value != '' and key[0]!='#':
-            if ret.has_key(key):
-                warnings.warn("Duplicate values for %s are provided in rcsetup.py"%key)
-            # Convert 'converter' from a string to a reference to the 
-            # validation object
-            converter = eval(converter)
-            ret[key] = (value, converter)
+            # Now pull out value and converter
+            value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
+            value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
+            converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
 
-        line = rcparams_file.readline()
-    return ret
+            if key != '':
+                if key_dict.has_key(key):
+                    warnings.warn("Duplicate values for %s are provided in %s and %s. Value from %s will take precedence."%(key, rcparams_defaults_files[0], rcparams_defaults_files[1], rcparams_defaults_files[1]))
+                # Convert 'converter' from a string to a reference to the 
+                # validation object
+                converter = eval(converter)
+                key_dict[key] = (value, converter)
 
-def read_rc_file(fname='ChitwanABMrc'):
+            parsed_lines.append((rcparams_defaults_file, linenum, key, value, comment))
+            line = fid.readline()
+        fid.close()
+
+    return parsed_lines, key_dict
+
+def read_rc_file(fname=os.path.basename(os.getcwd()) +'rc'):
     """
     Returns an RcParams instance containing the the keys / value combinations 
-    read from an rc file.
+    read from an rc file. The rc file name defaults to the module name plus 'rc'.
     """
     rcfile_params = RcParams(validation=True)
     cnt = 0
@@ -525,13 +555,13 @@ def read_rc_file(fname='ChitwanABMrc'):
         # Validate the values read in from the rc file
         try:
             rcfile_params[key] = val # try to convert to proper type or raise
-        except Exception, msg:
-            print """WARNING: While reading rc parameter "%s" on line %d in %s. %s. Will revert to default parameter value."""%(key, cnt, fname, msg)
+        except Exception:
+            print """WARNING: Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value."""%(key, cnt, fname)
     return rcfile_params
 
 # Load the rcparams_defaults into a dictionary, which will be used to tie keys 
 # to converters in the definition of the RcParams class
-rcparams_defaults_dict = read_rcparams_defaults()
+parsed_lines, rcparams_defaults_dict = parse_rcparams_defaults()
 
 # Convert the rcparams_defaults dictionary into an RcParams instance. This 
 # process will also validate that the values in rcparams_defaults are valid by 
@@ -552,18 +582,18 @@ def get_rc_params():
     """
     Loads rcParams by first starting with the default parameter values from 
     rcparams.default (already stored in the RcParams instance 'default_params', 
-    and then by checking for a ChitwanABMrc in:
+    and then by checking for an rc file in:
     
         1) the current working directory
         2) the user's home directory
-        3) the directory in which the ChitwanABM module is located
+        3) the directory in which the calling module is located
 
-    If a ChitwanABMrc is found, the default_params are updated with the values 
+    If a rc file is found, the default_params are updated with the values 
     from the rc file. The rc_params are then returned.
     """
     rc_file_params = None
     for path in [os.getcwd(), _get_home_dir(), sys.path[0]]:
-        rc_file = os.path.join(path, "ChitwanABMrc")
+        rc_file = os.path.basename(os.getcwd()) +'rc'
         if os.path.exists(rc_file):
             rc_file_params = read_rc_file(rc_file)
             break
@@ -598,45 +628,9 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
     in rcsetup.py are ignored (as read_rc_file would reject unknown keys anyways 
     when the rc file is read back in).
     """
-    try:
-        rcparams_file = open(os.path.join(sys.path[0], "rcparams.default"), "r")
-    except IOError:
-        raise IOError('ERROR: Could not find rcparams.defaults file')
-
-    linenum = 0
-    line = rcparams_file.readline()
-    while line:
-        linenum += 1
-        if line == "###***START OF RC DEFINITION***###\n":
-            break
-        line = rcparams_file.readline()
-
-    output_lines = [] # Stores lines to output to new rc file
-    line = rcparams_file.readline()
-    while line:
-        linenum += 1
-
-        # Remove linebreak
-        line = line.rstrip("\n")
-
-        # First pull out any comment, store the remaining back in line
-        comment = ''.join(line.partition("#")[1:3])
-        line = ''.join(line.partition("#")[0])
-
-        # Pull out key, and strip single quotes, double quotes and blank spaces
-        key = ''.join(line.partition(":")[0].strip("\'\" "))
-
-        # Now pull out value
-        value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
-        value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
-        
-        if key != '' and value != '':
-            if key in updated_params.keys():
-                # Update value from updated_params
-                value = updated_params.original_value[key]
-        output_lines.append((key, value, comment, linenum))
-
-        line = rcparams_file.readline()
+    # First load the rcparams.defaults files in order to obtain the formatting 
+    # and any comment strings, which will be retained in the output rcfile.
+    parsed_lines, rcparams_dict = parse_rcparams_defaults()
 
     # Finally, write rc file to outputFilename.
     outFile = open(outputFilename, "w")
@@ -645,11 +639,13 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
     else:
         outFile.writelines("%s\n\n"%(docstring))
     
-    for (key, value, comment, linenum) in output_lines:
+    for (rcparams_defaults_file, linenum, key, value, comment) in parsed_lines:
         if key == "" and value == "":
             outFile.write("%s\n"%(comment)) # if comment is blank, just writes a newline to the file
         else:
             if comment != '':
-                # precede comment by a blank space
+                # For a comment at the end of a line with a key : value pair, 
+                # ensure the comment is preceded by a blank space
                 comment = ' ' + comment
-            outFile.write("%s : %s %s \n"%(key, value, comment))
+            outFile.write("%s : %s%s\n"%(key, value, comment))
+    outFile.close()
