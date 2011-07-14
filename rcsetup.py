@@ -641,11 +641,15 @@ def write_RC_file(outputFilename, docstring=None, updated_params={}):
     
     for (rcparams_defaults_file, linenum, key, value, comment) in parsed_lines:
         if key == "" and value == "":
-            outFile.write("%s\n"%(comment)) # if comment is blank, just writes a newline to the file
-        else:
-            if comment != '':
-                # For a comment at the end of a line with a key : value pair, 
-                # ensure the comment is preceded by a blank space
-                comment = ' ' + comment
-            outFile.write("%s : %s%s\n"%(key, value, comment))
+            outFile.write("%s\n"%(comment)) # if comment is blank, just write a newline to the file
+            continue
+        elif comment != '':
+            # If there is a comment at the end of a line with a key : value 
+            # pair, ensure the comment is preceded by a blank space
+            comment = ' ' + comment
+        # Update the keyvalues from any rcparams instance handed to the 
+        # write_RC_file function:
+        if updated_params.has_key(key):
+            value = updated_params[key]
+        outFile.write("%s : %s%s\n"%(key, value, comment))
     outFile.close()
