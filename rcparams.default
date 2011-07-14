@@ -30,15 +30,11 @@
 ###############################################################################
 # PyABM Parameters
 ###############################################################################
-# Git binary directory (on Windows):
+# Git binary directory:
 'path.git_binary' : ["C:\Program Files (x86)\Git\bin\git.exe" | validate_readable_file]
-# Git binary directory (on Linux):
-# 'path.git_binary' : ["/usr/bin/git" | validate_readable_file]
 
-# Rscript binary directory (on Windows):
+# Rscript binary directory:
 'path.Rscript_binary' : ["C:\Program Files\R\R-2.13.0\bin\Rscript.exe" | validate_readable_file]
-# Rscript binary directory (on Linux):
-# 'path.Rscript_binary' : ["/usr/bin/Rscript" | validate_readable_file]
 
 # model.RandomState seeds the random number generator (useful for regenerating 
 # results later). If it is set to 'None' no seed is given. Regardless of 
