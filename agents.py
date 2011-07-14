@@ -1,6 +1,6 @@
 # Copyright 2011 Alex Zvoleff
 #
-# This file is part of the PyABM agent-based model toolkit.
+# This file is part of the PyABM agent-based modeling toolkit.
 # 
 # PyABM is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
