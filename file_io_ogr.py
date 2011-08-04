@@ -34,6 +34,11 @@ except ImportError:
     import ogr
 
 try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
+
+try:
     from osgeo import osr
 except ImportError:
     import osr
@@ -111,9 +116,31 @@ def write_NBH_shapefile(neighborhoods, output_file):
         new_feature.SetField("perc_bldg", percent_bldg)
 
         x, y = neighborhood.get_coords()
-        wkt = 'Point(%f %f)' %(x, y)
+        wkt = 'Point(%f %f)'%(x, y)
         geom = ogr.CreateGeometryFromWkt(wkt)
         new_feature.SetGeometry(geom)
 
         layer.CreateFeature(new_feature)
     ds.Destroy()
+
+def read_single_band_raster(input_file):
+    ds = gdal.Open(input_file)
+    if ds.RasterCount > 1:
+        raise IOError("Single-band raster %s has more than one band"%input_file)
+    raster_array = ds.ReadAsArray()
+    gt = ds.GetGeoTransform()
+    prj = ds.GetProjection()
+    ds = None
+    return raster_array, gt, prj
+
+def write_single_band_raster(array, prj, gt, output_file):
+    format = "GTiff"
+    driver = gdal.GetDriverByName(format)
+    dst_ds = driver.Create(output_file, array.shape[1], array.shape[0])
+    dst_ds.SetProjection(prj)
+    dst_ds.SetGeoTransform(gt)
+    dst_ds.GetRasterBand(1).WriteArray(array)
+    dst_ds = None
+    return 0
+    
+    return 0
