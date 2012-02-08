@@ -133,7 +133,7 @@ def read_single_band_raster(input_file):
     ds = None
     return raster_array, gt, prj
 
-def write_single_band_raster(array, prj, gt, output_file):
+def write_single_band_raster(array, gt, prj, output_file):
     format = "GTiff"
     driver = gdal.GetDriverByName(format)
     dst_ds = driver.Create(output_file, array.shape[1], array.shape[0])
