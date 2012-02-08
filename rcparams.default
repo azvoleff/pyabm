@@ -34,7 +34,7 @@
 'path.git_binary' : ["C:\Program Files (x86)\Git\bin\git.exe" | validate_readable_file]
 
 # Rscript binary directory:
-'path.Rscript_binary' : ["C:\Program Files\R\R-2.13.1\bin\Rscript.exe" | validate_readable_file]
+'path.Rscript_binary' : ["C:\Program Files\R\R-2.14.1\bin\Rscript.exe" | validate_readable_file]
 
 # model.RandomState seeds the random number generator (useful for regenerating 
 # results later). If it is set to 'None' no seed is given. Regardless of 
