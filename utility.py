@@ -25,6 +25,8 @@ agent-based models.
 Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
+import numpy as np
+
 class TimeSteps():
     def __init__(self, bounds, timestep):
         self._starttime = bounds[0]
