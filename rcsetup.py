@@ -158,51 +158,41 @@ class validate_nseq_float:
     def __init__(self, n):
         self.n = n
     def __call__(self, s):
-        """
-        Return a seq of n floats or raises error. If n == -1, then length 
-        doesn't matter.
-        """
+        'return a seq of n floats or raise'
         if type(s) is str:
-            ss = s.split(',')
-            if self.n != -1 and len(ss) != self.n:
+            ss = s.strip('( )')
+            ss = ss.split(',')
+            if len(ss) != self.n:
                 raise ValueError('You must supply exactly %d comma separated values'%self.n)
             try:
-                return [validate_float(val) for val in ss]
+                return [float(val) for val in ss]
             except ValueError:
                 raise ValueError('Could not convert all entries to floats')
         else:
-            assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
-            if self.n != -1 and len(s) != self.n:
+            assert type(s) in (list,tuple)
+            if len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
-            if type(s)==list:
-                return [validate_float(val) for val in s]
-            if type(s)==tuple:
-                return (validate_float(val) for val in s)
+            return [float(val) for val in s]
 
 class validate_nseq_int:
     def __init__(self, n):
         self.n = n
     def __call__(self, s):
-        """
-        Return a seq of n ints or raises error. If n == -1, then length 
-        doesn't matter.
-        """
+        'return a seq of n ints or raise'
         if type(s) is str:
-            ss = s.split(',')
-            if self.n != -1 and len(ss) != self.n:
+            ss = s.strip('( )')
+            ss = ss.split(',')
+            if len(ss) != self.n:
                 raise ValueError('You must supply exactly %d comma separated values'%self.n)
             try:
-                return [validate_int(val) for val in ss]
+                return [int(val) for val in ss]
             except ValueError:
                 raise ValueError('Could not convert all entries to ints')
         else:
-            assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
-            if self.n != -1 and len(s) != self.n:
+            assert type(s) in (list,tuple)
+            if len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
-            if type(s)==list:
-                return [validate_int(val) for val in s]
-            if type(s)==tuple:
-                return tuple([validate_int(val) for val in s])
+            return [int(val) for val in s]
 
 def validate_boolean(s):
     if s in [True, False]:
