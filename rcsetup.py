@@ -312,7 +312,7 @@ def validate_prob_dist(s):
         ([a, b, c, d], [1, 2, 3])
 
     where a, b, c, and d are bin limits, and 1, 2, and 3 are the probabilities 
-    assigned to each bin. Notice one more bin limit must be specifed than the 
+    assigned to each bin. Notice one more bin limit must be specified than the 
     number of probabilities given (to close the interval).
     """
     try:
