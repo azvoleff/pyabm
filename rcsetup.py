@@ -158,51 +158,41 @@ class validate_nseq_float:
     def __init__(self, n):
         self.n = n
     def __call__(self, s):
-        """
-        Return a seq of n floats or raises error. If n == -1, then length 
-        doesn't matter.
-        """
+        'return a seq of n floats or raise'
         if type(s) is str:
-            ss = s.split(',')
-            if self.n != -1 and len(ss) != self.n:
+            ss = s.strip('( )')
+            ss = ss.split(',')
+            if len(ss) != self.n:
                 raise ValueError('You must supply exactly %d comma separated values'%self.n)
             try:
-                return [validate_float(val) for val in ss]
+                return [float(val) for val in ss]
             except ValueError:
                 raise ValueError('Could not convert all entries to floats')
         else:
-            assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
-            if self.n != -1 and len(s) != self.n:
+            assert type(s) in (list,tuple)
+            if len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
-            if type(s)==list:
-                return [validate_float(val) for val in s]
-            if type(s)==tuple:
-                return (validate_float(val) for val in s)
+            return [float(val) for val in s]
 
 class validate_nseq_int:
     def __init__(self, n):
         self.n = n
     def __call__(self, s):
-        """
-        Return a seq of n ints or raises error. If n == -1, then length 
-        doesn't matter.
-        """
+        'return a seq of n ints or raise'
         if type(s) is str:
-            ss = s.split(',')
-            if self.n != -1 and len(ss) != self.n:
+            ss = s.strip('( )')
+            ss = ss.split(',')
+            if len(ss) != self.n:
                 raise ValueError('You must supply exactly %d comma separated values'%self.n)
             try:
-                return [validate_int(val) for val in ss]
+                return [int(val) for val in ss]
             except ValueError:
                 raise ValueError('Could not convert all entries to ints')
         else:
-            assert type(s) in (list,tuple), "%s is not a list or tuple"%(s)
-            if self.n != -1 and len(s) != self.n:
+            assert type(s) in (list,tuple)
+            if len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
-            if type(s)==list:
-                return [validate_int(val) for val in s]
-            if type(s)==tuple:
-                return tuple([validate_int(val) for val in s])
+            return [int(val) for val in s]
 
 def validate_boolean(s):
     if s in [True, False]:
@@ -228,23 +218,23 @@ def validate_RandomState(s):
     else:
         return validate_int(s)
 
-class validate_hazard:
+class validate_probability:
     """
-    Validates a hazard specified as a dictionary where each key is a tuple 
-    specifying the interval to which the hazard applies (in hazard_time_units). 
+    Validates a probability specified as a dictionary where each key is a tuple 
+    specifying the interval to which the probability applies (in probability_time_units). 
     The interval tuple is specified as:
         [lower, upper)
     (closed interval on the lower bound, open interval on the upper), and the 
-    value specified for each inteval tuple key is the hazard for that interval. 
+    value specified for each inteval tuple key is the probability for that interval. 
     
-    The 'min', 'max' values passed to the validate_hazard function give the 
-    minimum (inclusive) and maximum values (exclusive) for which hazards must 
-    be specified.  validate_hazard will check that hazards are specified for 
+    The 'min', 'max' values passed to the validate_probability function give the 
+    minimum (inclusive) and maximum values (exclusive) for which probabilities must 
+    be specified.  validate_probability will check that probabilities are specified for 
     all values of t between this minimum and maximum value, including the 
     minimum value ('min') in [min, max) and up to but excluding the maximum 
     value 'max'.
     
-    This function validates the hazards lie on the unit interval, and then 
+    This function validates the probabilities lie on the unit interval, and then 
     returns a dictionary object where there is a key for each age value in the 
     interval specified. Therefore,
         {(0,2):.6, (2,5):.9}
@@ -255,17 +245,17 @@ class validate_hazard:
         self.min = min
         self.max = max
     def __call__(self, s):
-        error_msg = """Invalid hazard parameter dictionary: %s
+        error_msg = """Invalid probability parameter dictionary: %s
 
-        Hazards must be specified in a dictionary of key, value pairs in the 
+        probabilities must be specified in a dictionary of key, value pairs in the 
         following format:
 
-            (lower_limit, upper_limit) : hazard
+            (lower_limit, upper_limit) : probability
 
-        Hazards apply to the interval [lower_limit, upper_limit), including the 
+        probabilities apply to the interval [lower_limit, upper_limit), including the 
         lower limit, and excluding the upper limit. The units in which the 
         lower and upper limits are specified should be consistent with the 
-        units of time specified by the hazard_time_units rc parameter."""
+        units of time specified by the probability_time_units rc parameter."""
 
         try:
             if type(s) == str:
@@ -279,39 +269,39 @@ class validate_hazard:
         if type(input) != dict:
             raise SyntaxError(error_msg%(s))
 
-        hazard_dict = {}
+        probability_dict = {}
         key_converter_tuple = validate_nseq_int(2) 
         for item in input.iteritems():
-            # First convert the hazard interval tuple (item[0]) from a string 
+            # First convert the probability interval tuple (item[0]) from a string 
             # to a length 2 tuple of ints
             # Validate that key is a length 2 tuple
             key = key_converter_tuple(item[0])
 
             # Now process the key and values, and check that they fall within 
-            # the specified overall interval for this hazard type
+            # the specified overall interval for this probability type
             lower_lim, upper_lim = validate_int(key[0]), validate_int(key[1])
             if lower_lim > upper_lim:
-                raise ValueError("lower_lim > upper_lim for hazard dictionary key '(%s, %s)'."%(key))
+                raise ValueError("lower_lim > upper_lim for probability dictionary key '(%s, %s)'."%(key))
             elif lower_lim == upper_lim:
-                raise ValueError("lower_lim = upper_lim for hazard dictionary key '(%s, %s)'."%(key))
-            hazard = validate_unit_interval(item[1])
+                raise ValueError("lower_lim = upper_lim for probability dictionary key '(%s, %s)'."%(key))
+            probability = validate_unit_interval(item[1])
             for t in xrange(lower_lim, upper_lim):
-                if hazard_dict.has_key(t):
-                    raise ValueError("Hazard is specified twice for dictionary key '%s'."%(t))
-                hazard_dict[t] = hazard
-        for key in hazard_dict.keys():
+                if probability_dict.has_key(t):
+                    raise ValueError("probability is specified twice for dictionary key '%s'."%(t))
+                probability_dict[t] = probability
+        for key in probability_dict.keys():
             if key < self.min or key >= self.max:
-                raise ValueError("A hazard is given for a time outside the \
-specified overall hazard interval.\nA hazard is given for time %s, but the overall \
-hazard interval is [%s, %s)."%(key, self.min, self.max))
-        return hazard_dict
+                raise ValueError("A probability is given for a time outside the \
+specified overall probability interval.\nA probability is given for time %s, but the overall \
+probability interval is [%s, %s)."%(key, self.min, self.max))
+        return probability_dict
 
 def validate_prob_dist(s):
     # TODO: Finish documenting this section.
     """
     Validates a probability distribution specified as a dictionary where each 
     key is a tuple specifying the interval to which the probability applies (in 
-    hazard_time_units). 
+    probability_time_units). 
     """
     error_msg = """
     Invalid probability distribution parameter tuple: %s
@@ -322,7 +312,7 @@ def validate_prob_dist(s):
         ([a, b, c, d], [1, 2, 3])
 
     where a, b, c, and d are bin limits, and 1, 2, and 3 are the probabilities 
-    assigned to each bin. Notice one more bin limit must be specifed than the 
+    assigned to each bin. Notice one more bin limit must be specified than the 
     number of probabilities given (to close the interval).
     """
     try:
