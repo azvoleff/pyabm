@@ -131,6 +131,7 @@ class Agent_Store(object):
         agent.get_parent_agent().remove_agent(agent)
 
     def release_agents(self, time):
+        released_agents = {}
         if not self._releases.has_key(time):
             return 
         for agent in self._releases[time]:
@@ -140,3 +141,7 @@ class Agent_Store(object):
             # agents only, though it should be fairly flexible).
             parent_agent = self._parents[agent]
             parent_agent.add_agent(agent)
+            if not released_agents.has_key(parent_agent.get_ID()):
+                released_agents[parent_agent.get_ID()] = 0
+            released_agents[parent_agent.get_ID()] += 1
+        return released_agents
