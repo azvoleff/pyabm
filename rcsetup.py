@@ -335,7 +335,7 @@ def validate_prob_dist(s):
                 # which there is only one value in this case) is stored as a 
                 # length 1 tuple as this is the format expected by the 
                 # statistics functions.
-                raise SyntaxError("Length of probability tuple must be 1 greater than the length of the bin limit tuple")
+                raise SyntaxError("Length of probability tuple must be 1 less than the length of the bin limit tuple")
 
     return prob_dist_tuple
 
