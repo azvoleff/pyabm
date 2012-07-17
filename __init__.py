@@ -19,10 +19,10 @@
 # contact information.
 
 """
-Part of Chitwan Valley agent-based model.
+Part of the PyABM agent-based modeling toolkit.
 
 Sets up rc parameters so that they can be loaded and reused by other parts of 
-the model.
+the toolkit.
 
 Alex Zvoleff, azvoleff@mail.sdsu.edu
 """

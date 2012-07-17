@@ -19,8 +19,6 @@ DEPENDENCIES
             Matplotlib - Matplotlib is required (to enable the automatic 
             plotting of the results of each model run).
 
-            Psyco (optional) - Pysco is optional, but will speed up model runs.
-
             OGR (optional) - OGR is required to output shapefiles of 
             neighborhoods locations
 

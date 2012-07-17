@@ -29,10 +29,6 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 from PyABM import rcParams
 
-if rcParams['model.use_psyco'] == True:
-    import psyco
-    psyco.full()
-
 class Agent(object):
     "Superclass for agent objects."
     def __init__(self, world, ID, initial_agent=False):

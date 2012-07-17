@@ -32,8 +32,9 @@ import os
 import sys
 import tempfile
 import copy
+import logging
 
-import warnings
+logger = logging.getLogger(__name__)
 
 class KeyError(Exception):
     def __init__(self, value):
@@ -109,17 +110,17 @@ def validate_readable_file_warning(s):
     file is not readable (does not raise error).
     """
     if (type(s) != str):
-        print "WARNING: %s is not a readable file"%s
+        logger.warn("%s is not a readable file"%s)
         return s
     if not os.path.exists(s):
-        print "WARNING: %s does not exist"%s
+        logger.warn("%s does not exist"%s)
         return s
     try:
         file = open(s, 'r')
         file.readline()
         file.close()
     except IOError:
-        print "WARNING: error reading file %s"%s
+        logger.warn("error reading file %s"%s)
     return s
 
 def validate_readable_dir(s):
@@ -446,7 +447,7 @@ See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
                 cval = self.validate[key](val)
                 dict.__setitem__(self, key, cval)
             except KeyError, msg:
-                print 'ERROR: Problem processing %s rc parameter. %s'%(key, msg)
+                logger.error('problem processing %s rc parameter. %s'%(key, msg))
 def read_rcparams_defaults():
     pass
     return 0
@@ -508,7 +509,7 @@ def parse_rcparams_defaults():
 
             if key != '':
                 if key_dict.has_key(key):
-                    warnings.warn("Duplicate values for %s are provided in %s and %s. Value from %s will take precedence."%(key, rcparams_defaults_files[0], rcparams_defaults_files[1], rcparams_defaults_files[1]))
+                    logger.warn("Duplicate values for %s are provided in %s and %s. Value from %s will take precedence."%(key, rcparams_defaults_files[0], rcparams_defaults_files[1], rcparams_defaults_files[1]))
                 # Convert 'converter' from a string to a reference to the 
                 # validation object
                 converter = eval(converter)
@@ -533,20 +534,19 @@ def read_rc_file(fname=os.path.basename(os.getcwd()) +'rc'):
         if not strippedline: continue
         tup = strippedline.split(':',1)
         if len(tup) !=2:
-            warnings.warn('Illegal line #%d\n\t%s\n\tin file "%s"'%\
-                          (cnt, line, fname))
+            logger.warn('illegal line #%d in file "%s"'%(cnt, fname))
             continue
         key, val = tup
         key = key.strip()
         val = val.strip()
         if rcfile_params.has_key(key):
-            warnings.warn('Duplicate key in file "%s", line #%d'%(fname,cnt))
+            logger.warn('duplicate key in file "%s", line #%d'%(fname,cnt))
 
         # Validate the values read in from the rc file
         try:
             rcfile_params[key] = val # try to convert to proper type or raise
         except Exception:
-            print """WARNING: Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value."""%(key, cnt, fname)
+            logger.warning('Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value.'%key, cnt, fname)
     return rcfile_params
 
 # Load the rcparams_defaults into a dictionary, which will be used to tie keys 
@@ -593,9 +593,9 @@ def get_rc_params():
     if rc_file_params != None:
         for key in rc_file_params.iterkeys():
             default_params[key] = rc_file_params.original_value[key]
-            print "INFO: Custom '%s' parameter loaded from %s"%(key, rc_file)
+            logger.info("custom '%s' parameter loaded from %s"%(key, rc_file))
     else:
-        print "INFO: No rc file found. Using parameters from rcparams.default."
+        logger.info("no rc file found. Using parameters from rcparams.default")
 
     # Now run the validation on all the items in the default_params instance 
     # (as values read from rcparams.defaults have not yet been validated).
