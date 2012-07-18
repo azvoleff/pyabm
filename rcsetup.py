@@ -106,7 +106,7 @@ def validate_readable_file(s):
 
 def validate_readable_file_warning(s):
     """
-    Checks that a file exists and is readable. Only prints a warning if the 
+    Checks that a file exists and is readable. Only logs a warning if the 
     file is not readable (does not raise error).
     """
     if (type(s) != str):

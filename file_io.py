@@ -26,6 +26,9 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:
     from file_io_arcgis import *
@@ -33,7 +36,7 @@ except:
     try:
         from file_io_ogr import *
     except ImportError:
-        print "ERROR: failed to load ArcGIS or OGR. Cannot process shapefiles."
+        logger.error("Failed to load ArcGIS or OGR. Cannot process shapefiles.")
 
 def write_point_process(nodes, outputFile):
     'Writes input node instances to a text file in R point-process format.'

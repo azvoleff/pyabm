@@ -28,6 +28,9 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 
 import sys
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 import arcgisscripting
 gp = arcgisscripting.create()
@@ -41,8 +44,8 @@ def convertToShpUnits(shapefile, input):
     desc = gp.Describe(shapefile)
     shpUnits = desc.SpatialReference.LinearUnitName.lower()
     if shpUnits != inputUnits and shpUnits + 's' != inputUnits:
-        print "ERROR: shapefile units do not match input units"
-        sys.exit(1)
+        logger.error("Shapefile units do not match input units")
+        return 1
     else:
         return float(inputLength)
 
