@@ -112,7 +112,8 @@ class Agent_Store(object):
         # parent agent (when they return from school, or from their temporary 
         # migration, for example.
         self._releases = {}
-        self._parents = {}
+        self._parent_list = {}
+        self._stored_agents = []
 
     def add_agent(self, agent, release_time):
         """
@@ -123,8 +124,16 @@ class Agent_Store(object):
             self._releases[release_time].append(agent)
         else:
             self._releases[release_time] = [agent]
-        self._parents[agent] = agent.get_parent_agent()
+        self._parent_list[agent] = agent.get_parent_agent()
+        # Store a reference to the agent store with the class instance that is 
+        # being stored, for easy retrieval later
+        agent._store_list.append(self)
         agent.get_parent_agent().remove_agent(agent)
+        # Keep a list of the agents stored in this agent_set instance in 
+        # _stored_agents so that we can easily check whether or now an agent is 
+        # in an agent store instance, without having to iterate through all the 
+        # release times.
+        self._stored_agents.append(agent)
 
     def release_agents(self, time):
         released_agents = {}
@@ -135,9 +144,20 @@ class Agent_Store(object):
             # store people) is no longer part of the model, then don't release 
             # the agent (currently agent_store is designed to handle person 
             # agents only, though it should be fairly flexible).
-            parent_agent = self._parents[agent]
+            parent_agent = self._parent_list[agent]
             parent_agent.add_agent(agent)
+            agent._store_list.remove(self)
+            self._stored_agents.remove(agent)
             if not released_agents.has_key(parent_agent.get_ID()):
                 released_agents[parent_agent.get_ID()] = 0
             released_agents[parent_agent.get_ID()] += 1
+        # Remove the now unused releases list for this timestep.
+        self._releases.pop(time)
         return released_agents
+
+    def in_store(self, agent):
+        if agent in self._stored_agents: return True
+        else: return False
+
+    def __str__(self):
+        return 'Agent_Store(%s)'%self._releases
