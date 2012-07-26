@@ -36,6 +36,9 @@
 # Rscript binary directory:
 'path.Rscript_binary' : ["C:\Program Files\R\R-2.15.1\bin\Rscript.exe" | validate_readable_file]
 
+# Default program to use for 'tailing' the logfile, if desired:
+'path.tail_binary' : ["C:\Program Files (x86)\LogExpert\LogExpert.exe" | validate_readable_file]
+
 # model.RandomState seeds the random number generator (useful for regenerating 
 # results later). If it is set to 'None' no seed is given. Regardless of 
 # whether or not a seed is provided, the seed that is used will be saved

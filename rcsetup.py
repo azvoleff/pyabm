@@ -448,6 +448,7 @@ See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
                 dict.__setitem__(self, key, cval)
             except KeyError, msg:
                 logger.error('problem processing %s rc parameter. %s'%(key, msg))
+
 def read_rcparams_defaults():
     pass
     return 0
