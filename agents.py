@@ -112,7 +112,7 @@ class Agent_Store(object):
         # parent agent (when they return from school, or from their temporary 
         # migration, for example.
         self._releases = {}
-        self._parent_list = {}
+        self._parent_dict = {}
         self._stored_agents = []
 
     def add_agent(self, agent, release_time):
@@ -124,7 +124,7 @@ class Agent_Store(object):
             self._releases[release_time].append(agent)
         else:
             self._releases[release_time] = [agent]
-        self._parent_list[agent] = agent.get_parent_agent()
+        self._parent_dict[agent] = agent.get_parent_agent()
         # Store a reference to the agent store with the class instance that is 
         # being stored, for easy retrieval later
         agent._store_list.append(self)
@@ -136,28 +136,36 @@ class Agent_Store(object):
         self._stored_agents.append(agent)
 
     def release_agents(self, time):
-        released_agents = {}
+        released_agents = []
+        released_agents_count = {}
         if not self._releases.has_key(time):
             return 
         for agent in self._releases[time]:
-            # TODO: If parent_agent (a household when Agent_Store is used to 
-            # store people) is no longer part of the model, then don't release 
-            # the agent (currently agent_store is designed to handle person 
-            # agents only, though it should be fairly flexible).
-            parent_agent = self._parent_list[agent]
+            parent_agent = self._parent_dict.pop(agent)
             parent_agent.add_agent(agent)
             agent._store_list.remove(self)
             self._stored_agents.remove(agent)
-            if not released_agents.has_key(parent_agent.get_ID()):
-                released_agents[parent_agent.get_ID()] = 0
-            released_agents[parent_agent.get_ID()] += 1
+            if not released_agents_count.has_key(parent_agent.get_ID()):
+                released_agents_count[parent_agent.get_ID()] = 0
+            released_agents_count[parent_agent.get_ID()] += 1
+            released_agents.append(agent)
         # Remove the now unused releases list for this timestep.
         self._releases.pop(time)
-        return released_agents
+        return released_agents_count, released_agents
 
     def in_store(self, agent):
         if agent in self._stored_agents: return True
         else: return False
+
+    def remove_agent(self, agent):
+        """
+        Remove an agent from the store without releasing it to its original 
+        location (useful for handling agents who die while away from home).
+        """
+        self._releases[self._return_time].remove(agent)
+        self._parent_dict.remove(agent)
+        self._stored_agents.remove(agent)
+        agent._store_list.remove(self)
 
     def __str__(self):
         return 'Agent_Store(%s)'%self._releases
