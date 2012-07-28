@@ -162,8 +162,8 @@ class Agent_Store(object):
         Remove an agent from the store without releasing it to its original 
         location (useful for handling agents who die while away from home).
         """
-        self._releases[self._return_time].remove(agent)
-        self._parent_dict.remove(agent)
+        self._releases[agent._return_time].pop(agent)
+        self._parent_dict.pop(agent)
         self._stored_agents.remove(agent)
         agent._store_list.remove(self)
 
