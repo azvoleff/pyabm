@@ -138,19 +138,18 @@ class Agent_Store(object):
     def release_agents(self, time):
         released_agents = []
         released_agents_count = {}
-        if not self._releases.has_key(time):
-            return 
-        for agent in self._releases[time]:
-            parent_agent = self._parent_dict.pop(agent)
-            parent_agent.add_agent(agent)
-            agent._store_list.remove(self)
-            self._stored_agents.remove(agent)
-            if not released_agents_count.has_key(parent_agent.get_ID()):
-                released_agents_count[parent_agent.get_ID()] = 0
-            released_agents_count[parent_agent.get_ID()] += 1
-            released_agents.append(agent)
-        # Remove the now unused releases list for this timestep.
-        self._releases.pop(time)
+        if self._releases.has_key(time):
+            for agent in self._releases[time]:
+                parent_agent = self._parent_dict.pop(agent)
+                parent_agent.add_agent(agent)
+                agent._store_list.remove(self)
+                self._stored_agents.remove(agent)
+                if not released_agents_count.has_key(parent_agent.get_ID()):
+                    released_agents_count[parent_agent.get_ID()] = 0
+                released_agents_count[parent_agent.get_ID()] += 1
+                released_agents.append(agent)
+            # Remove the now unused releases list for this timestep.
+            self._releases.pop(time)
         return released_agents_count, released_agents
 
     def in_store(self, agent):
