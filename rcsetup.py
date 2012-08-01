@@ -547,7 +547,7 @@ def read_rc_file(fname=os.path.basename(os.getcwd()) +'rc'):
         try:
             rcfile_params[key] = val # try to convert to proper type or raise
         except Exception:
-            logger.warning('Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value.'%key, cnt, fname)
+            logger.warning('Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value.'%(key, cnt, fname))
     return rcfile_params
 
 # Load the rcparams_defaults into a dictionary, which will be used to tie keys 
