@@ -136,21 +136,25 @@ class Agent_Store(object):
         self._stored_agents.append(agent)
 
     def release_agents(self, time):
+        # TODO: Make this more general, so it works for households or person 
+        # agents. Right now it only works for persons since to get the 
+        # neighborhood ID for tracking we have to call .get_parent_agent twice.
         released_agents = []
-        released_agents_count = {}
+        released_agents_dict = {}
         if self._releases.has_key(time):
             for agent in self._releases[time]:
                 parent_agent = self._parent_dict.pop(agent)
                 parent_agent.add_agent(agent)
                 agent._store_list.remove(self)
                 self._stored_agents.remove(agent)
-                if not released_agents_count.has_key(parent_agent.get_ID()):
-                    released_agents_count[parent_agent.get_ID()] = 0
-                released_agents_count[parent_agent.get_ID()] += 1
+                neighborhood = parent_agent.get_parent_agent()
+                if not released_agents_dict.has_key(neighborhood.get_ID()):
+                    released_agents_dict[neighborhood.get_ID()] = 0
+                released_agents_dict[neighborhood.get_ID()] += 1
                 released_agents.append(agent)
             # Remove the now unused releases list for this timestep.
             self._releases.pop(time)
-        return released_agents_count, released_agents
+        return released_agents_dict, released_agents
 
     def in_store(self, agent):
         if agent in self._stored_agents: return True
