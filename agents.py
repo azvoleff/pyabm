@@ -74,6 +74,10 @@ class Agent_set(Agent):
         "Returns an agent given the agent's ID"
         return self._members[ID]
 
+    def is_member(self, ID):
+        "Returns true if agent is a member of this set"
+        return self._members.has_key(ID)
+
     def add_agent(self, agent):
         "Adds a new agent to the set."
         if self._members.has_key(agent.get_ID()):
