@@ -31,6 +31,10 @@ import os
 import sys
 import warnings
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import numpy as np
 
 from rcsetup import get_rc_params
@@ -80,6 +84,7 @@ if rcParams['RandomState'] == None:
     random_int = int(10**8 * np.random.random())
     rcParams['RandomState'] = random_int
 random_state = np.random.RandomState(int(rcParams['RandomState']))
+logger.debug("Random seed set to %s"%int(rcParams['RandomState']))
 
 def boolean_choice(trueProb=.5):
     """A function that returns true or false depending on whether a randomly
