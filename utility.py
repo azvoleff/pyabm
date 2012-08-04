@@ -101,6 +101,12 @@ class TimeSteps():
         T0_year, T0_month = self.get_T0_date()
         return T0_year + (T0_month-1)/12.
 
+    def get_T_minus_date_float(self, neg_months):
+        if neg_months > 0:
+            raise Exception("Negative timestep must be provided to get_T_minus_date_float")
+        T0_year, T0_month = self.get_T0_date()
+        return T0_year + (T0_month+neg_months)/12.
+
     def get_cur_int_timestep(self):
         return self._int_timestep
 
