@@ -39,8 +39,8 @@
 # Default program to use for 'tailing' the logfile, if desired:
 'path.tail_binary' : ["C:\Program Files (x86)\LogExpert\LogExpert.exe" | validate_readable_file]
 
-# model.RandomState seeds the random number generator (useful for regenerating 
+# random_seed seeds the random number generator (useful for regenerating 
 # results later). If it is set to 'None' no seed is given. Regardless of 
 # whether or not a seed is provided, the seed that is used will be saved
 # in the model output for later reuse.
-'RandomState' : [None | validate_RandomState] 
+'random_seed' : [None | validate_random_seed] 

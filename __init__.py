@@ -74,22 +74,21 @@ class IDGenerator(object):
 # this is the instance used by the PyABM module, and by the calling module
 rcParams = get_rc_params()
 
-# Check if a RandomState was loaded from the rcfile. If not (if 
-# RandomState==None), then choose a random RandomState, and store it in 
+# Check if a random_seed was loaded from the rcfile. If not (if 
+# random_seed==None), then choose a random random_seed, and store it in 
 # rcParams so that it can be written to a file at the end of model runs, and 
 # saved for later reuse (for testing, etc.).
-if rcParams['RandomState'] == None:
-    # Seed the RandomState with a known random integer, and save the seed for 
+if rcParams['random_seed'] == None:
+    # Seed the random_seed with a known random integer, and save the seed for 
     # later reuse (for testing, etc.).
-    random_int = int(10**8 * np.random.random())
-    rcParams['RandomState'] = random_int
-random_state = np.random.RandomState(int(rcParams['RandomState']))
-logger.debug("Random seed set to %s"%int(rcParams['RandomState']))
+    rcParams['random_seed'] = int(10**8 * np.random.random())
+np.random.seed(int(rcParams['random_seed']))
+logger.debug("Random seed set to %s"%int(rcParams['random_seed']))
 
 def boolean_choice(trueProb=.5):
     """A function that returns true or false depending on whether a randomly
     drawn float is less than trueProb"""
-    if random_state.rand() < trueProb:
+    if np.random.rand() < trueProb:
         return True
     else:
         return False

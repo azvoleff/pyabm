@@ -213,7 +213,7 @@ def validate_time_units(s):
     else:
         raise ValueError("%s is not a valid unit of time"%s)
 
-def validate_RandomState(s):
+def validate_random_seed(s):
     if s == 'None' or s == None:
         return None
     else:
@@ -569,7 +569,7 @@ for key, (default, converter) in rcparams_defaults_dict.iteritems():
 # paths and input/ouput file locations will almost always fail.)
 default_params._validation = True
 
-def get_rc_params():
+def get_rc_params(rc_file=None):
     """
     Loads rcParams by first starting with the default parameter values from 
     rcparams.default (already stored in the RcParams instance 'default_params', 
@@ -583,7 +583,7 @@ def get_rc_params():
     from the rc file. The rc_params are then returned.
     """
     rc_file_params = None
-    for path in [os.getcwd(), _get_home_dir(), sys.path[0]]:
+    for path in [rc_file, os.getcwd(), _get_home_dir(), sys.path[0]]:
         rc_file = os.path.basename(os.getcwd()) +'rc'
         if os.path.exists(rc_file):
             rc_file_params = read_rc_file(rc_file)
