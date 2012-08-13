@@ -30,7 +30,7 @@ Alex Zvoleff, azvoleff@mail.sdsu.edu
 from PyABM import rcParams
 
 class Agent(object):
-    "Superclass for agent objects."
+    "Class for agent objects."
     def __init__(self, world, ID, initial_agent=False):
         # Keep a reference to the agent's world so that ID generators and other 
         # world properties can be easily referenced
@@ -59,8 +59,10 @@ class Agent(object):
         return self._parent_agent
 
 class Agent_set(Agent):
-    """Superclass for agents that contain a "set" of agents from a lower 
-    hierarchical  level."""
+    """
+    Class for agents that contain a "set" of agents from a lower 
+    hierarchical  level.
+    """
     def __init__(self, world, ID, initial_agent):
         Agent.__init__(self, world, ID, initial_agent)
 
@@ -107,7 +109,7 @@ class Agent_set(Agent):
 class Agent_Store(object):
     """
     Agent_Store is a class used to store agents who have left for various 
-    reasongs (such as migration) or are in school. It allows triggering their 
+    reasons (such as migration) or are in school. It allows triggering their 
     return or graduation during a later timestep of the model.
     """
     def __init__(self):
