@@ -583,10 +583,11 @@ def load_rc_params(custom_rc_file=None):
     """
     rc_file_params = None
     rc_file_paths = [os.getcwd(), _get_home_dir(), sys.path[0]]
+    # Make the default rc file name equal to the module name (derived from the 
+    # module path) plus 'rc'.
     rc_file_paths = [os.path.join(path, os.path.basename(os.getcwd()) +'rc') for path in rc_file_paths]
     if custom_rc_file != None: rc_file_paths = [custom_rc_file] + rc_file_paths
     for rc_file_path in rc_file_paths:
-        print rc_file_path
         if os.path.exists(rc_file_path):
             logger.info("Loading custom rc_file %s"%rc_file_path)
             rc_file_params = read_rc_file(rc_file_path)
