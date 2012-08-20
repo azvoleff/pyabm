@@ -449,10 +449,6 @@ See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
             except KeyError, msg:
                 logger.error('problem processing %s rc parameter. %s'%(key, msg))
 
-def read_rcparams_defaults():
-    pass
-    return 0
-
 def parse_rcparams_defaults():
     """
     Parses the PyABM rcparams.defaults file as well as the rcparams.defaults 
@@ -569,24 +565,31 @@ for key, (default, converter) in rcparams_defaults_dict.iteritems():
 # paths and input/ouput file locations will almost always fail.)
 default_params._validation = True
 
-def get_rc_params(rc_file=None):
+def load_rc_params(custom_rc_file=None):
     """
     Loads rcParams by first starting with the default parameter values from 
     rcparams.default (already stored in the RcParams instance 'default_params', 
     and then by checking for an rc file in:
-    
-        1) the current working directory
-        2) the user's home directory
-        3) the directory in which the calling module is located
+        
+        1) the path specified by the 'custom_rc_file' parameter
+        2) the current working directory
+        3) the user's home directory
+        4) the directory in which the calling module is located
 
-    If a rc file is found, the default_params are updated with the values 
-    from the rc file. The rc_params are then returned.
+    The script searches in each of these locations, in order, and reads the 
+    first and only the first rc file that is found. If a rc file is found, the 
+    default_params are updated with the values from the rc file. The rc_params 
+    are then returned.
     """
     rc_file_params = None
-    for path in [rc_file, os.getcwd(), _get_home_dir(), sys.path[0]]:
-        rc_file = os.path.basename(os.getcwd()) +'rc'
-        if os.path.exists(rc_file):
-            rc_file_params = read_rc_file(rc_file)
+    rc_file_paths = [os.getcwd(), _get_home_dir(), sys.path[0]]
+    rc_file_paths = [os.path.join(path, os.path.basename(os.getcwd()) +'rc') for path in rc_file_paths]
+    if custom_rc_file != None: rc_file_paths = [custom_rc_file] + rc_file_paths
+    for rc_file_path in rc_file_paths:
+        print rc_file_path
+        if os.path.exists(rc_file_path):
+            logger.info("Loading custom rc_file %s"%rc_file_path)
+            rc_file_params = read_rc_file(rc_file_path)
             break
     
     # If an rc file was found, update the default_params with the values from 
@@ -594,7 +597,7 @@ def get_rc_params(rc_file=None):
     if rc_file_params != None:
         for key in rc_file_params.iterkeys():
             default_params[key] = rc_file_params.original_value[key]
-            logger.info("custom '%s' parameter loaded from %s"%(key, rc_file))
+            logger.info("custom '%s' parameter loaded from %s"%(key, rc_file_path))
     else:
         logger.info("no rc file found. Using parameters from rcparams.default")
 

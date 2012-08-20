@@ -27,7 +27,8 @@ households, neighborhoods, and regions all contain lower-level agents).
 Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
-from PyABM import rcParams
+from PyABM import rc_params
+rcParams = rc_params.get_params()
 
 class Agent(object):
     "Class for agent objects."

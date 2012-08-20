@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 
-from rcsetup import get_rc_params
+from rcsetup import RcParams, load_rc_params
 
 class IDError(Exception):
     pass
@@ -70,21 +70,6 @@ class IDGenerator(object):
         if used_ID in self._used_IDs:
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
-
-# this is the instance used by the PyABM module, and by the calling module
-rcParams = get_rc_params()
-
-# Check if a random_seed was loaded from the rcfile. If not (if 
-# random_seed==None), then choose a random random_seed, and store it in 
-# rcParams so that it can be written to a file at the end of model runs, and 
-# saved for later reuse (for testing, etc.).
-if rcParams['random_seed'] == None:
-    # Seed the random_seed with a known random integer, and save the seed for 
-    # later reuse (for testing, etc.).
-    rcParams['random_seed'] = int(10**8 * np.random.random())
-np.random.seed(int(rcParams['random_seed']))
-logger.debug("Random seed set to %s"%int(rcParams['random_seed']))
-
 def boolean_choice(trueProb=.5):
     """A function that returns true or false depending on whether a randomly
     drawn float is less than trueProb"""
@@ -92,3 +77,25 @@ def boolean_choice(trueProb=.5):
         return True
     else:
         return False
+
+class rc_params_management():
+    """
+    This class returns the RcParams instance used by PyABM and shared by any 
+    calling modules.
+    """
+    def load_params(self, custom_rc_file=None):
+        self._rcParams = load_rc_params(custom_rc_file)
+        # Check if a random_seed was loaded from the rcfile. If not (if 
+        # random_seed==None), then choose a random random_seed, and store it in 
+        # rcParams so that it can be written to a file at the end of model 
+        # runs, and saved for later reuse (for testing, etc.).
+        if self._rcParams['random_seed'] == None:
+            # Seed the random_seed with a known random integer, and save the seed for 
+            # later reuse (for testing, etc.).
+            self._rcParams['random_seed'] = int(10**8 * np.random.random())
+        np.random.seed(int(self._rcParams['random_seed']))
+        logger.debug("Random seed set to %s"%int(self._rcParams['random_seed']))
+
+    def get_params(self):
+        return self._rcParams
+rc_params = rc_params_management()

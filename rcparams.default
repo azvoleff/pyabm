@@ -6,7 +6,7 @@
 # no local rc file is provided when the model is run, or that are used if any 
 # parameters are missing from it.
 # 
-# Parameters are specifed in the following format:
+# Parameters are specified in the following format:
 #
 # 	'parameter_name' : [default_value | validation_function] # Comment
 #
