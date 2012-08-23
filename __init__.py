@@ -83,6 +83,9 @@ class rc_params_management():
     This class returns the RcParams instance used by PyABM and shared by any 
     calling modules.
     """
+    def __init__(self):
+        self._rcParams = None
+
     def load_params(self, custom_rc_file=None):
         self._rcParams = load_rc_params(custom_rc_file)
         # Check if a random_seed was loaded from the rcfile. If not (if 
@@ -97,5 +100,9 @@ class rc_params_management():
         logger.debug("Random seed set to %s"%int(self._rcParams['random_seed']))
 
     def get_params(self):
+        if self._rcParams == "None":
+            logger.error("rc params not yet defined - must call load_params")
+            return 1
         return self._rcParams
+
 rc_params = rc_params_management()
