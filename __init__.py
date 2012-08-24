@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 
-from rcsetup import RcParams, load_rc_params
+from rcsetup import rc_params_management
 
 class IDError(Exception):
     pass
@@ -77,32 +77,5 @@ def boolean_choice(trueProb=.5):
         return True
     else:
         return False
-
-class rc_params_management():
-    """
-    This class returns the RcParams instance used by PyABM and shared by any 
-    calling modules.
-    """
-    def __init__(self):
-        self._rcParams = None
-
-    def load_params(self, custom_rc_file=None):
-        self._rcParams = load_rc_params(custom_rc_file)
-        # Check if a random_seed was loaded from the rcfile. If not (if 
-        # random_seed==None), then choose a random random_seed, and store it in 
-        # rcParams so that it can be written to a file at the end of model 
-        # runs, and saved for later reuse (for testing, etc.).
-        if self._rcParams['random_seed'] == None:
-            # Seed the random_seed with a known random integer, and save the seed for 
-            # later reuse (for testing, etc.).
-            self._rcParams['random_seed'] = int(10**8 * np.random.random())
-        np.random.seed(int(self._rcParams['random_seed']))
-        logger.debug("Random seed set to %s"%int(self._rcParams['random_seed']))
-
-    def get_params(self):
-        if self._rcParams == "None":
-            logger.error("rc params not yet defined - must call load_params")
-            return 1
-        return self._rcParams
 
 rc_params = rc_params_management()
