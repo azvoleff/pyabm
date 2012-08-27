@@ -547,47 +547,6 @@ def read_rc_file(default_params, fname=os.path.basename(os.getcwd()) +'rc'):
             logger.warning('Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value.'%(key, cnt, fname))
     return rcfile_params
 
-def write_RC_file(outputFilename, docstring=None, updated_params={}):
-    """
-    Write default rcParams to a file after optionally updating them from an 
-    RcParam dictionary. Any keys in updated_params that are not already defined 
-    in rcsetup.py are ignored (as read_rc_file would reject unknown keys anyways 
-    when the rc file is read back in).
-    """
-    # The default string used as the header of rc_files (if an alternative one 
-    # is not provided).
-    default_RCfile_docstring = """# Default values of parameters for the Chitwan Valley Agent-based Model. Values 
-# are read in to set defaults prior to initialization of the model by the 
-# runmodel script.
-#
-# Alex Zvoleff, azvoleff@mail.sdsu.edu"""
-
-    # First load the rcparams.defaults files in order to obtain the formatting 
-    # and any comment strings, which will be retained in the output rcfile.
-    parsed_lines, rcparams_dict = parse_rcparams_defaults()
-
-    # Finally, write rc file to outputFilename.
-    outFile = open(outputFilename, "w")
-    if docstring == None:
-        outFile.writelines("%s\n\n"%(default_RCfile_docstring))
-    else:
-        outFile.writelines("%s\n\n"%(docstring))
-    
-    for (rcparams_defaults_file, linenum, key, value, comment) in parsed_lines:
-        if key == "" and value == "":
-            outFile.write("%s\n"%(comment)) # if comment is blank, just write a newline to the file
-            continue
-        elif comment != '':
-            # If there is a comment at the end of a line with a key : value 
-            # pair, ensure the comment is preceded by a blank space
-            comment = ' ' + comment
-        # Update the keyvalues from any rcparams instance handed to the 
-        # write_RC_file function:
-        if updated_params.has_key(key):
-            value = updated_params[key]
-        outFile.write("%s : %s%s\n"%(key, value, comment))
-    outFile.close()
-
 class rc_params_management():
     """
     This class manages the RcParams instance used by PyABM and shared by any 
@@ -597,6 +556,7 @@ class rc_params_management():
         self._initialized = False
         self._validated = False
         self.load_default_params()
+        self._default_parsed_lines = None
 
     def load_default_params(self, custom_module_paths=None):
         """
@@ -613,14 +573,14 @@ class rc_params_management():
             else:
                 module_paths.append(custom_module_paths)
 
-        parsed_lines, self._rcparams_dict = parse_rcparams_defaults(module_paths)
+        self._default_parsed_lines, self._default_rcparams_dict = parse_rcparams_defaults(module_paths)
 
         # Convert the rcparams_defaults dictionary into an RcParams instance. 
         # This process will also validate that the values in rcparams_defaults 
         # are valid by using the validation function specified in 
         # rcparams_defaults to convert each parameter value.
-        self._rcParams = RcParams(self._rcparams_dict, validation=False)
-        for key, (default, converter) in self._rcparams_dict.iteritems():
+        self._rcParams = RcParams(self._default_rcparams_dict, validation=False)
+        for key, (default, converter) in self._default_rcparams_dict.iteritems():
             try:
                 self._rcParams[key] = default
             except Exception, msg:
@@ -680,7 +640,7 @@ class rc_params_management():
         for rc_file_path in rc_file_paths:
             if os.path.exists(rc_file_path):
                 logger.info("Loading custom rc_file %s"%rc_file_path)
-                rc_file_params = read_rc_file(self._rcparams_dict, rc_file_path)
+                rc_file_params = read_rc_file(self._default_rcparams_dict, rc_file_path)
                 break
         
         # If an rc file was found, update the default_params with the values from 
@@ -707,3 +667,44 @@ class rc_params_management():
         np.random.seed(int(self._rcParams['random_seed']))
         logger.debug("Random seed set to %s"%int(self._rcParams['random_seed']))
         self._initialized = True
+
+    def write_RC_file(self, outputFilename, docstring=None):
+        """
+        Write default rcParams to a file after updating them from the currently 
+        loaded rcParams dictionary. Any keys in the updated dictionary that are 
+        not already defined in the default parameter files (rcparams.defaults) 
+        used to build the rcParams dictionary are ignored (as read_rc_file 
+        would reject unknown keys anyways when the rc file is read back in).
+        """
+        # The default string used as the header of rc_files (if an alternative one 
+        # is not provided).
+        default_RCfile_docstring = """# Default values of parameters for the Chitwan Valley Agent-based Model. Values 
+# are read in to set defaults prior to initialization of the model by the 
+# runmodel script.
+#
+# Alex Zvoleff, azvoleff@mail.sdsu.edu"""
+        
+        if self._default_parsed_lines == None:
+            logger.warning("rcparams_defaults have not yet been read into this rc_params_management instance")
+
+        # Finally, write rc file to outputFilename.
+        outFile = open(outputFilename, "w")
+        if docstring == None:
+            outFile.writelines("%s\n\n"%(default_RCfile_docstring))
+        else:
+            outFile.writelines("%s\n\n"%(docstring))
+        
+        for (rcparams_defaults_file, linenum, key, value, comment) in self._default_parsed_lines:
+            if key == "" and value == "":
+                outFile.write("%s\n"%(comment)) # if comment is blank, just write a newline to the file
+                continue
+            elif comment != '':
+                # If there is a comment at the end of a line with a key : value 
+                # pair, ensure the comment is preceded by a blank space
+                comment = ' ' + comment
+            # Update the keyvalues from any rcparams instance handed to the 
+            # write_RC_file function:
+            if self._rcParams.has_key(key):
+                value = self._rcParams[key]
+            outFile.write("%s : %s%s\n"%(key, value, comment))
+        outFile.close()
