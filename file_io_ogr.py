@@ -21,8 +21,6 @@
 """
 Functions for writing shapefiles of model results, using OGR to process 
 shapefiles.
-
-Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import sys

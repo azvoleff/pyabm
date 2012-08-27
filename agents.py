@@ -23,8 +23,6 @@ Contains classes to assist in making agents. 'Person' agents, for example,
 would be subclasses of the Agent class, while Household, Neighborhood, and 
 Region agents would be represented as subclasses of the Agent_set object (as 
 households, neighborhoods, and regions all contain lower-level agents).
-
-Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 from PyABM import rc_params

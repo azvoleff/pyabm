@@ -19,12 +19,8 @@
 # contact information.
 
 """
-Part of the PyABM agent-based modeling toolkit.
-
 Sets up rc parameters so that they can be loaded and reused by other parts of 
 the toolkit.
-
-Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import os

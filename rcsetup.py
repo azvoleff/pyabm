@@ -222,24 +222,30 @@ def validate_random_seed(s):
 class validate_probability:
     """
     Validates a probability specified as a dictionary where each key is a tuple 
-    specifying the interval to which the probability applies (in probability_time_units). 
-    The interval tuple is specified as:
+    specifying the interval to which the probability applies (in 
+    probability_time_units).  The interval tuple is specified as::
+
         [lower, upper)
+
     (closed interval on the lower bound, open interval on the upper), and the 
-    value specified for each inteval tuple key is the probability for that interval. 
+    value specified for each inteval tuple key is the probability for that 
+    interval. 
     
-    The 'min', 'max' values passed to the validate_probability function give the 
-    minimum (inclusive) and maximum values (exclusive) for which probabilities must 
-    be specified.  validate_probability will check that probabilities are specified for 
-    all values of t between this minimum and maximum value, including the 
-    minimum value ('min') in [min, max) and up to but excluding the maximum 
-    value 'max'.
+    The 'min', 'max' values passed to the validate_probability function give 
+    the minimum (inclusive) and maximum values (exclusive) for which 
+    probabilities must be specified.  validate_probability will check that 
+    probabilities are specified for all values of t between this minimum and 
+    maximum value, including the minimum value ('min') in [min, max) and up to 
+    but excluding the maximum value 'max'.
     
-    This function validates the probabilities lie on the unit interval, and then 
-    returns a dictionary object where there is a key for each age value in the 
-    interval specified. Therefore,
+    This function validates the probabilities lie on the unit interval, and 
+    then returns a dictionary object where there is a key for each age value in 
+    the interval specified. Therefore,::
+
         {(0,2):.6, (2,5):.9}
-    would be converted to:
+
+    would be converted to::
+
         {0:.6, 1:.6, 2:.9, 3:.9, 4:.9}
     """
     def __init__(self, min, max):

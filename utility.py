@@ -21,8 +21,6 @@
 """
 Contains miscellaneuous utility functions useful in building and running 
 agent-based models.
-
-Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import numpy as np

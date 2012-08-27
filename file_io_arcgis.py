@@ -22,8 +22,6 @@
 Functions for reading coordinate and segment files from ArcGIS, and for
 converting generated networks into an ArcGIS coverage or shapefile. Also
 handles writing network statistics fields to a given shapefile
-
-Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import sys

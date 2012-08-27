@@ -21,8 +21,6 @@
 """
 Chooses either file_io_arcgis.py or file_io_ogr.py to handle shapefile i/o.
 Returns an error if neither is available.
-
-Alex Zvoleff, azvoleff@mail.sdsu.edu
 """
 
 import sys
