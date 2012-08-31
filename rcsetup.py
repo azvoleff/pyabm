@@ -648,7 +648,7 @@ class rc_params_management():
         if rc_file_params != None:
             for key in rc_file_params.iterkeys():
                 self._rcParams[key] = rc_file_params.original_value[key]
-                logger.info("custom '%s' parameter loaded from %s"%(key, rc_file_path))
+                logger.info("custom '%s' parameter loaded"%key)
         else:
             logger.info("no rc file found. Using parameters from rcparams.default")
 
