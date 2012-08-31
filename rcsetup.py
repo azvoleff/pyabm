@@ -350,7 +350,7 @@ def validate_time_bounds(values):
     """Converts and validates the start and stop time for the model. Checks to 
     ensure consistency, and rejects unlikely inputs, like years < minyear or > 
     maxyear ."""
-    minyear, maxyear = 1990, 2101
+    minyear, maxyear = 1990, 2201
     values = values.replace(' ', '')
     try:
         values = values.split('),(')
