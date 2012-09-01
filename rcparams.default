@@ -52,8 +52,8 @@
 # The following parameters are for the 'email_log' function.
 'email_log' : [False | validate_boolean]
 'email_log.smtp_server' : ['smtp.example.com' | validate_string]
-'email_log.username' : ['someone' | validate_string]
-'email_log.password' : ['password' | validate_string]
+'email_log.smtp_username' : ['someone' | validate_string]
+'email_log.smtp_password' : ['password' | validate_string]
 'email_log.from' : ['someone@example.com' | validate_string]
 'email_log.to' : ['someone@example.com' | validate_string]
 
