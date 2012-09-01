@@ -39,6 +39,24 @@
 # Default program to use for 'tailing' the logfile, if desired:
 'path.tail_binary' : ["C:\Program Files (x86)\LogExpert\LogExpert.exe" | validate_readable_file]
 
+# The following parameters are for the threaded_batch_run script. The script 
+# will run a total of batchrun.num_runs, using subprocesses to run a total of 
+# batchrun.num_cores runs simultaneously.
+'batchrun.num_runs' : [20 | validate_int]
+'batchrun.num_cores' : [1 | validate_int]
+# The path of python installation to be used for running the model:
+'batchrun.python_path' : ["C:/Python27_64bit/python.exe" | validate_readable_file]
+# The path of the runmodel.py script:
+'batchrun.runmodel_path' : ["C:/Users/azvoleff/Code/Python/ChitwanABM/runmodel.py" | validate_readable_file]
+
+# The following parameters are for the 'email_log' function.
+'email_log' : [False | validate_boolean]
+'email_log.smtp_server' : ['smtp.example.com' | validate_string]
+'email_log.username' : ['someone' | validate_string]
+'email_log.password' : ['password' | validate_string]
+'email_log.from' : ['someone@example.com' | validate_string]
+'email_log.to' : ['someone@example.com' | validate_string]
+
 # random_seed seeds the random number generator (useful for regenerating 
 # results later). If it is set to 'None' no seed is given. Regardless of 
 # whether or not a seed is provided, the seed that is used will be saved
