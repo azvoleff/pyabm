@@ -19,11 +19,21 @@
 # contact information.
 
 """
-Contains miscellaneuous utility functions useful in building and running 
+Contains miscellaneous utility functions useful in building and running 
 agent-based models.
 """
 
+import logging
+import smtplib
+from email.MIMEText import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 import numpy as np
+
+from PyABM import rc_params
+rcParams = rc_params.get_params()
+
+logger = logging.getLogger(__name__)
 
 class TimeSteps():
     def __init__(self, bounds, timestep):
@@ -111,4 +121,30 @@ class TimeSteps():
     def __str__(self):
         return "%s-%s"%(self._year, self._month)
 
-
+def email_logfile(log_file, subject='PyABM Log'):
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    msg['From'] = rcParams['email_log.from']
+    msg['To'] = rcParams['email_log.to']
+    msg.preamble = 'This is a multi-part message in MIME format.'
+    try:
+        f = open(log_file, 'r')
+    except IOError:
+        logger.warning('Error reading logfile %s'%log_file)
+        return 1
+    file_content = f.read()
+    f.close()
+    # Include the log in the body of the email and as an attachment
+    msg.attach(MIMEText(file_content, 'plain'))
+    attachment = MIMEText(file_content, 'plain')
+    attachment.add_header('Content-Disposition', 'attachment', filename=log_file)           
+    msg.attach(attachment)
+    try:
+        server = smtplib.SMTP(rcParams['email_log.smtp_server'])
+        server.login(rcParams['email_log.smtp_username'], rcParams['email_log.smtp_password'])
+        server.sendmail(rcParams['email_log.from'], rcParams['email_log.to'], msg.as_string())
+        server.quit()
+    except smtplib.SMTPException:
+        logger.warning('Error sending logfile %s via email. Check the email_log rcparams.'%log_file)
+        return 1
+    return 0
