@@ -140,5 +140,3 @@ def write_single_band_raster(array, gt, prj, output_file):
     dst_ds.GetRasterBand(1).WriteArray(array)
     dst_ds = None
     return 0
-    
-    return 0

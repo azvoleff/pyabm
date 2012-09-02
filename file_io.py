@@ -34,7 +34,7 @@ except:
     try:
         from file_io_ogr import *
     except ImportError:
-        logger.error("Failed to load ArcGIS or OGR. Cannot process shapefiles.")
+        logger.error("Failed to load ArcGIS or OGR. Cannot process shapefiles or geotiffs.")
 
 def write_point_process(nodes, outputFile):
     'Writes input node instances to a text file in R point-process format.'
