@@ -425,11 +425,10 @@ class RcParams(dict):
     """
     A dictionary object including validation
     """
-    def __init__(self, rcparams_defaults_dict, validation=True, *args):
+    def __init__(self, validation=True, *args):
         self._validation = validation
         dict.__init__(self, *args)
-        self.validate = dict([ (key, converter) for key, (default, converter) in \
-                     rcparams_defaults_dict.iteritems() ])
+        self._validation_dict = None
         # self.original_value stores the unconverted strings representing the 
         # originally input values (prior to conversion). This allows printing 
         # to an rc file the original values given by a user or rc file without 
@@ -437,86 +436,75 @@ class RcParams(dict):
         # doing floating point -> string -> floating point conversions
         self.original_value = {}
 
+    def setup_validation(self, rcparams_defaults_dict):
+        self._validation_dict = dict([(key, converter) for key, (default, 
+            converter) in rcparams_defaults_dict.iteritems()])
+
     def __setitem__(self, key, val):
         self.original_value[key] = val
         if self._validation:
             try:
-                cval = self.validate[key](val)
+                cval = self._validation_dict[key](val)
                 dict.__setitem__(self, key, cval)
             except KeyError, msg:
                 raise KeyError('%s is not a valid rc parameter. \
 See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
+        else:
+            dict.__setitem__(self, key, val)
 
     def validate_items(self):
         for key, val in self.original_value.iteritems():
             try:
-                cval = self.validate[key](val)
+                cval = self._validation_dict[key](val)
                 dict.__setitem__(self, key, cval)
             except KeyError, msg:
                 logger.error('problem processing %s rc parameter. %s'%(key, msg))
 
-def parse_rcparams_defaults(module_paths):
+def parse_rcparams_defaults(rcparams_defaults_file):
     """
     Parses the PyABM rcparams.defaults file as well as the rcparams.defaults 
     file (if any) for the calling module. Returns a list of tuples:
 
         (filename, linenum, key, value, comment)
     """
-    rcparams_defaults_files = []
-    for module_path in module_paths:
-        rcparams_defaults_file = os.path.join(module_path, "rcparams.default")
-        if os.path.isfile(rcparams_defaults_file):
-            rcparams_defaults_files.append(rcparams_defaults_file)
-
-    # Remove duplicate rcparams_defaults_files paths:
-    rcparams_defaults_files = list(set(rcparams_defaults_files))
-
     parsed_lines = []
     key_dict = {}
-    for rcparams_defaults_file in rcparams_defaults_files:
-        try:
-            fid = open(rcparams_defaults_file, "r")
-        except IOError:
-            raise IOError('ERROR: Could not open rcparams.defaults file "%s"'%rcparams_defaults_file)
-
-        linenum = 0
+    try:
+        fid = open(rcparams_defaults_file, "r")
+    except IOError:
+        raise IOError('ERROR: Could not open rcparams.defaults file "%s"'%rcparams_defaults_file)
+    logger.info("Loading default rcparams from %s"%rcparams_defaults_file)
+    linenum = 0
+    line = fid.readline()
+    while line:
+        linenum += 1
+        if line == "###***START OF RC DEFINITION***###\n":
+            break
         line = fid.readline()
-        while line:
-            linenum += 1
-            if line == "###***START OF RC DEFINITION***###\n":
-                break
-            line = fid.readline()
-
+    line = fid.readline()
+    while line:
+        linenum += 1
+        # Remove linebreak
+        line = line.rstrip("\n")
+        # Pull out key, and strip single quotes, double quotes and blank 
+        # spaces
+        comment = ''.join(line.partition("#")[1:3])
+        line = ''.join(line.partition("#")[0])
+        key = ''.join(line.partition(":")[0].strip("\'\" "))
+        # Now pull out value and converter
+        value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
+        value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
+        converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
+        if key != '':
+            if key_dict.has_key(key):
+                logger.warn("Duplicate values for %s are provided in %s and %s. Value from %s will take precedence."%(key, rcparams_defaults_files[0], rcparams_defaults_files[1], rcparams_defaults_files[1]))
+            # Convert 'converter' from a string to a reference to the 
+            # validation object
+            converter = eval(converter)
+            key_dict[key] = (value, converter)
+        parsed_lines.append((rcparams_defaults_file, linenum, key, value, comment))
         line = fid.readline()
-        while line:
-            linenum += 1
-
-            # Remove linebreak
-            line = line.rstrip("\n")
-
-            # Pull out key, and strip single quotes, double quotes and blank spaces
-            comment = ''.join(line.partition("#")[1:3])
-            line = ''.join(line.partition("#")[0])
-
-            key = ''.join(line.partition(":")[0].strip("\'\" "))
-
-            # Now pull out value and converter
-            value_validation_tuple = line.partition(':')[2].partition("#")[0].strip(", ")
-            value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
-            converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
-
-            if key != '':
-                if key_dict.has_key(key):
-                    logger.warn("Duplicate values for %s are provided in %s and %s. Value from %s will take precedence."%(key, rcparams_defaults_files[0], rcparams_defaults_files[1], rcparams_defaults_files[1]))
-                # Convert 'converter' from a string to a reference to the 
-                # validation object
-                converter = eval(converter)
-                key_dict[key] = (value, converter)
-
-            parsed_lines.append((rcparams_defaults_file, linenum, key, value, comment))
-            line = fid.readline()
-        fid.close()
-
+    fid.close()
     return parsed_lines, key_dict
 
 def read_rc_file(default_params, fname=os.path.basename(os.getcwd()) +'rc'):
@@ -524,7 +512,8 @@ def read_rc_file(default_params, fname=os.path.basename(os.getcwd()) +'rc'):
     Returns an RcParams instance containing the the keys / value combinations 
     read from an rc file. The rc file name defaults to the module name plus 'rc'.
     """
-    rcfile_params = RcParams(default_params, validation=True)
+    rcfile_params = RcParams(validation=True)
+    rcfile_params.setup_validation(default_params)
     cnt = 0
     for line in file(fname):
         cnt += 1
@@ -555,39 +544,43 @@ class rc_params_management():
     def __init__(self):
         self._initialized = False
         self._validated = False
-        self.load_default_params()
+        self._rcParams = None
         self._default_parsed_lines = None
+        self._default_rcparams_dict = None
+        self.load_default_params(os.path.dirname(os.path.realpath(__file__)))
 
-    def load_default_params(self, custom_module_paths=None):
+    def load_default_params(self, module_path):
         """
         Load the rcparams_defaults into a dictionary, which will be used to tie 
         keys to converters in the definition of the RcParams class.
+        
+        The function can be called repeatedly to load new defaults (from 
+        different modules who share the same rc_params_management instance, for 
+        example). If the function is called more than once, any default 
+        parameters that are not explicitly overwritten will be left unchanged.
         """
-        # It is important that the PyABM rcparams.default file be read first, 
-        # so that modules calling PyABM can override these defaults with their 
-        # own local rcparams.default file.
-        module_paths = [os.path.dirname(os.path.realpath(__file__))]
-        if not custom_module_paths == None:
-            if len(module_paths) > 1:
-                module_paths.extend(custom_module_paths)
-            else:
-                module_paths.append(custom_module_paths)
+        rcparams_defaults_file = os.path.join(module_path, "rcparams.default")
+        default_parsed_lines, default_rcparams_dict = parse_rcparams_defaults(rcparams_defaults_file)
+        if self._default_parsed_lines == None and self._default_rcparams_dict == None:
+            self._default_parsed_lines = default_parsed_lines
+            self._default_rcparams_dict = default_rcparams_dict
+        else:
+            self._default_parsed_lines.extend(default_parsed_lines)
+            self._default_rcparams_dict.update(default_rcparams_dict)
 
-        self._default_parsed_lines, self._default_rcparams_dict = parse_rcparams_defaults(module_paths)
-
-        # Convert the rcparams_defaults dictionary into an RcParams instance. 
+        # Convert the rcparams_defaults dictionary into an RcParams instance.  
         # This process will also validate that the values in rcparams_defaults 
         # are valid by using the validation function specified in 
         # rcparams_defaults to convert each parameter value.
-        self._rcParams = RcParams(self._default_rcparams_dict, validation=False)
-        for key, (default, converter) in self._default_rcparams_dict.iteritems():
+        if self._rcParams == None:
+            self._rcParams = RcParams(validation=False)
+        self._rcParams.setup_validation(self._default_rcparams_dict)
+        self._rcParams._validation = False
+        for key, (default, converter) in default_rcparams_dict.iteritems():
             try:
                 self._rcParams[key] = default
             except Exception, msg:
                 raise Exception("ERROR: Problem processing rcparams.default key '%s'. %s"%(key, msg))
-        # Now turn on validation to validate any further changes made (don't validate 
-        # the originals read from rcparams.defaults in the first place, as default 
-        # paths and input/ouput file locations will almost always fail.)
         self._rcParams._validation = True
 
     def is_initialized(self):
@@ -597,8 +590,8 @@ class rc_params_management():
         return self._validated
 
     def validate_params(self):
-        self._validated = True
         self._rcParams.validate_items()
+        self._validated = True
 
     def get_params(self):
         if not self.is_initialized():
@@ -626,11 +619,10 @@ class rc_params_management():
         The name of the rc file can be specified as a parameter ``rcfile_name`` 
         to the script. If not given, the rc file name defaults to the name of 
         the calling module passed as an input parameter, with an 'rc' suffix.
-        """
-        if self.is_initialized():
-            logger.warning("rc_params_management instance already initialized - no action taken")
-            return
 
+        Note that this function can be called more than once, in order to 
+        initialize different sets of parameters from different rc files.
+        """
         rc_file_params = None
         rc_file_paths = [module_path, os.getcwd(), 
                          _get_home_dir(), sys.path[0]]
@@ -643,8 +635,9 @@ class rc_params_management():
                 rc_file_params = read_rc_file(self._default_rcparams_dict, rc_file_path)
                 break
         
-        # If an rc file was found, update the default_params with the values from 
-        # that rc file.
+        self._rcParams._validation = False
+        # If an rc file was found, update the default_params with the values 
+        # from that rc file.
         if rc_file_params != None:
             for key in rc_file_params.iterkeys():
                 self._rcParams[key] = rc_file_params.original_value[key]
@@ -652,9 +645,12 @@ class rc_params_management():
         else:
             logger.info("no rc file found. Using parameters from rcparams.default")
 
-        # Now run the validation on all the items in the default_params instance 
-        # (as values read from rcparams.defaults have not yet been validated).
+        # Now run the validation on all the items in the default_params 
+        # instance (as values read from rcparams.defaults have not yet been 
+        # validated).
         self.validate_params()
+        self._rcParams._validation = True
+        self._initialized = True
 
         # Check if a random_seed was loaded from the rcfile. If not (if 
         # random_seed==None), then choose a random random_seed, and store it in 
@@ -666,7 +662,6 @@ class rc_params_management():
             self._rcParams['random_seed'] = int(10**8 * np.random.random())
         np.random.seed(int(self._rcParams['random_seed']))
         logger.debug("Random seed set to %s"%int(self._rcParams['random_seed']))
-        self._initialized = True
 
     def write_RC_file(self, outputFilename, docstring=None):
         """

@@ -66,6 +66,7 @@ class IDGenerator(object):
         if used_ID in self._used_IDs:
             raise IDError("ID %s has already been used"%(used_ID))
         self._used_IDs.append(used_ID)
+
 def boolean_choice(trueProb=.5):
     """A function that returns true or false depending on whether a randomly
     drawn float is less than trueProb"""
@@ -75,3 +76,4 @@ def boolean_choice(trueProb=.5):
         return False
 
 rc_params = rc_params_management()
+rc_params.initialize(os.path.dirname(os.path.realpath(__file__)))
