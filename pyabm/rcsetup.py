@@ -33,6 +33,7 @@ import tempfile
 import copy
 import logging
 import inspect
+from pkg_resources import resource_string
 
 import numpy as np
 
@@ -470,7 +471,7 @@ def parse_rcparams_defaults(rcparams_defaults_file):
     parsed_lines = []
     key_dict = {}
     try:
-        fid = open(rcparams_defaults_file, "r")
+        rcparams_defaults_file = resource_stream(__name__, 'rcparams.defaults')
     except IOError:
         raise IOError('ERROR: Could not open rcparams.defaults file "%s"'%rcparams_defaults_file)
     logger.info("Loading default rcparams from %s"%rcparams_defaults_file)
@@ -549,7 +550,7 @@ class rc_params_management():
         self._default_rcparams_dict = None
         self.load_default_params(os.path.dirname(os.path.realpath(__file__)))
 
-    def load_default_params(self, module_path):
+    def load_default_params(self, module_name):
         """
         Load the rcparams_defaults into a dictionary, which will be used to tie 
         keys to converters in the definition of the RcParams class.
@@ -559,8 +560,7 @@ class rc_params_management():
         example). If the function is called more than once, any default 
         parameters that are not explicitly overwritten will be left unchanged.
         """
-        rcparams_defaults_file = os.path.join(module_path, "rcparams.default")
-        default_parsed_lines, default_rcparams_dict = parse_rcparams_defaults(rcparams_defaults_file)
+        default_parsed_lines, default_rcparams_dict = parse_rcparams_defaults(module_name)
         if self._default_parsed_lines == None and self._default_rcparams_dict == None:
             self._default_parsed_lines = default_parsed_lines
             self._default_rcparams_dict = default_rcparams_dict
