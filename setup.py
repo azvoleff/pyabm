@@ -36,7 +36,7 @@ project `(grant OISE 0729709) <http://pire.psc.isr.umich.edu>`_
 Development of pyabm is ongoing, and the documentation is still a work in 
 progress.
 
-See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/pyabm.php>`_ 
+See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/PyABM.php>`_ 
 for more information, past releases, publications, and recent presentations.
 """,
 	classifiers = [
