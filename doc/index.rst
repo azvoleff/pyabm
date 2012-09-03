@@ -1,30 +1,30 @@
-PyABM
+pyabm
 ======
 
-PyABM is an agent-based modeling toolkit written to simplify coding and running 
-agent-based models in the Python programming language. PyABM includes basic 
+pyabm is an agent-based modeling toolkit written to simplify coding and running 
+agent-based models in the Python programming language. pyabm includes basic 
 classes for creation of agents, has tools to output model results (as text 
 files, plots or ESRI shapefiles), has a parameter handling system to ease the 
 process of model testing and validation, and has utilities to assist in running 
 multiple scenarios with varying model parameters.
 
-Construction of PyABM is supported as part of an ongoing National Science 
+Construction of pyabm is supported as part of an ongoing National Science 
 Foundation Partnerships for International Research and Education (NSF PIRE) 
 project `(grant OISE 0729709) <http://pire.psc.isr.umich.edu>`_
-Development of PyABM is ongoing, and the documentation is still incomplete.  As 
+Development of pyabm is ongoing, and the documentation is still incomplete.  As 
 work continues, this page will be updated.
 
-See the `PyABM website <http://rohan.sdsu.edu/~zvoleff/research/PyABM.php>`_ 
+See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/pyabm.php>`_ 
 for more information, past releases, publications, and recent presentations.
 
 Getting the Code
 _________________
 
 The latest version of the code (unstable) is available as a `zipped snapshot 
-from Github <https://github.com/azvoleff/PyABM/zipball/master>`_.
+from Github <https://github.com/azvoleff/pyabm/zipball/master>`_.
 
 You can also `browse the source at GitHub 
-<https://github.com/azvoleff/PyABM>`_.
+<https://github.com/azvoleff/pyabm>`_.
 
 Documentation
 ______________
@@ -32,7 +32,7 @@ ______________
 .. toctree::
    :maxdepth: 4
 
-   PyABM
+   pyabm
 
 Author Information
 ___________________

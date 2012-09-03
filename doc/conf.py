@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# PyABM documentation build configuration file, created by
+# pyabm documentation build configuration file, created by
 # sphinx-quickstart on Sun Aug 26 22:07:43 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PyABM'
+project = u'pyabm'
 copyright = u'2012, Alex Zvoleff'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PyABMdoc'
+htmlhelp_basename = 'pyabmdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PyABM.tex', u'PyABM Documentation',
+  ('index', 'pyabm.tex', u'pyabm Documentation',
    u'Alex Zvoleff', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyabm', u'PyABM Documentation',
+    ('index', 'pyabm', u'pyabm Documentation',
      [u'Alex Zvoleff'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PyABM', u'PyABM Documentation',
-   u'Alex Zvoleff', 'PyABM', 'One line description of project.',
+  ('index', 'pyabm', u'pyabm Documentation',
+   u'Alex Zvoleff', 'pyabm', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -245,7 +245,7 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'PyABM'
+epub_title = u'pyabm'
 epub_author = u'Alex Zvoleff'
 epub_publisher = u'Alex Zvoleff'
 epub_copyright = u'2012, Alex Zvoleff'

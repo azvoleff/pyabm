@@ -4,7 +4,7 @@ distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
 
 setup(
-    name = "PyABM",
+    name = "pyabm",
     version = ".3dev",
     packages = find_packages(),
 
@@ -24,7 +24,7 @@ setup(
     description = "Agent-based modeling toolkit",
     license = "GPL v3 or later",
     keywords = "agent-based modeling ABM simulation model",
-    url = "http://rohan.sdsu.edu/~zvoleff/PyABM.php",   # project home page, if any
+    url = "http://rohan.sdsu.edu/~zvoleff/pyabm.php",   # project home page, if any
 
     long_description = """
 'ChitwanABM' is an agent-based model of the Western Chitwan Valley, Nepal.  

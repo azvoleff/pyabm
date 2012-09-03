@@ -1,13 +1,13 @@
-PyABM README
+pyabm README
 ===============================================================================
 
-PyABM - an agent-based modeling toolkit for Python 2.7.x.
+pyabm - an agent-based modeling toolkit for Python 2.7.x.
  
 Description
 _______________________________________________________________________________
 
-'PyABM' is an agent-based modeling toolkit written to simplify coding and 
-running agent-based models int he Python programming language. PyABM 
+'pyabm' is an agent-based modeling toolkit written to simplify coding and 
+running agent-based models int he Python programming language. pyabm 
 includes tools to output model results (as text files, plots or ESRI 
 shapefiles), and has a parameter handling system to ease the process of 
 model testing and validation, and of running multiple scenarios with 
@@ -20,13 +20,13 @@ Geography. Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
 GETTING THE CODE:
 _______________________________________________________________________________
 
-See the PyABM website at: http://rohan.sdsu.edu/~zvoleff/research/PyABM.php.
+See the pyabm website at: http://rohan.sdsu.edu/~zvoleff/research/pyabm.php.
 
 The latest version of the code is available as a zipped snapshot from: 
-https://github.com/azvoleff/PyABM/zipball/master.
+https://github.com/azvoleff/pyabm/zipball/master.
 
 The source can also be downloaded via git from: 
-git://github.com/azvoleff/PyABM.git.
+git://github.com/azvoleff/pyabm.git.
 
 Author Contact Information
 _______________________________________________________________________________

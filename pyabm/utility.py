@@ -1,18 +1,18 @@
 # Copyright 2011 Alex Zvoleff
 #
-# This file is part of the PyABM agent-based modeling toolkit.
+# This file is part of the pyabm agent-based modeling toolkit.
 # 
-# PyABM is free software: you can redistribute it and/or modify it under the
+# pyabm is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 # 
-# PyABM is distributed in the hope that it will be useful, but WITHOUT ANY
+# pyabm is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License along with
-# PyABM.  If not, see <http://www.gnu.org/licenses/>.
+# pyabm.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact Alex Zvoleff in the Department of Geography at San Diego State 
 # University with any comments or questions. See the README.txt file for 
@@ -30,7 +30,7 @@ from email.mime.multipart import MIMEMultipart
 
 import numpy as np
 
-from PyABM import rc_params
+from pyabm import rc_params
 rcParams = rc_params.get_params()
 
 logger = logging.getLogger(__name__)
@@ -121,7 +121,7 @@ class TimeSteps():
     def __str__(self):
         return "%s-%s"%(self._year, self._month)
 
-def email_logfile(log_file, subject='PyABM Log'):
+def email_logfile(log_file, subject='pyabm Log'):
     msg = MIMEMultipart()
     msg['Subject'] = subject
     msg['From'] = rcParams['email_log.from']

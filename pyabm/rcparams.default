@@ -1,8 +1,8 @@
 # Copyright 2011 Alex Zvoleff
 #
-# This file is part of the PyABM agent-based modeling toolkit.
+# This file is part of the pyabm agent-based modeling toolkit.
 #
-# rcparams.default provides the default values that are used for the PyABM if 
+# rcparams.default provides the default values that are used for the pyabm if 
 # no local rc file is provided when the model is run, or that are used if any 
 # parameters are missing from it.
 # 
@@ -28,7 +28,7 @@
 ##################################
 ###***START OF RC DEFINITION***###
 ###############################################################################
-# PyABM Parameters
+# pyabm Parameters
 ###############################################################################
 # Git binary directory:
 'path.git_binary' : ["C:\Program Files (x86)\Git\bin\git.exe" | validate_readable_file]
