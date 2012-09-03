@@ -11,8 +11,8 @@ multiple scenarios with varying model parameters.
 Construction of pyabm is supported as part of an ongoing National Science 
 Foundation Partnerships for International Research and Education (NSF PIRE) 
 project `(grant OISE 0729709) <http://pire.psc.isr.umich.edu>`_
-Development of pyabm is ongoing, and the documentation is still incomplete.  As 
-work continues, this page will be updated.
+Development of pyabm is ongoing, and the documentation is still a work in 
+progress.
 
 See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/pyabm.php>`_ 
 for more information, past releases, publications, and recent presentations.

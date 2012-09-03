@@ -461,7 +461,7 @@ See rcParams.keys() for a list of valid parameters. %s'%(key, msg))
             except KeyError, msg:
                 logger.error('problem processing %s rc parameter. %s'%(key, msg))
 
-def parse_rcparams_defaults(rcparams_defaults_file):
+def parse_rcparams_defaults(module_name):
     """
     Parses the pyabm rcparams.defaults file as well as the rcparams.defaults 
     file (if any) for the calling module. Returns a list of tuples:
@@ -471,22 +471,16 @@ def parse_rcparams_defaults(rcparams_defaults_file):
     parsed_lines = []
     key_dict = {}
     try:
-        rcparams_defaults_file = resource_stream(__name__, 'rcparams.defaults')
+        rcparams_lines = resource_string(module_name, 'rcparams.default').splitlines()
     except IOError:
-        raise IOError('ERROR: Could not open rcparams.defaults file "%s"'%rcparams_defaults_file)
-    logger.info("Loading default rcparams from %s"%rcparams_defaults_file)
-    linenum = 0
-    line = fid.readline()
-    while line:
-        linenum += 1
-        if line == "###***START OF RC DEFINITION***###\n":
+        raise IOError('ERROR: Could not open rcparams.defaults file in %s'%module_name)
+    logger.debug("Loading rcparams.defaults from %s"%module_name)
+    for preamble_linenum in xrange(1, len(rcparams_lines)):
+        if rcparams_lines[preamble_linenum] == "###***START OF RC DEFINITION***###":
             break
-        line = fid.readline()
-    line = fid.readline()
-    while line:
-        linenum += 1
+    for linenum in xrange((preamble_linenum + 1), len(rcparams_lines)):
         # Remove linebreak
-        line = line.rstrip("\n")
+        line = rcparams_lines[linenum]
         # Pull out key, and strip single quotes, double quotes and blank 
         # spaces
         comment = ''.join(line.partition("#")[1:3])
@@ -498,14 +492,12 @@ def parse_rcparams_defaults(rcparams_defaults_file):
         converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
         if key != '':
             if key_dict.has_key(key):
-                logger.warn("Duplicate values for %s are provided in %s and %s. Value from %s will take precedence."%(key, rcparams_defaults_files[0], rcparams_defaults_files[1], rcparams_defaults_files[1]))
+                logger.warn("Duplicate values for %s are provided in %s rcparams.default."%(key, module_name))
             # Convert 'converter' from a string to a reference to the 
             # validation object
             converter = eval(converter)
             key_dict[key] = (value, converter)
-        parsed_lines.append((rcparams_defaults_file, linenum, key, value, comment))
-        line = fid.readline()
-    fid.close()
+        parsed_lines.append((module_name, linenum, key, value, comment))
     return parsed_lines, key_dict
 
 def read_rc_file(default_params, fname=os.path.basename(os.getcwd()) +'rc'):
@@ -548,7 +540,7 @@ class rc_params_management():
         self._rcParams = None
         self._default_parsed_lines = None
         self._default_rcparams_dict = None
-        self.load_default_params(os.path.dirname(os.path.realpath(__file__)))
+        self.load_default_params(__name__)
 
     def load_default_params(self, module_name):
         """
@@ -567,11 +559,10 @@ class rc_params_management():
         else:
             self._default_parsed_lines.extend(default_parsed_lines)
             self._default_rcparams_dict.update(default_rcparams_dict)
-
-        # Convert the rcparams_defaults dictionary into an RcParams instance.  
-        # This process will also validate that the values in rcparams_defaults 
-        # are valid by using the validation function specified in 
-        # rcparams_defaults to convert each parameter value.
+        # Convert the rcparams_defaults dictionary into an RcParams 
+        # instance.  This process will also validate that the values in 
+        # rcparams_defaults are valid by using the validation function 
+        # specified in rcparams_defaults to convert each parameter value.
         if self._rcParams == None:
             self._rcParams = RcParams(validation=False)
         self._rcParams.setup_validation(self._default_rcparams_dict)
@@ -689,7 +680,7 @@ class rc_params_management():
         else:
             outFile.writelines("%s\n\n"%(docstring))
         
-        for (rcparams_defaults_file, linenum, key, value, comment) in self._default_parsed_lines:
+        for (module, linenum, key, value, comment) in self._default_parsed_lines:
             if key == "" and value == "":
                 outFile.write("%s\n"%(comment)) # if comment is blank, just write a newline to the file
                 continue
