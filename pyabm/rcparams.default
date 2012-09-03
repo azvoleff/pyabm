@@ -46,8 +46,6 @@
 'batchrun.num_cores' : [1 | validate_int]
 # The path of python installation to be used for running the model:
 'batchrun.python_path' : ["C:/Python27_64bit/python.exe" | validate_readable_file]
-# The path of the runmodel.py script:
-'batchrun.runmodel_path' : ["C:/Users/azvoleff/Code/Python/ChitwanABM/runmodel.py" | validate_readable_file]
 
 # The following parameters are for the 'email_log' function.
 'email_log' : [False | validate_boolean]
