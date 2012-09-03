@@ -7,26 +7,20 @@ setup(
     name = "pyabm",
     version = ".3dev",
     packages = find_packages(),
-
     include_package_data = True,
-
     exclude_package_data = {'': ['.gitignore']},
-
-    # Project uses reStructuredText, so ensure that the docutils get
-    # installed or upgraded on the target machine
+    zip_safe = True,
     install_requires = ['docutils >= 0.3',
                         'setuptools_git >= 0.3',
                         'numpy >= 1.6.2',
                         'GDAL > 1.6'],
 
-    # metadata for upload to PyPI
     author = "Alex Zvoleff",
     author_email = "azvoleff@mail.sdsu.edu",
     description = "Agent-based modeling toolkit",
     license = "GPL v3 or later",
     keywords = "agent-based modeling ABM simulation model",
     url = "http://rohan.sdsu.edu/~zvoleff/pyabm.php",   # project home page, if any
-
     long_description = """
 pyabm is an agent-based modeling toolkit written to simplify coding and 
 running agent-based models in the Python programming language. pyabm 

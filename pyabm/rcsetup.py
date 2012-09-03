@@ -591,7 +591,7 @@ class rc_params_management():
             logger.warning("rcparams not yet validated - must call validate_params")
         return self._rcParams
 
-    def initialize(self, module_path, custom_rc_file=None):
+    def initialize(self, module_name, custom_rc_file=None):
         """
         Loads rcParams by first starting with the default parameter values from 
         rcparams.default (already stored in the attribute 'default_params', and 
@@ -615,9 +615,8 @@ class rc_params_management():
         initialize different sets of parameters from different rc files.
         """
         rc_file_params = None
-        rc_file_paths = [module_path, os.getcwd(), 
-                         _get_home_dir(), sys.path[0]]
-        rcfile_name = os.path.split(module_path)[-1] + 'rc'
+        rc_file_paths = [os.getcwd(), _get_home_dir(), sys.path[0]]
+        rcfile_name = os.path.split(module_name)[-1] + 'rc'
         rc_file_paths = [os.path.join(path, rcfile_name) for path in rc_file_paths]
         if custom_rc_file != None: rc_file_paths = [custom_rc_file] + rc_file_paths
         for rc_file_path in rc_file_paths:

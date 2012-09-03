@@ -76,4 +76,4 @@ def boolean_choice(trueProb=.5):
         return False
 
 rc_params = rc_params_management()
-rc_params.initialize(os.path.dirname(os.path.realpath(__file__)))
+rc_params.initialize(__name__)
