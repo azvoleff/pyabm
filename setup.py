@@ -20,7 +20,7 @@ setup(
     description = "Agent-based modeling toolkit",
     license = "GPL v3 or later",
     keywords = "agent-based modeling ABM simulation model",
-    url = "http://rohan.sdsu.edu/~zvoleff/pyabm.php",   # project home page, if any
+    url = "http://rohan.sdsu.edu/~zvoleff/research/PyABM.php",   # project home page, if any
     long_description = """
 pyabm is an agent-based modeling toolkit written to simplify coding and 
 running agent-based models in the Python programming language. pyabm 
