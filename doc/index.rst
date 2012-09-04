@@ -20,6 +20,9 @@ for more information, past releases, publications, and recent presentations.
 Getting the Code
 _________________
 
+To install the toolkit, download the stable version of the code from the 
+`Python Package Index (PyPI) <http://pypi.python.org/pypi/pyabm>`_.
+
 The latest version of the code (unstable) is available as a `zipped snapshot 
 from Github <https://github.com/azvoleff/pyabm/zipball/master>`_.
 
