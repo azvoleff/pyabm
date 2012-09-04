@@ -18,16 +18,23 @@ The model was constructed by Alex Zvoleff as part of his dissertation
 research at San Diego State University (SDSU) in the Department of 
 Geography. Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
 
-GETTING THE CODE:
+See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/PyABM.php>`_ 
+for more information, past releases, publications, and recent presentations.
+
+Getting the Code
 _______________________________________________________________________________
 
-See the pyabm website at: http://rohan.sdsu.edu/~zvoleff/research/PyABM.php.
+Stable releases of pyabm are available from the `Python Package Index 
+(PyPI) <http://pypi.python.org/pypi/pyabm>`_.
 
-The latest version of the code is available as a zipped snapshot from: 
-https://github.com/azvoleff/pyabm/zipball/master.
+The latest version of the code (unstable) is available as a `zipped snapshot 
+from Github <https://github.com/azvoleff/pyabm/zipball/master>`_.
 
-The source can also be downloaded via git from: 
-git://github.com/azvoleff/pyabm.git.
+You can also `browse the source at GitHub 
+<https://github.com/azvoleff/pyabm>`_.
+
+The source can also be downloaded via git from::
+    git://github.com/azvoleff/pyabm.git
 
 Author Contact Information
 _______________________________________________________________________________
