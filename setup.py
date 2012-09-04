@@ -13,7 +13,7 @@ setup(
     install_requires = ['docutils >= 0.3',
                         'setuptools_git >= 0.3',
                         'numpy >= 1.6.2',
-                        'GDAL > 1.6'],
+                        'GDAL >= 1.6'],
 
     author = "Alex Zvoleff",
     author_email = "azvoleff@mail.sdsu.edu",
