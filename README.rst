@@ -20,7 +20,7 @@ Geography. Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
 GETTING THE CODE:
 _______________________________________________________________________________
 
-See the pyabm website at: http://rohan.sdsu.edu/~zvoleff/research/pyabm.php.
+See the pyabm website at: http://rohan.sdsu.edu/~zvoleff/research/PyABM.php.
 
 The latest version of the code is available as a zipped snapshot from: 
 https://github.com/azvoleff/pyabm/zipball/master.
