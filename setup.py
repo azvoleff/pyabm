@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "pyabm",
-    version = "0.3.1",
+    version = "0.4dev",
     packages = find_packages(),
     include_package_data = True,
     exclude_package_data = {'': ['.gitignore']},
