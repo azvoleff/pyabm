@@ -34,6 +34,7 @@ You can also `browse the source at GitHub
 <https://github.com/azvoleff/pyabm>`_.
 
 The source can also be downloaded via git from::
+
     git://github.com/azvoleff/pyabm.git
 
 Author Contact Information
