@@ -32,6 +32,7 @@ ______________
 .. toctree::
    :maxdepth: 4
 
+   setup
    pyabm
 
 Author Information
