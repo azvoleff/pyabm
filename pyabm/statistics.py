@@ -22,6 +22,8 @@
 Contains miscellaneous functions useful in running statistics for agent-based models.
 """
 
+from pyabm import np
+
 class UnitsError(Exception):
     pass
 
