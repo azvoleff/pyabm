@@ -77,11 +77,11 @@ class Agent_set(Agent):
 
     def is_member(self, ID):
         "Returns true if agent is a member of this set"
-        return self._members.has_key(ID)
+        return ID in self._members
 
     def add_agent(self, agent):
         "Adds a new agent to the set."
-        if self._members.has_key(agent.get_ID()):
+        if agent.get_ID() in self._members:
             raise KeyError("agent %s is already a member of agent set %s"%(agent.get_ID(), self._ID))
         self._members[agent.get_ID()] = agent
         # Set the agent's _parent_agent to reflect the parent of this Agent_set 
@@ -125,7 +125,7 @@ class Agent_Store(object):
         Adds a new agent to the agent store. Also remove the agent from it's 
         parent Agent_set instance.
         """
-        if self._releases.has_key(release_time):
+        if release_time in self._releases:
             self._releases[release_time].append(agent)
         else:
             self._releases[release_time] = [agent]
@@ -146,14 +146,14 @@ class Agent_Store(object):
         # neighborhood ID for tracking we have to call .get_parent_agent twice.
         released_agents = []
         released_agents_dict = {}
-        if self._releases.has_key(time):
+        if time in self._releases:
             for agent in self._releases[time]:
                 parent_agent = self._parent_dict.pop(agent)
                 parent_agent.add_agent(agent)
                 agent._store_list.remove(self)
                 self._stored_agents.remove(agent)
                 neighborhood = parent_agent.get_parent_agent()
-                if not released_agents_dict.has_key(neighborhood.get_ID()):
+                if not neighborhood.get_ID() in released_agents_dict:
                     released_agents_dict[neighborhood.get_ID()] = 0
                 released_agents_dict[neighborhood.get_ID()] += 1
                 released_agents.append(agent)

@@ -294,7 +294,7 @@ class validate_probability:
                 raise ValueError("lower_lim = upper_lim for probability dictionary key '(%s, %s)'."%(key))
             probability = validate_unit_interval(item[1])
             for t in xrange(lower_lim, upper_lim):
-                if probability_dict.has_key(t):
+                if t in probability_dict:
                     raise ValueError("probability is specified twice for dictionary key '%s'."%(t))
                 probability_dict[t] = probability
         for key in probability_dict.keys():
@@ -491,7 +491,7 @@ def parse_rcparams_defaults(module_name):
         value = value_validation_tuple.rpartition("|")[0].strip("[]\"\' ")
         converter = value_validation_tuple.rpartition("|")[2].strip("[]\"\' ")
         if key != '':
-            if key_dict.has_key(key):
+            if key in key_dict:
                 logger.warn("Duplicate values for %s are provided in %s rcparams.default."%(key, module_name))
             # Convert 'converter' from a string to a reference to the 
             # validation object
@@ -519,7 +519,7 @@ def read_rc_file(default_params, fname=os.path.basename(os.getcwd()) +'rc'):
         key, val = tup
         key = key.strip()
         val = val.strip()
-        if rcfile_params.has_key(key):
+        if key in rcfile_params:
             logger.warn('duplicate key in file "%s", line #%d'%(fname,cnt))
 
         # Validate the values read in from the rc file
@@ -689,7 +689,7 @@ class rc_params_management():
                 comment = ' ' + comment
             # Update the keyvalues from any rcparams instance handed to the 
             # write_RC_file function:
-            if self._rcParams.has_key(key):
+            if key in self._rcParams:
                 value = self._rcParams[key]
             outFile.write("%s : %s%s\n"%(key, value, comment))
         outFile.close()
