@@ -124,3 +124,17 @@ def calc_prob_from_prob_dist(prob_dist, attribute):
     # Now we know the bin lims, so draw a random number evenly distributed 
     # between those two limits.
     return probs[n]
+
+def calc_coefficient(coef_tuple):
+    """
+    Use to handle uncertainty in regression coefficients. ``calc_coefficient`` 
+    takes in a tuple of two floats::
+
+        (coef, stderror)
+
+    where coef is the estimated regression coefficient, and stderror is the 
+    standard error of the estimated coefficient.
+    """
+    if len(coef_tuple) != 2:
+        raise ValueError("coef_tuple must be of the from (coef, stderror)")
+    return coef_tuple[0] + np.random.randn() * coef_tuple[1]
