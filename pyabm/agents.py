@@ -25,6 +25,8 @@ Region agents would be represented as subclasses of the Agent_set object (as
 households, neighborhoods, and regions all contain lower-level agents).
 """
 
+from __future__ import division
+
 from pyabm import rc_params
 rcParams = rc_params.get_params()
 

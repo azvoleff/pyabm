@@ -18,6 +18,8 @@
 # University with any comments or questions. See the README.txt file for 
 # contact information.
 
+from __future__ import division
+
 """
 Contains miscellaneous utility functions useful in building and running 
 agent-based models.
@@ -48,7 +50,7 @@ class TimeSteps():
 
     def increment(self):
         self._month += self._timestep
-        dyear = int((self._month - 1) / 12)
+        dyear = int((self._month - 1) / 12.)
         self._year += dyear
         self._month = self._month - dyear*12
         self._int_timestep += 1
@@ -63,7 +65,7 @@ class TimeSteps():
 
     def is_last_iteration(self):
         next_month = self._month + self._timestep
-        dyear = int((next_month - 1) / 12)
+        dyear = int((next_month - 1) / 12.)
         next_year = self._year + dyear
         next_month = next_month - dyear*12
         if next_year >= self._endtime[0] and next_month >= self._endtime[1]:

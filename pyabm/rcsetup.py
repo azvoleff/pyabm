@@ -27,6 +27,8 @@ rc file.
           off of the the rcsetup.py module used in matplotlib.
 """
 
+from __future__ import division
+
 import os
 import sys
 import tempfile
