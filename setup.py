@@ -10,9 +10,8 @@ setup(
     include_package_data = True,
     exclude_package_data = {'': ['.gitignore']},
     zip_safe = True,
-    install_requires = ['docutils >= 0.3',
-                        'setuptools_git >= 0.3',
-                        'numpy >= 1.6.2',
+    install_requires = ['numpy >= 1.6.2',
+                        'matplotlib >= 0.98.4',
                         'GDAL >= 1.6'],
 
     author = "Alex Zvoleff",
