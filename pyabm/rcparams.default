@@ -55,6 +55,10 @@
 'email_log.from' : ['someone@example.com' | validate_string]
 'email_log.to' : ['someone@example.com' | validate_string]
 
+# Force trying either ArcGIS or GDAL/OGR first by default - the other will be 
+# tried if the first fails.
+'geoprocessor' : ['GDAL/OGR' | validate_string] 
+
 # random_seed seeds the random number generator (useful for regenerating 
 # results later). If it is set to 'None' no seed is given. Regardless of 
 # whether or not a seed is provided, the seed that is used will be saved

@@ -28,13 +28,29 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-try:
-    from file_io_arcgis import *
-except:
+from pyabm import rc_params
+rcParams = rc_params.get_params()
+
+if rcParams['geoprocessor'].lower() == 'arcgis':
+    try:
+        from file_io_arcgis import *
+    except:
+        logger.error("Failed to load ArcGIS - trying GDAL/OGR")
+        try:
+            from file_io_ogr import *
+        except ImportError:
+            logger.error("Failed to load ArcGIS or GDAL/OGR. Cannot process shapefiles or geotiffs.")
+elif rcParams['geoprocessor'].lower() == 'gdal/ogr':
     try:
         from file_io_ogr import *
-    except ImportError:
-        logger.error("Failed to load ArcGIS or OGR. Cannot process shapefiles or geotiffs.")
+    except:
+        logger.error("Failed to load GDAL/OGR - trying ArcGIS")
+        try:
+            from file_io_arcgis import *
+        except ImportError:
+            logger.error("Failed to load GDAL/OGR or ArcGIS. Cannot process shapefiles or geotiffs.")
+else:
+    logger.error("Unknown option %s for geoprocessor rcparam"%rcParams['geoprocessor'])
 
 def write_point_process(nodes, outputFile):
     'Writes input node instances to a text file in R point-process format.'
