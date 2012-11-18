@@ -32,10 +32,14 @@ from pyabm import rc_params
 rcParams = rc_params.get_params()
 
 if rcParams['geoprocessor'].lower() == 'arcgis':
-    try:
-        from file_io_arcgis import *
-    except:
-        logger.error("Failed to load ArcGIS geoprocessor. Cannot process spatial data. If GDAL/OGR is installed, set 'geoprocessor' rcparam to 'ArcGIS'.")
+    logger.error("ArcGIS geoprocessing is not yet available in PyABM. Geoprocessing disabled. Cannot process spatial data. If GDAL/OGR is installed, set 'geoprocessor' rcparam to 'GDAL/OGR to use GDAL/OGR instead'.")
+# elif rcParams['geoprocessor'].lower() == 'gdal/ogr':
+#     try:
+#         from file_io_arcgis import *
+#     except:
+#         logger.error("Failed to load ArcGIS geoprocessor. Cannot process 
+#         spatial data. If GDAL/OGR is installed, set 'geoprocessor' rcparam to 
+#         'GDAL/OGR'.")
 elif rcParams['geoprocessor'].lower() == 'gdal/ogr':
     try:
         from file_io_ogr import *
