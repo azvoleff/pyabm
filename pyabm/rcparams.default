@@ -33,15 +33,15 @@
 # Git binary. If git is used for version control of the model sourcecode, PyABM 
 # will track the version of the code that used used to run the model in the 
 # model results. Or, use 'None' to disable this feature.
-'path.git_binary' : ["C:\Program Files (x86)\Git\bin\git.exe" | validate_readable_file]
+'path.git_binary' : [None | validate_git_binary]
 
 # Rscript binary path. Will be used by PyABM to call R scripts to plot model 
 # results after running a model. Or, use 'None' to disable this feature.
-'path.Rscript_binary' : ["C:/Program Files/R/R-2.15.1/bin/Rscript.exe" | validate_readable_file]
+'path.Rscript_binary' : [None | validate_Rscript_binary]
 
 # Default program to use for tailing model logfiles. Use 'None' to disable this 
 # feature.
-'path.tail_binary' : ["C:/Program Files (x86)/LogExpert/LogExpert.exe" | validate_readable_file]
+'path.tail_binary' : [None | validate_tail_binary]
 
 # The following parameters are for the threaded_batch_run script in PyABM. The 
 # script will run a total of batchrun.num_runs model runs, by spawning new 

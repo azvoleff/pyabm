@@ -107,6 +107,27 @@ def validate_readable_file(s):
         raise OSError("error reading file %s"%s)
     return s
 
+def validate_git_binary(s):
+    if s.lower() == 'none':
+        logger.warn("git version control features disabled. Specify bit binary path in your pyabmrc to enable.")
+        return None
+    else:
+        validate_readable_file(s)
+
+def validate_Rscript_binary(s):
+    if s.lower() == 'none':
+        logger.warn("Rscript access disabled. Specify Rscript binary path in your pyabmrc to enable.")
+        return None
+    else:
+        validate_readable_file(s)
+
+def validate_tail_binary(s):
+    if s.lower() == 'none':
+        logger.warn("Log 'tailing' disabled. Specify tail binary path (or path to equivalent program) in your pyabmrc to enable live tailing of ABM logs.")
+        return None
+    else:
+        validate_readable_file(s)
+
 def validate_readable_file_warning(s):
     """
     Checks that a file exists and is readable. Only logs a warning if the 
