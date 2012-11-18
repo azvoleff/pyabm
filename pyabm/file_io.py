@@ -35,20 +35,12 @@ if rcParams['geoprocessor'].lower() == 'arcgis':
     try:
         from file_io_arcgis import *
     except:
-        logger.error("Failed to load ArcGIS - trying GDAL/OGR")
-        try:
-            from file_io_ogr import *
-        except ImportError:
-            logger.error("Failed to load ArcGIS or GDAL/OGR. Cannot process shapefiles or geotiffs.")
+        logger.error("Failed to load ArcGIS geoprocessor. Cannot process spatial data. If GDAL/OGR is installed, set 'geoprocessor' rcparam to 'ArcGIS'.")
 elif rcParams['geoprocessor'].lower() == 'gdal/ogr':
     try:
         from file_io_ogr import *
     except:
-        logger.error("Failed to load GDAL/OGR - trying ArcGIS")
-        try:
-            from file_io_arcgis import *
-        except ImportError:
-            logger.error("Failed to load GDAL/OGR or ArcGIS. Cannot process shapefiles or geotiffs.")
+        logger.error("Failed to load GDAL/OGR. Cannot process spatial data. If ArcGIS is installed, set 'geoprocessor' rcparam to 'ArcGIS'.")
 else:
     logger.error("Unknown option %s for geoprocessor rcparam"%rcParams['geoprocessor'])
 
