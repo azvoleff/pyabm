@@ -30,24 +30,31 @@
 ###############################################################################
 # pyabm Parameters
 ###############################################################################
-# Git binary directory:
+# Git binary. If git is used for version control of the model sourcecode, PyABM 
+# will track the version of the code that used used to run the model in the 
+# model results. Or, use 'None' to disable this feature.
 'path.git_binary' : ["C:\Program Files (x86)\Git\bin\git.exe" | validate_readable_file]
 
-# Rscript binary directory:
+# Rscript binary path. Will be used by PyABM to call R scripts to plot model 
+# results after running a model. Or, use 'None' to disable this feature.
 'path.Rscript_binary' : ["C:\Program Files\R\R-2.15.1\bin\Rscript.exe" | validate_readable_file]
 
-# Default program to use for 'tailing' the logfile, if desired:
+# Default program to use for tailing model logfiles. Use 'None' to disable this 
+# feature.
 'path.tail_binary' : ["C:\Program Files (x86)\LogExpert\LogExpert.exe" | validate_readable_file]
 
-# The following parameters are for the threaded_batch_run script. The script 
-# will run a total of batchrun.num_runs, using subprocesses to run a total of 
-# batchrun.num_cores runs simultaneously.
+# The following parameters are for the threaded_batch_run script in PyABM. The 
+# script will run a total of batchrun.num_runs model runs, by spawning new 
+# processes to run a total of batchrun.num_cores simultaneous model runs.  
+# PyABM will use the Python binary located at batchrun.python_path.
 'batchrun.num_runs' : [20 | validate_int]
 'batchrun.num_cores' : [1 | validate_int]
-# The path of python installation to be used for running the model:
 'batchrun.python_path' : ["C:/Python27_64bit/python.exe" | validate_readable_file]
 
-# The following parameters are for the 'email_log' function.
+# The following parameters are for the 'email_log' function in PyABM. If you 
+# wish to use the email_log function, these parameters must be set to valid 
+# values. Given that the smtp password is stored as plain text, using a 
+# temporary or PyABM specific email account is recommended.
 'email_log' : [False | validate_boolean]
 'email_log.smtp_server' : ['smtp.example.com' | validate_string]
 'email_log.smtp_username' : ['someone' | validate_string]
@@ -55,12 +62,14 @@
 'email_log.from' : ['someone@example.com' | validate_string]
 'email_log.to' : ['someone@example.com' | validate_string]
 
-# Force trying either ArcGIS or GDAL/OGR first by default - the other will be 
-# tried if the first fails.
+# PyABM will use ArcGIS or OGR for handling raster and vector spatial data for 
+# data input and output. The 'geoprocessor' can be set to:
+#   ArcGIS  - to use ArcGIS for geoprocessing
+#   GDAL/OGR - to use GDAL/OGR for geoprocessing
 'geoprocessor' : ['GDAL/OGR' | validate_string] 
 
-# random_seed seeds the random number generator (useful for regenerating 
-# results later). If it is set to 'None' no seed is given. Regardless of 
-# whether or not a seed is provided, the seed that is used will be saved
-# in the model output for later reuse.
+# random_seed seeds the random number generator (useful for regenerating
+# results later). If it is set to 'None' no seed is given, and a seed will be 
+# chosen by numpy using its default settings.  In either case, the seed is that 
+# is used will be saved in the model output for later reuse.
 'random_seed' : [None | validate_random_seed] 
