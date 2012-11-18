@@ -1,4 +1,4 @@
-# Copyright 2011 Alex Zvoleff
+# Copyright 2012 Alex Zvoleff
 #
 # This file is part of the pyabm agent-based modeling toolkit.
 # 
