@@ -1,0 +1,81 @@
+###############################################################################
+# Copyright 2011 Alex Zvoleff
+#
+# This file is part of the pyabm agent-based modeling toolkit.
+#
+# This file is an example pyabmrc file for PyABM configuration. PyABM is 
+# configured using a 'pyabmrc' text file.  When PyABM is imported in Python, 
+# using:
+#
+#   import pyabm
+#
+# PyABM will search for a pyabmrc file. PyABM will search in three locations, 
+# in order:
+#
+#	1) the current working directory
+#	2) the current user's home directory
+#	3) the pyabm module directory
+#
+# PyABM will use the first pyabmrc file it finds, ignoring any others. To set 
+# custom values for any of the pyabmrc parameters, rename this file to 
+# 'pyabmrc' and move it to one three above locations.  Changes can also be made 
+# in the rcparams.defaults file in the PyABM module directory, but this is not 
+# recommended as these values will be overwritten when PyABM is upgraded.
+#
+# Parameters are specified in the following format:
+#
+# 	parameter_name : value
+#
+# where 'parameter_name' is the name of the parameter, and 'value' is the 
+# value. Parameters will be validated using the validation functions assigned 
+# in the rcparams.defaults file. To add a new parameter to PyABM, the parameter 
+# must first be defined in rcparams.defaults.
+#
+# Contact Alex Zvoleff in the Department of Geography at San Diego State 
+# University with any comments or questions. See the README.txt file for 
+# contact information.
+###############################################################################
+
+# Git binary. If git is used for version control of the model sourcecode, PyABM 
+# will track the version of the code that used used to run the model in the 
+# model results. Or, use 'None' to disable this feature.
+path.git_binary : C:\Program Files (x86)\Git\bin\git.exe
+
+# Rscript binary path. Will be used by PyABM to call R scripts to plot model 
+# results after running a model. Or, use 'None' to disable this feature.
+path.Rscript_binary : C:\Program Files\R\R-2.15.1\bin\Rscript.exe
+
+# Default program to use for tailing model logfiles. Use 'None' to disable this 
+# feature.
+path.tail_binary : C:\Program Files (x86)\LogExpert\LogExpert.exe
+
+# The following parameters are for the threaded_batch_run script in PyABM. The 
+# script will run a total of batchrun.num_runs model runs, by spawning new 
+# processes to run a total of batchrun.num_cores simultaneous model runs.  
+# PyABM will use the Python binary located at batchrun.python_path.
+batchrun.num_runs : 20
+batchrun.num_cores : 1
+batchrun.python_path : C:/Python27/python.exe
+
+# The following parameters are for the 'email_log' function in PyABM. If you 
+# wish to use the email_log function, these parameters must be set to valid 
+# values. Given that the smtp password is stored as plain text, using a 
+# temporary or PyABM specific email account is recommended.
+email_log : False
+email_log.smtp_server : smtp.example.com
+email_log.smtp_username : someone
+email_log.smtp_password : password
+email_log.from : someone@example.com
+email_log.to : someone@example.com
+
+# PyABM will use ArcGIS or OGR for handling raster and vector spatial data for 
+# data input and output. The 'geoprocessor' can be set to:
+#   ArcGIS  - to use ArcGIS for geoprocessing
+#   GDAL/OGR - to use GDAL/OGR for geoprocessing
+geoprocessor : GDAL/OGR
+
+# random_seed seeds the random number generator (useful for regenerating
+# results later). If it is set to 'None' no seed is given, and a seed will be 
+# chosen by numpy using its default settings.  In either case, the seed is that 
+# is used will be saved in the model output for later reuse.
+random_seed : None
