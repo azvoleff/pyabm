@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "pyabm",
-    version = "0.3.2",
+    version = "0.4dev",
     packages = find_packages(),
     include_package_data = True,
     exclude_package_data = {'': ['.gitignore']},
@@ -15,7 +15,6 @@ setup(
     install_requires = ['numpy >= 1.6.2',
                         'matplotlib >= 0.98.4',
                         'GDAL >= 1.6'],
-
     author = "Alex Zvoleff",
     author_email = "azvoleff@mail.sdsu.edu",
     description = "Agent-based modeling toolkit",
