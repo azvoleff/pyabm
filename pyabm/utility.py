@@ -150,3 +150,30 @@ def email_logfile(log_file, subject='pyabm Log'):
         logger.warning('Error sending logfile %s via email. Check the email_log rcparams.'%log_file)
         return 1
     return 0
+
+def save_git_diff(code_path, git_diff_file):
+    git_binary = rcParams['path.git_binary']
+    if git_binary == None:
+        logger.warning("Git features disabled. Skipping git diff output.")
+        return 1
+    # First get commit hash from git show
+    temp_file_fd, temp_file_path = tempfile.mkstemp()
+    try:
+        subprocess.check_call([git_binary, 'show','--pretty=format:%H'], stdout=temp_file_fd, cwd=code_path)
+    except:
+        logger.exception("Problem running git. Skipping git-diff patch output.")
+        return 1
+    os.close(temp_file_fd)
+    temp_file = open(temp_file_path, 'r')
+    commit_hash = temp_file.readline().strip('\n')
+    temp_file.close()
+    os.remove(temp_file_path)
+
+    # Now write output of git diff to a file.
+    try:
+        out_file = open(git_diff_file, "w")
+        subprocess.check_call([git_binary, 'diff'], stdout=out_file, cwd=code_path)
+        out_file.close()
+    except IOError:
+        logger.exception("Problem writing to git diff output file %s"%git_diff_file)
+    return commit_hash
