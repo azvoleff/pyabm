@@ -26,6 +26,7 @@ agent-based models.
 """
 
 import logging
+import tempfile
 import smtplib
 from email.MIMEText import MIMEText
 from email.mime.multipart import MIMEMultipart
