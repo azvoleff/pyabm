@@ -109,21 +109,21 @@ def validate_readable_file(s):
 
 def validate_git_binary(s):
     if s.lower() == 'none':
-        logger.warn("git version control features disabled. Specify bit binary path in your pyabmrc to enable.")
+        logger.warn("git version control features disabled. Specify valid git binary path in your pyabmrc to enable.")
         return None
     else:
         validate_readable_file(s)
 
 def validate_Rscript_binary(s):
     if s.lower() == 'none':
-        logger.warn("Rscript access disabled. Specify Rscript binary path in your pyabmrc to enable.")
+        logger.warn("Rscript access disabled. Specify valid Rscript binary path in your pyabmrc to enable.")
         return None
     else:
         validate_readable_file(s)
 
 def validate_tail_binary(s):
     if s.lower() == 'none':
-        logger.warn("Log 'tailing' disabled. Specify tail binary path (or path to equivalent program) in your pyabmrc to enable live tailing of ABM logs.")
+        logger.warn("Log 'tailing' disabled. Specify valid tail binary path (or path to equivalent program) in your pyabmrc to enable live tailing of ABM logs.")
         return None
     else:
         validate_readable_file(s)
@@ -548,8 +548,8 @@ def read_rc_file(default_params, fname=os.path.basename(os.getcwd()) +'rc'):
         # Validate the values read in from the rc file
         try:
             rcfile_params[key] = val # try to convert to proper type or raise
-        except Exception:
-            logger.warning('Failure while reading rc parameter %s on line %d in %s. Will revert to default parameter value.'%(key, cnt, fname))
+        except Exception, msg:
+            logger.warning('Failure while reading rc parameter %s on line %d in %s: %s. Reverting to default parameter value.'%(key, cnt, fname, msg))
     return rcfile_params
 
 class rc_params_management():
