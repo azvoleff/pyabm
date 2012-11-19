@@ -25,8 +25,11 @@ Contains miscellaneous utility functions useful in building and running
 agent-based models.
 """
 
+import sys
+import os
 import logging
 import tempfile
+import subprocess
 import smtplib
 from email.MIMEText import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -162,7 +165,7 @@ def save_git_diff(code_path, git_diff_file):
     try:
         subprocess.check_call([git_binary, 'show','--pretty=format:%H'], stdout=temp_file_fd, cwd=code_path)
     except:
-        logger.exception("Problem running git. Skipping git-diff patch output.")
+        logger.exception("Problem running git: %s. Skipping git-diff patch output."%(sys.exc_info()[1]))
         return 1
     os.close(temp_file_fd)
     temp_file = open(temp_file_path, 'r')
