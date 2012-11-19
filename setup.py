@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import distribute_setup
 distribute_setup.use_setuptools()
 

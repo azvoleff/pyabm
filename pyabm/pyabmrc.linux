@@ -43,11 +43,11 @@ path.git_binary : git
 
 # Rscript binary path. Will be used by PyABM to call R scripts to plot model 
 # results after running a model. Or, use 'None' to disable this feature.
-path.Rscript_binary : Rscript
+path.Rscript_binary : /usr/bin/Rscript
 
 # Default program to use for tailing model logfiles. Use 'None' to disable this 
 # feature.
-path.tail_binary : tail
+path.tail_binary : /usr/bin/tail
 
 # The following parameters are for the threaded_batch_run script in PyABM. The 
 # script will run a total of batchrun.num_runs model runs, by spawning new 
@@ -55,7 +55,7 @@ path.tail_binary : tail
 # PyABM will use the Python binary located at batchrun.python_path.
 batchrun.num_runs : 20
 batchrun.num_cores : 1
-batchrun.python_path : python
+batchrun.python_path : /usr/bin/python
 
 # The following parameters are for the 'email_log' function in PyABM. If you 
 # wish to use the email_log function, these parameters must be set to valid 
