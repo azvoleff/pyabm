@@ -49,7 +49,7 @@
 # PyABM will use the Python binary located at batchrun.python_path.
 'batchrun.num_runs' : [20 | validate_int]
 'batchrun.num_cores' : [1 | validate_int]
-'batchrun.python_path' : ["C:/Python27/python.exe" | validate_readable_file]
+'batchrun.python_path' : [None | validate_batchrun_python_binary]
 
 # The following parameters are for the 'email_log' function in PyABM. If you 
 # wish to use the email_log function, these parameters must be set to valid 

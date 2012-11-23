@@ -121,6 +121,13 @@ def validate_Rscript_binary(s):
     else:
         return validate_readable_file(s)
 
+def validate_batchrun_python_binary(s):
+    if s.lower() == 'none':
+        logger.warn("Parallel features are disabled. Specify valid python binary path in your pyabmrc to enable.")
+        return None
+    else:
+        return validate_readable_file(s)
+
 def validate_tail_binary(s):
     if s.lower() == 'none':
         logger.warn("Log 'tailing' disabled. Specify valid tail binary path (or path to equivalent program) in your pyabmrc to enable live tailing of ABM logs.")
