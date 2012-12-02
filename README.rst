@@ -18,8 +18,8 @@ The model was constructed by Alex Zvoleff as part of his dissertation
 research at San Diego State University (SDSU) in the Department of 
 Geography. Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
 
-See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/PyABM.php>`_ 
-for more information, past releases, publications, and recent presentations.
+See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/pyabm>`_ for 
+more information, past releases, publications, and recent presentations.
 
 Getting the Code
 _______________________________________________________________________________
