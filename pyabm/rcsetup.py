@@ -84,6 +84,17 @@ def validate_string(s):
     ret = ret.strip("\"'")
     return ret
 
+def validate_string_list(s):
+    try:
+        if type(s) != list:
+            s = s.strip('( )\'"')
+            s = s.split(',')
+            s = list(s)
+    except NameError:
+        raise TypeError('Could not convert "%s" to list of strings'%s)
+    s = [validate_string(item) for item in s]
+    return s
+
 def validate_unit_interval(s):
     "Checks that s is a number between 0 and 1, inclusive, or raises an error."
     s = validate_float(s)
@@ -201,7 +212,7 @@ class validate_nseq_float:
             except ValueError:
                 raise ValueError('Could not convert all entries to floats')
         else:
-            assert type(s) in (list,tuple)
+            assert type(s) in (list, tuple)
             if len(s) != self.n:
                 raise ValueError('You must supply exactly %d values'%self.n)
             return [float(val) for val in s]
