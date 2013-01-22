@@ -146,7 +146,10 @@ def email_logfile(log_file, subject='pyabm Log'):
     attachment.add_header('Content-Disposition', 'attachment', filename=log_file)           
     msg.attach(attachment)
     try:
-        server = smtplib.SMTP(rcParams['email_log.smtp_server'])
+        if 'email_log.smtp_ssl':
+            server = smtplib.SMTP_SSL(rcParams['email_log.smtp_server'])
+        else:
+            server = smtplib.SMTP(rcParams['email_log.smtp_server'])
         server.login(rcParams['email_log.smtp_username'], rcParams['email_log.smtp_password'])
         server.sendmail(rcParams['email_log.from'], rcParams['email_log.to'], msg.as_string())
         server.quit()
