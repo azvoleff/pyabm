@@ -163,6 +163,9 @@ def save_git_diff(code_path, git_diff_file):
     if git_binary == None:
         logger.warning("Git features disabled. Skipping git diff output.")
         return 1
+    elif not os.path.exists(os.path.join(code_path, '.git')):
+        logger.warning("Not running from a git repository. Skipping git diff output.")
+        return 1
     # First get commit hash from git show
     temp_file_fd, temp_file_path = tempfile.mkstemp()
     try:
