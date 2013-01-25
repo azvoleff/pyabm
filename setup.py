@@ -11,7 +11,7 @@ setup(
     packages = find_packages(),
     package_data = {'pyabm' : ['rcparams.default',
                                'pyabmrc.windows',
-                               'pyabmrc.linux']}
+                               'pyabmrc.linux']},
     zip_safe = True,
     install_requires = ['numpy >= 1.6.1',
                         'matplotlib >= 0.98.4',
