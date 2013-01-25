@@ -8,7 +8,8 @@ from setuptools import setup, find_packages
 setup(
     name = "pyabm",
     version = "0.4dev",
-    packages = find_packages(),
+    packages = ['pyabm'],
+    package_dir = {'pyabm' : 'pyabm'},
     package_data = {'pyabm' : ['rcparams.default',
                                'pyabmrc.windows',
                                'pyabmrc.linux']},
