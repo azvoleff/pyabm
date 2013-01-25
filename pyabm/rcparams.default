@@ -57,6 +57,7 @@
 # temporary or PyABM specific email account is recommended.
 'email_log' : [False | validate_boolean]
 'email_log.smtp_server' : ['smtp.example.com' | validate_string]
+'email_log.smtp_ssl' : [True | validate_boolean]
 'email_log.smtp_username' : ['someone' | validate_string]
 'email_log.smtp_password' : ['password' | validate_string]
 'email_log.from' : ['someone@example.com' | validate_string]
