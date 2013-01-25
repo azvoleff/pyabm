@@ -9,8 +9,9 @@ setup(
     name = "pyabm",
     version = "0.4dev",
     packages = find_packages(),
-    include_package_data = True,
-    exclude_package_data = {'': ['.gitignore']},
+    package_data = {'pyabm' : ['rcparams.default',
+                               'pyabmrc.windows',
+                               'pyabmrc.linux']}
     zip_safe = True,
     install_requires = ['numpy >= 1.6.2',
                         'matplotlib >= 0.98.4',
