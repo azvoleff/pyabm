@@ -97,7 +97,7 @@ def draw_from_prob_dist(prob_dist):
 
 def calc_prob_from_prob_dist(prob_dist, attribute):
     """
-    Calculated the probability of something based on a manually specified 
+    Calculates the probability of something based on a manually specified 
     probability distribution, where the probability distribution is a tuple 
     specified as::
 
