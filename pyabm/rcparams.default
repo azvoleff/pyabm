@@ -63,12 +63,6 @@
 'email_log.from' : ['someone@example.com' | validate_string]
 'email_log.to' : ['someone@example.com' | validate_string]
 
-# PyABM will use ArcGIS or OGR for handling raster and vector spatial data for 
-# data input and output. The 'geoprocessor' can be set to:
-#   ArcGIS  - to use ArcGIS for geoprocessing
-#   GDAL/OGR - to use GDAL/OGR for geoprocessing
-'geoprocessor' : ['GDAL/OGR' | validate_string] 
-
 # random_seed seeds the random number generator (useful for regenerating
 # results later). If it is set to 'None' no seed is given, and a seed will be 
 # chosen by numpy using its default settings.  In either case, the seed is that 

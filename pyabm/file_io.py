@@ -19,8 +19,9 @@
 # University with any comments or questions. See the README.txt file for 
 # contact information.
 """
-Chooses either file_io_arcgis.py or file_io_ogr.py to handle shapefile i/o.
-Returns an error if neither is available.
+Contains functions to input and output data to various formats. Also attempts 
+to load GDAL to handle geospatial data, logging a warning if GDAL is not 
+available.
 """
 
 import sys
@@ -31,22 +32,10 @@ logger = logging.getLogger(__name__)
 from pyabm import rc_params
 rcParams = rc_params.get_params()
 
-if rcParams['geoprocessor'].lower() == 'arcgis':
-    logger.error("ArcGIS geoprocessing is not yet available in PyABM. Geoprocessing disabled. Cannot process spatial data. If GDAL/OGR is installed, set 'geoprocessor' rcparam to 'GDAL/OGR to use GDAL/OGR instead'.")
-# elif rcParams['geoprocessor'].lower() == 'gdal/ogr':
-#     try:
-#         from file_io_arcgis import *
-#     except:
-#         logger.error("Failed to load ArcGIS geoprocessor. Cannot process 
-#         spatial data. If GDAL/OGR is installed, set 'geoprocessor' rcparam to 
-#         'GDAL/OGR'.")
-elif rcParams['geoprocessor'].lower() == 'gdal/ogr':
-    try:
-        from file_io_ogr import *
-    except:
-        logger.error("Failed to load GDAL/OGR. Cannot process spatial data. If ArcGIS is installed, set 'geoprocessor' rcparam to 'ArcGIS'.")
-else:
-    logger.error("Unknown option %s for geoprocessor rcparam"%rcParams['geoprocessor'])
+try:
+    from file_io_ogr import *
+except ImportError:
+    logger.warning("Failed to load GDAL/OGR. Cannot process spatial data.")
 
 def write_point_process(nodes, outputFile):
     'Writes input node instances to a text file in R point-process format.'
