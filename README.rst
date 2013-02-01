@@ -8,15 +8,21 @@ Description
 _______________________________________________________________________________
 
 'pyabm' is an agent-based modeling toolkit written to simplify coding and 
-running agent-based models int he Python programming language. pyabm 
-includes tools to output model results (as text files, plots or ESRI 
-shapefiles), and has a parameter handling system to ease the process of 
-model testing and validation, and of running multiple scenarios with 
-varying model parameters.
+running agent-based models in the Python programming language. pyabm includes 
+tools to output model results (as text files, plots or ESRI shapefiles), and 
+has a parameter handling system to ease the process of model testing and 
+validation, and of running multiple scenarios with varying model parameters.
 
-The model was constructed by Alex Zvoleff as part of his dissertation 
-research at San Diego State University (SDSU) in the Department of 
-Geography. Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
+The toolkit was constructed by Alex Zvoleff as part of his dissertation 
+research at San Diego State University (SDSU) in the Department of Geography.  
+Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
+
+pyabm is still a work in progress - while the toolkit is functional in its 
+present form, changes that will be made in the near future may not be backward 
+compatible with existing code. Contact Alex Zvoleff or see the `pyabm website 
+<http://rohan.sdsu.edu/~zvoleff/research/pyabm>`_ for more details. A Python 3 
+compatible version of pyabm is in the works, and should be released by summer 
+2013.
 
 See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/pyabm>`_ for 
 more information, past releases, publications, and recent presentations.
