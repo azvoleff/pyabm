@@ -25,14 +25,6 @@ pyabm Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`file_io_arcgis` Module
-----------------------------
-
-.. automodule:: pyabm.file_io_arcgis
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`file_io_ogr` Module
 -------------------------
 
