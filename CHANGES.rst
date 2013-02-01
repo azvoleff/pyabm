@@ -7,7 +7,7 @@ ___________________________
 
 New Features
 ------------
-- Make rgdal an optional dependency.
+- Make GDAL an optional dependency.
 - Deprecate ArcGIS support.
 - Allow using SSL for email sending.
 - Allow setting batch_run_python_path to none (disables the threaded batch run 
