@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'pyabm',
-    version = '0.4dev',
+    version = '0.3.3',
     packages = ['pyabm'],
     package_dir = {'pyabm' : 'pyabm'},
     package_data = {'pyabm' : ['rcparams.default',

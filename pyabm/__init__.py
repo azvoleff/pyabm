@@ -23,7 +23,7 @@ Sets up rc parameters so that they can be loaded and reused by other parts of
 the toolkit.
 """
 
-__version__ = '0.4dev'
+__version__ = '0.3.3'
 
 import os
 import sys
