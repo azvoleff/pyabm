@@ -81,7 +81,7 @@ def validate_string(s):
         raise ValueError('Could not convert "%s" to string'%s)
     if ret != str(s):
         raise ValueError('"%s" is not a string'%s)
-    ret = ret.strip("\"'")
+    ret = ret.strip("\"' ")
     return ret
 
 def validate_string_list(s):
