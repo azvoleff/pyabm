@@ -47,6 +47,12 @@ class TimeSteps():
         self._endtime = bounds[1]
         self._timestep = timestep
 
+        assert self._starttime[0] < self._endtime[0], "Start year cannot be greater than end year"
+        # If start year is equal to end year, check that the start month is 
+        # less than the end month
+        if self._starttime[0] == self._endtime[0]:
+            assert self._starttime[1] < self._endtime[1], "Start time cannot be greater than end time"
+
         # Initialize the current month and year
         self._year = self._starttime[0]
         self._month = self._starttime[1]
@@ -59,6 +65,12 @@ class TimeSteps():
         self._month = self._month - dyear*12
         self._int_timestep += 1
         assert self._month != 0, "Month cannot be 0"
+
+    def get_total_num_timesteps(self):
+        num_full_years = self._endtime[0] - self._starttime[0] - 1
+        num_months_year_zero = 12 - self._starttime[1] + 1
+        num_months_year_end = self._endtime[1] - 1
+        return(num_full_years * 12 + num_months_year_zero + num_months_year_end)
 
     def in_bounds(self):
         if self._year == self._endtime[0] and self._month >= self._endtime[1] \
