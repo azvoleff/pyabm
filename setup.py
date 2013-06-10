@@ -14,7 +14,7 @@ setup(
                                'pyabmrc.windows',
                                'pyabmrc.linux']},
     zip_safe = True,
-    install_requires = ['numpy >= 1.6.1',
+    install_requires = ['numpy >= 1.7.0',
                         'matplotlib >= 0.98.4'],
     extras_require = {'gdal' : ['GDAL >= 1.6']},
     author = 'Alex Zvoleff',
