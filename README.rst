@@ -47,9 +47,11 @@ Author Contact Information
 _______________________________________________________________________________
 
 | Alex Zvoleff
-| SDSU/UCSB Joint Doctoral Candidate
-| Department of Geography
-| San Diego State University
-| 5500 Campanile Dr.
-| San Diego, CA 92182-4493
-| Email: azvoleff@mail.sdsu.edu
+| Postdoctoral Associate
+| Tropical Ecology Assessment and Monitoring (TEAM) Network
+| Conservation International
+| 2011 Crystal Dr. Suite 500
+| Arlington, Virginia 22202
+| USA
+
+Email: azvoleff@conservation.org
