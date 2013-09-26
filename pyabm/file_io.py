@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # pyabm.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Contact Alex Zvoleff in the Department of Geography at San Diego State 
-# University with any comments or questions. See the README.txt file for 
-# contact information.
+# See the README.rst file for author contact information.
 """
 Contains functions to input and output data to various formats. Also attempts 
 to load GDAL to handle geospatial data, logging a warning if GDAL is not 

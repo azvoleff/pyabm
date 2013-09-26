@@ -14,9 +14,7 @@
 # You should have received a copy of the GNU General Public License along with
 # pyabm.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Contact Alex Zvoleff in the Department of Geography at San Diego State 
-# University with any comments or questions. See the README.txt file for 
-# contact information.
+# See the README.rst file for author contact information.
 
 """
 Sets up parameters for a model run. Used to read in settings from any provided 
@@ -708,7 +706,7 @@ class rc_params_management():
 # are read in to set defaults prior to initialization of the model by the 
 # runmodel script.
 #
-# Alex Zvoleff, azvoleff@mail.sdsu.edu"""
+# Alex Zvoleff, azvoleff@conservation.org"""
         
         if self._default_parsed_lines == None:
             logger.warning("rcparams_defaults have not yet been read into this rc_params_management instance")

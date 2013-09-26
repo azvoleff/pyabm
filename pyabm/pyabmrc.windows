@@ -31,9 +31,7 @@
 # in the rcparams.defaults file. To add a new parameter to PyABM, the parameter 
 # must first be defined in rcparams.defaults.
 #
-# Contact Alex Zvoleff in the Department of Geography at San Diego State 
-# University with any comments or questions. See the README.txt file for 
-# contact information.
+# See the README.rst file for author contact information.
 ###############################################################################
 
 # Git binary. If git is used for version control of the model sourcecode, PyABM 

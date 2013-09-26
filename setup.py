@@ -18,7 +18,7 @@ setup(
                         'matplotlib >= 0.98.4'],
     extras_require = {'gdal' : ['GDAL >= 1.6']},
     author = 'Alex Zvoleff',
-    author_email = 'azvoleff@mail.sdsu.edu',
+    author_email = 'azvoleff@conservation.org',
     description = 'Agent-based modeling toolkit',
     keywords = 'agent-based modeling ABM simulation model',
     license = 'GPL v3 or later',
