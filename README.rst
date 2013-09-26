@@ -20,12 +20,12 @@ Contact Alex Zvoleff or Prof. Li An at SDSU with any questions.
 pyabm is still a work in progress - while the toolkit is functional in its 
 present form, changes that will be made in the near future may not be backward 
 compatible with existing code. Contact Alex Zvoleff or see the `pyabm website 
-<http://rohan.sdsu.edu/~zvoleff/research/pyabm>`_ for more details. A Python 3 
+<http://www.azvoleff.com/research/pyabm>`_ for more details.  A Python 3 
 compatible version of pyabm is in the works, and should be released by summer 
 2013.
 
-See the `pyabm website <http://rohan.sdsu.edu/~zvoleff/research/pyabm>`_ for 
-more information, past releases, publications, and recent presentations.
+See the `pyabm website <http://www.azvoleff.com/research/pyabm>`_ for more 
+information, past releases, publications, and recent presentations.
 
 Getting the Code
 _______________________________________________________________________________

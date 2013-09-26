@@ -22,7 +22,7 @@ setup(
     description = 'Agent-based modeling toolkit',
     keywords = 'agent-based modeling ABM simulation model',
     license = 'GPL v3 or later',
-    url = 'http://rohan.sdsu.edu/~zvoleff/research/pyabm',   # project home page, if any
+    url = 'http://www.azvoleff.com/research/pyabm',   # project home page, if any
     long_description = ''.join(open('README.rst').readlines()[6:]),
 	classifiers = [
         'Development Status :: 3 - Alpha',
