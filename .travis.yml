@@ -8,7 +8,7 @@ python:
 
 before_install:
     - sudo apt-get update -qq -y
-    - sudo apt-get install -qq python-numpy python-matplotlib python-gdal
+    - sudo apt-get install -qq python-numpy python-gdal gdal-bin
 
 install:
     - pip install .
