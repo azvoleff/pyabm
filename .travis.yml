@@ -1,0 +1,21 @@
+language: python
+
+virtualenv:
+    system_site_packages: true
+
+python:
+    - "2.7"
+
+before_install:
+    - sudo apt-get update -qq -y
+    - sudo apt-get install -qq python-numpy python-matplotlib python-gdal
+
+install:
+    - pip install .
+
+script: nosetests
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
