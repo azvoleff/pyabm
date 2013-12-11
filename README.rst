@@ -2,6 +2,10 @@
 pyabm README
 =============
 
+.. image:: https://travis-ci.org/azvoleff/pyabm.png
+    :alt: Build Status
+    :target: https://travis-ci.org/azvoleff/pyabm
+
 pyabm - an agent-based modeling toolkit for Python 2.7.x.
  
 Description
