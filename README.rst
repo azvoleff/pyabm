@@ -1,6 +1,6 @@
-=============
-pyabm README
-=============
+=====
+pyabm
+=====
 
 .. image:: https://travis-ci.org/azvoleff/pyabm.png
     :alt: Build Status
